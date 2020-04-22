@@ -10,6 +10,8 @@ For the original README document from BasicSR, refer to [README.md.txt](./README
 
 We have updated model tunings for high-resolution satellite data.  See [Datasets](#Datasets).
 
+These new changes are authored by Ethan D. Kyzivat and Ekaterina Lezine.
+
 ## Dependencies and Installation
 - Python 3 (Recommend to use [Anaconda](https://www.anaconda.com/download/#linux))
 - [PyTorch >= 1.0](https://pytorch.org/)
