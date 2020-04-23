@@ -18,7 +18,7 @@ def main():
     if getpass.getuser()=='ekyzivat': # on ethan local
         input_folder = 'F:\ComputerVision\Planet'
         save_folder = 'F:\ComputerVision\Planet_sub'
-    elif getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine' # on GCP 
+    elif getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
         input_folder = '/data_dir/planet'
         save_folder = '/data_dir/planet_sub'
     else: # other
