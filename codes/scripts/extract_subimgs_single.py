@@ -1,22 +1,32 @@
 import os
 import os.path as osp
 import sys
+import getpass
 from multiprocessing import Pool
 import numpy as np
 import cv2
 try:
     sys.path.append(osp.dirname(osp.dirname(osp.abspath(__file__))))
     from utils.util import ProgressBar
-except ImportError:
+except ImportError as e:
+    print('Error caught: '+str(e))
     pass
 
 
 def main():
     """A multi-thread tool to crop sub imags."""
-    input_folder = '/mnt/SSD/xtwang/BasicSR_datasets/DIV2K800/DIV2K800'
-    save_folder = '/mnt/SSD/xtwang/BasicSR_datasets/DIV2K800/DIV2K800_sub'
+    if getpass.getuser()=='ekyzivat': # on ethan local
+        input_folder = 'F:\ComputerVision\Planet'
+        save_folder = 'F:\ComputerVision\Planet_sub'
+    elif getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine' # on GCP 
+        input_folder = '/data_dir/planet'
+        save_folder = '/data_dir/planet_sub'
+    else: # other
+        raise ValueError('input_folder not specified!')
+        pass
+
     n_thread = 20
-    crop_sz = 480
+    crop_sz = 480 # num px in x and y
     step = 240
     thres_sz = 48
     compression_level = 3  # 3 is the default value in cv2
@@ -29,6 +39,7 @@ def main():
     else:
         print('Folder [{:s}] already exists. Exit...'.format(save_folder))
         sys.exit(1)
+        #pass # uncomment above two lines for ease of working, if necessary
 
     img_list = []
     for root, _, file_list in sorted(os.walk(input_folder)):
@@ -69,10 +80,9 @@ def worker(path, save_folder, crop_sz, step, thres_sz, compression_level):
     if w - (w_space[-1] + crop_sz) > thres_sz:
         w_space = np.append(w_space, w - crop_sz)
 
-    index = 0
+    index = 1
     for x in h_space:
         for y in w_space:
-            index += 1
             if n_channels == 2:
                 crop_img = img[x:x + crop_sz, y:y + crop_sz]
             else:
@@ -81,9 +91,15 @@ def worker(path, save_folder, crop_sz, step, thres_sz, compression_level):
             # var = np.var(crop_img / 255)
             # if var > 0.008:
             #     print(img_name, index_str, var)
-            cv2.imwrite(
-                os.path.join(save_folder, img_name.replace('.png', '_s{:03d}.png'.format(index))),
-                crop_img, [cv2.IMWRITE_PNG_COMPRESSION, compression_level])
+            if ~np.any(crop_img==0):
+                cv2.imwrite(
+                    os.path.join(save_folder, img_name.replace('.tif', '_s{:04d}.png'.format(index))),
+                    crop_img, [cv2.IMWRITE_PNG_COMPRESSION, compression_level])
+                index += 1
+            else:
+                print('\tSome No Data pixels in: {:d}, {:d}.  Skipping.'.format(x,y))
+                pass
+
     return 'Processing {:s} ...'.format(img_name)
 
 
