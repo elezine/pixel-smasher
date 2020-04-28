@@ -15,7 +15,7 @@ datasets:
     dataroot_LQ: /home/ekaterina_lezine/esrgan_test_data/DIV2K/train_mod/train_LR.lmdb
 
     use_shuffle: true
-    n_workers: 6  # per GPU
+    n_workers: 8  # per GPU
     batch_size: 16
     GT_size: 128
     use_flip: true
