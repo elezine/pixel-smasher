@@ -24,8 +24,8 @@ datasets:
   val:
     name: val_set14_part
     mode: LQGT
-    dataroot_GT: /home/ekaterina_lezine/esrgan_test_data/DIV2K/valid_mod/HR/x4/ #/mnt/SSD/xtwang/BasicSR_datasets/val_set14_part/Set14
-    dataroot_LQ: /home/ekaterina_lezine/esrgan_test_data/DIV2K/valid_mod/LR/x4/ #/mnt/SSD/xtwang/BasicSR_datasets/val_set14_part/Set14_bicLRx4
+    dataroot_GT: /home/ekaterina_lezine/esrgan_test_data/DIV2K/valid_mod/HR/x4/*.png #/mnt/SSD/xtwang/BasicSR_datasets/val_set14_part/Set14
+    dataroot_LQ: /home/ekaterina_lezine/esrgan_test_data/DIV2K/valid_mod/LR/x4/*.png #/mnt/SSD/xtwang/BasicSR_datasets/val_set14_part/Set14_bicLRx4
 
 #### network structures
 network_G:
@@ -57,7 +57,7 @@ train:
   beta2_D: 0.99
   lr_scheme: MultiStepLR
 
-  niter: 4000
+  niter: 1000
   warmup_iter: -1  # no warm up
   lr_steps: [500, 1000, 2000, 3000]
   lr_gamma: 0.5
@@ -73,7 +73,7 @@ train:
   D_init_iters: 0
 
   manual_seed: 10
-  val_freq: !!float 5e3
+  val_freq: 100 #!!float 5e3
 
 #### logger
 logger:
