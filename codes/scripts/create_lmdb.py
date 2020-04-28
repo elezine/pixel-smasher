@@ -12,8 +12,8 @@ except ImportError:
     pass
 
 # configurations
-img_folder = '/mnt/SSD/xtwang/BasicSR_datasets/DIV2K800/DIV2K800_sub/*'  # glob matching pattern
-lmdb_save_path = '/mnt/SSD/xtwang/BasicSR_datasets/DIV2K800/DIV2K800_sub.lmdb'
+img_folder = '~/esrgan_test_data/DIV2K/train_mod/HR/x4/*'  # glob matching pattern
+lmdb_save_path = '~/esrgan_test_data/DIV2K/train_mod/DIV2K800_sub.lmdb'
 meta_info = {'name': 'DIV2K800_sub_GT'}
 mode = 2  # 1 for reading all the images to memory and then writing to lmdb (more memory);
 # 2 for reading several images and then writing to lmdb, loop over (less memory)
