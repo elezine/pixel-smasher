@@ -2,6 +2,7 @@ import os
 import sys
 import cv2
 import numpy as np
+import getpass
 
 try:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -15,8 +16,12 @@ def generate_mod_LR_bic():
     up_scale = 4
     mod_scale = 4
     # set data dir
-    sourcedir = '/data/datasets/img'
-    savedir = '/data/datasets/mod'
+    if getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
+        sourcedir = '/data_dir/planet_sub'
+        savedir = '/data_dir/planet_sub_LR'
+    else: # other
+        raise ValueError('input_folder not specified!')
+        pass
 
     saveHRpath = os.path.join(savedir, 'HR', 'x' + str(mod_scale))
     saveLRpath = os.path.join(savedir, 'LR', 'x' + str(up_scale))

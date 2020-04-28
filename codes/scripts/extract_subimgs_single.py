@@ -19,7 +19,7 @@ def main():
         input_folder = 'F:\ComputerVision\Planet'
         save_folder = 'F:\ComputerVision\Planet_sub'
     elif getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
-        input_folder = '/data_dir/planet'
+        input_folder = '/data_dir/planet_scenes'
         save_folder = '/data_dir/planet_sub'
     else: # other
         raise ValueError('input_folder not specified!')
