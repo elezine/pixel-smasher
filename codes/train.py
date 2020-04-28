@@ -15,6 +15,7 @@ from data import create_dataloader, create_dataset
 from models import create_model
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
+print(torch.cuda.is_available())
 
 def init_dist(backend='nccl', **kwargs):
     ''' initialization for distributed training'''
