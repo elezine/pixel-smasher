@@ -49,6 +49,7 @@ def mkdir(path):
 
 
 def mkdirs(paths):
+    print(paths)
     if isinstance(paths, str):
         mkdir(paths)
     else:
