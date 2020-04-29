@@ -13,7 +13,7 @@ except ImportError:
 
 # configurations
 img_folder = '/data_dir/train_mod/HR/x4/*.png'  # glob matching pattern
-lmdb_save_path = '/data_dir/train_mod/train_HR.lmdb'
+lmdb_save_path = '/data_dir/train_HR.lmdb'
 meta_info = {'name': 'DIV2K800_sub_GT'}
 mode = 2  # 1 for reading all the images to memory and then writing to lmdb (more memory);
 # 2 for reading several images and then writing to lmdb, loop over (less memory)
