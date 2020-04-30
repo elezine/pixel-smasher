@@ -42,9 +42,9 @@ network_D:
 #### path
 path:
   #edited for resume state 500
-  pretrain_model_G: /pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/models/17000_G.pth #/home/ekaterina_lezine/pixel-smasher/RRDB_PSNR_x4.pth
+  pretrain_model_G: /pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/models/19500_G.pth #/home/ekaterina_lezine/pixel-smasher/RRDB_PSNR_x4.pth
   strict_load: true
-  resume_state: /home/ekaterina_lezine/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/training_state/17000.state
+  resume_state: /home/ekaterina_lezine/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/training_state/19500.state
 
 #### training settings: learning rate scheme, loss
 train:
