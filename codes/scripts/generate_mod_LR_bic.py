@@ -18,7 +18,7 @@ def generate_mod_LR_bic():
     # set data dir
     if getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
         sourcedir = '/data_dir/planet_sub'
-        savedir = '/data_dir/planet_sub_LR'
+        savedir = '/data_dir/planet_sub_LR_test'
     else: # other
         raise ValueError('input_folder not specified!')
         pass
@@ -63,21 +63,21 @@ def generate_mod_LR_bic():
         filename = filepaths[i]
         print('No.{} -- Processing {}'.format(i, filename))
         # read image
-        image = cv2.imread(os.path.join(sourcedir, filename))
+        image = cv2.imread(os.path.join(sourcedir, filename)) # apparently, this loads as 8-bit bit depth...
 
         width = int(np.floor(image.shape[1] / mod_scale))
         height = int(np.floor(image.shape[0] / mod_scale))
         # modcrop
         if len(image.shape) == 3:
-            image_HR = image[0:mod_scale * height, 0:mod_scale * width, :]
+            image_HR = image[0:mod_scale * height, 0:mod_scale * width, :] # this simply makes the dimenions of the image even if they weren't originally
         else:
             image_HR = image[0:mod_scale * height, 0:mod_scale * width]
         # LR
         image_LR = imresize_np(image_HR, 1 / up_scale, True)
         # bic
-        image_Bic = imresize_np(image_LR, up_scale, True)
+        image_Bic = imresize_np(image_LR, up_scale, True) # uses bicubic resampling to recreate the HR image from the LR naively (the GAN will do this better)
 
-        cv2.imwrite(os.path.join(saveHRpath, filename), image_HR)
+        cv2.imwrite(os.path.join(saveHRpath, filename), image_HR) 
         cv2.imwrite(os.path.join(saveLRpath, filename), image_LR)
         cv2.imwrite(os.path.join(saveBicpath, filename), image_Bic)
 

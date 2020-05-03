@@ -94,7 +94,7 @@ def worker(path, save_folder, crop_sz, step, thres_sz, compression_level):
             if ~np.any(crop_img==0):
                 cv2.imwrite(
                     os.path.join(save_folder, img_name.replace('.tif', '_s{:04d}.png'.format(index))),
-                    crop_img, [cv2.IMWRITE_PNG_COMPRESSION, compression_level])
+                    crop_img[:,:,(2,1,3)], [cv2.IMWRITE_PNG_COMPRESSION, compression_level]) # 2,1,3 for RGN, 2,1,0 for RGB
                 index += 1
             else:
                 print('\tSome No Data pixels in: {:d}, {:d}.  Skipping.'.format(x,y))
