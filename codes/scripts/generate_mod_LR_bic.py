@@ -16,6 +16,7 @@ def generate_mod_LR_bic():
     # set parameters
     up_scale = 4
     mod_scale = 4
+    stretch_multiplier=3 # to increase total dynamic range
     # set data dir
     if getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
         sourcedir = '/data_dir/planet_sub'
@@ -76,7 +77,7 @@ def generate_mod_LR_bic():
         ID=filename[:-10]
         coeffs=hash[ID]
         for j in range(3):
-            image_cal[:,:,j]=image[:,:,j]*coeffs[b[j]]*255
+            image_cal[:,:,j]=image[:,:,j]*coeffs[b[j]]*255*stretch_multiplier
         image=image_cal.astype(np.uint8)
 
         ## continue
