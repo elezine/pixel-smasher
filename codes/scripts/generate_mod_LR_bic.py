@@ -3,6 +3,7 @@ import sys
 import cv2
 import numpy as np
 import getpass
+import pickle
 
 try:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,7 +19,7 @@ def generate_mod_LR_bic():
     # set data dir
     if getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
         sourcedir = '/data_dir/planet_sub'
-        savedir = '/data_dir/planet_sub_LR_test'
+        savedir = '/data_dir/planet_sub_LR_cal'
     else: # other
         raise ValueError('input_folder not specified!')
         pass
@@ -58,13 +59,27 @@ def generate_mod_LR_bic():
     filepaths = [f for f in os.listdir(sourcedir) if f.endswith('.png')]
     num_files = len(filepaths)
 
+    ## load hash
+    f=open("cal_hash.pkl", "rb")
+    hash=pickle.load(f)
+    b=[3,2,4]
+
     # prepare data with augementation
     for i in range(num_files):
         filename = filepaths[i]
         print('No.{} -- Processing {}'.format(i, filename))
         # read image
-        image = cv2.imread(os.path.join(sourcedir, filename)) # apparently, this loads as 8-bit bit depth...
+        image = cv2.imread(os.path.join(sourcedir, filename), cv2.IMREAD_UNCHANGED) # apparently, this loads as 8-bit bit depth... Changed!
 
+        ## apply correction
+        image_cal=np.array(np.zeros(image.shape), dtype='double')
+        ID=filename[:-10]
+        coeffs=hash[ID]
+        for j in range(3):
+            image_cal[:,:,j]=image[:,:,j]*coeffs[b[j]]*255
+        image=image_cal.astype(np.uint8)
+
+        ## continue
         width = int(np.floor(image.shape[1] / mod_scale))
         height = int(np.floor(image.shape[0] / mod_scale))
         # modcrop
