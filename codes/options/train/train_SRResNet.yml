@@ -2,8 +2,7 @@
 # With 16 Residual blocks w/o BN
 
 #### general settings
-name: 001_MSRResNetx4_scratch_DIV2K
-use_tb_logger: true
+name: 001_MSRResNetx8_planet
 model: sr
 distortion: sr
 scale: 8
@@ -37,7 +36,7 @@ network_G:
   out_nc: 3
   nf: 64
   nb: 16
-  upscale: 4
+  upscale: 8
 
 #### path
 path:
