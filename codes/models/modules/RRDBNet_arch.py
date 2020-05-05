@@ -54,7 +54,8 @@ class RRDBNet(nn.Module):
         self.trunk_conv = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
         #### upsampling
         self.upconv1 = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
-        #self.upconv2 = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
+        self.upconv2 = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
+        self.upconv3 = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
         self.HRconv = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
         self.conv_last = nn.Conv2d(nf, out_nc, 3, 1, 1, bias=True)
 
@@ -66,7 +67,8 @@ class RRDBNet(nn.Module):
         fea = fea + trunk
 
         fea = self.lrelu(self.upconv1(F.interpolate(fea, scale_factor=2, mode='nearest')))
-        #fea = self.lrelu(self.upconv2(F.interpolate(fea, scale_factor=2, mode='nearest')))
+        fea = self.lrelu(self.upconv2(F.interpolate(fea, scale_factor=2, mode='nearest')))
+        fea = self.lrelu(self.upconv3(F.interpolate(fea, scale_factor=2, mode='nearest')))
         out = self.conv_last(self.lrelu(self.HRconv(fea)))
 
         return out
