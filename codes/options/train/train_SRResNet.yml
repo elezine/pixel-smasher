@@ -17,7 +17,7 @@ datasets:
     dataroot_LQ: /data_dir/train_LR_cal_x8.lmdb
 
     use_shuffle: true
-    n_workers: 6  # per GPU
+    n_workers: 8  # per GPU
     batch_size: 16
     GT_size: 128
     use_flip: true
