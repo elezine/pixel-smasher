@@ -24,8 +24,8 @@ datasets:
   val:
     name: val_set14_part
     mode: LQGT
-    dataroot_GT: /data_dir/valid_mod/HR/x4/ #/mnt/SSD/xtwang/BasicSR_datasets/val_set14_part/Set14
-    dataroot_LQ: /data_dir/valid_mod/LR/x4/ #/mnt/SSD/xtwang/BasicSR_datasets/val_set14_part/Set14_bicLRx4
+    dataroot_GT: /data_dir/valid_mod_cal/HR/x4/ #/mnt/SSD/xtwang/BasicSR_datasets/val_set14_part/Set14
+    dataroot_LQ: /data_dir/valid_mod_cal/LR/x4/ #/mnt/SSD/xtwang/BasicSR_datasets/val_set14_part/Set14_bicLRx4
 
 #### network structures
 network_G:
@@ -42,9 +42,9 @@ network_D:
 #### path
 path:
   #edited for resume state 500
-  pretrain_model_G: /home/ekaterina_lezine/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/models/21500_G.pth #/home/ekaterina_lezine/pixel-smasher/RRDB_PSNR_x4.pth
+  pretrain_model_G: /home/ekaterina_lezine/pixel-smasher/RRDB_PSNR_x4.pth
   strict_load: true
-  resume_state: /home/ekaterina_lezine/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/training_state/21500.state
+  resume_state: #/home/ekaterina_lezine/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/training_state/21500.state
 
 #### training settings: learning rate scheme, loss
 train:
