@@ -16,7 +16,7 @@ def generate_mod_LR_bic():
     # set parameters
     up_scale = 4
     mod_scale = 4
-    stretch_multiplier=3 # to increase total dynamic range
+    stretch_multiplier=1 # to increase total dynamic range
     # set data dir
     if getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
         sourcedir = '/data_dir/planet_sub'
