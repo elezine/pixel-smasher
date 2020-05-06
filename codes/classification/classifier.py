@@ -7,6 +7,7 @@ import numpy as np
 import cv2
 from multiprocessing import Pool
 import multiprocessing as mp
+import pickle
 
 
 # example output paths: /data_dir/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images/716222_1368610_2017-08-27_0e0f_BGRN_Analytic_s0984
@@ -79,16 +80,18 @@ if __name__ == '__main__':
     dirpaths = [f for f in os.listdir(sourcedir_SR) ] # removed: if f.endswith('.png')
     num_files = len(dirpaths)
     # global results
-    results = [] # init
+    results = {} # init
     pool = Pool(mp.cpu_count())
     for i in range(30): #range(num_files): # switch for testing
         name = dirpaths[i]
 
         # parallel
-        pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, 10), callback=collect_result) # , callback=update
+        results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, 10)) # , , callback=collect_result
     pool.close()
     pool.join()
     print('All subprocesses done.')
 
+
+    # save result
         ## for non- parallel
     #im_out=group_classify(sourcedir_SR, sourcedir_R, outdir, name)
