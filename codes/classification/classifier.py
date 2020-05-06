@@ -26,6 +26,8 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=10): # 
     A simple classification function for high-resolution, low-resolution, and  super resolution images.  Takes input path and write To output path (pre-– formatted).
     '''
 
+        # init
+    int_res=[None, None, None, None, None, None] #intermediate result
         # in paths
     SR_in_pth=sourcedir_SR+os.sep+name+os.sep+name+'_'+str(iter)+'.png'
     HR_in_pth=os.path.join(sourcedir_R, 'HR', 'x' + str(up_scale), name+ '.png')
@@ -42,13 +44,16 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=10): # 
     # if 
     if 1==1: #os.path.isfile(Bic_out_pth)==False: # only write if file doesn't exist\ # HERE change back
         print('No.{} -- Classifying {}'.format(i, name)) # printf: end='' # somehow i is in this functions namespace...?
-        classify(SR_in_pth, SR_out_pth)
-        classify(HR_in_pth, HR_out_pth)
-        classify(LR_in_pth, LR_out_pth)
-        classify(Bic_in_pth, Bic_out_pth)
+        int_res[2]=classify(SR_in_pth, SR_out_pth)
+        int_res[3]=classify(HR_in_pth, HR_out_pth)
+        int_res[4]=classify(LR_in_pth, LR_out_pth)
+        int_res[5]=classify(Bic_in_pth, Bic_out_pth)
     else:# elif os.path.isfile(saveHRpath+os.sep+filename)==True: 
         print('Skipping: {}.'.format(name))
     # save out put to row
+    int_res[0]=i
+    int_res[1]=name
+    return int_res
 
 def classify(pth_in, pth_out, threshold=2):
         # classify procedure
@@ -86,7 +91,7 @@ if __name__ == '__main__':
         name = dirpaths[i]
 
         # parallel
-        results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, 10)) # , , callback=collect_result
+        results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, 10)).get() # , , callback=collect_result
     pool.close()
     pool.join()
     print('All subprocesses done.')
