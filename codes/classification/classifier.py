@@ -8,6 +8,7 @@ import cv2
 from multiprocessing import Pool
 import multiprocessing as mp
 import pickle
+import pandas as pd
 
 
 # example output paths: /data_dir/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images/716222_1368610_2017-08-27_0e0f_BGRN_Analytic_s0984
@@ -98,5 +99,9 @@ if __name__ == '__main__':
 
 
     # save result
+
+    df = pd.DataFrame(list(results.values()), columns =['num','name','sr','hr','lr','bic'])
+df.to_csv('classification_stats.csv') # zip(im_name, hr, lr, bic, sr)
+
         ## for non- parallel
     #im_out=group_classify(sourcedir_SR, sourcedir_R, outdir, name)
