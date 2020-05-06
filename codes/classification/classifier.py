@@ -21,8 +21,9 @@ sourcedir_R='/data_dir/valid_mod' # HERE update
 outdir='/data_dir/classify/valid_mod'
 up_scale=4
 iter=100000 # quick fix to get latest validation image in folder
+thresh=2
 
-def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=10): # filstrucutre is pre-defined
+def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2): # filstrucutre is pre-defined
     '''
     A simple classification function for high-resolution, low-resolution, and  super resolution images.  Takes input path and write To output path (pre-– formatted).
     '''
@@ -45,10 +46,10 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=10): # 
     # if 
     if 1==1: #os.path.isfile(Bic_out_pth)==False: # only write if file doesn't exist\ # HERE change back
         print('No.{} -- Classifying {}'.format(i, name)) # printf: end='' # somehow i is in this functions namespace...?
-        int_res[2]=classify(SR_in_pth, SR_out_pth)
-        int_res[3]=classify(HR_in_pth, HR_out_pth)
-        int_res[4]=classify(LR_in_pth, LR_out_pth)
-        int_res[5]=classify(Bic_in_pth, Bic_out_pth)
+        int_res[2]=classify(SR_in_pth, SR_out_pth,thresh)
+        int_res[3]=classify(HR_in_pth, HR_out_pth,thresh)
+        int_res[4]=classify(LR_in_pth, LR_out_pth,thresh)
+        int_res[5]=classify(Bic_in_pth, Bic_out_pth,thresh)
     else:# elif os.path.isfile(saveHRpath+os.sep+filename)==True: 
         print('Skipping: {}.'.format(name))
     # save out put to row
@@ -68,9 +69,9 @@ def classify(pth_in, pth_out, threshold=2):
     #pass # Why is this necessary?  It's not
     return nWaterPix
 
-def collect_result(result):
-    global results
-    results.append(result)
+# def collect_result(result):
+#     global results
+#     results.append(result)
 
 if __name__ == '__main__':
 
@@ -88,11 +89,11 @@ if __name__ == '__main__':
     # global results
     results = {} # init
     pool = Pool(mp.cpu_count())
-    for i in range(30): #range(num_files): # switch for testing
+    for i in range(num_files): # switch for testing # range(30): #
         name = dirpaths[i]
 
         # parallel
-        results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, 10)).get() # , , callback=collect_result
+        results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, thresh)).get() # , , callback=collect_result
     pool.close()
     pool.join()
     print('All subprocesses done.')
@@ -101,7 +102,7 @@ if __name__ == '__main__':
     # save result
 
     df = pd.DataFrame(list(results.values()), columns =['num','name','sr','hr','lr','bic'])
-df.to_csv('classification_stats.csv') # zip(im_name, hr, lr, bic, sr)
+df.to_csv('classification_stats_T'+thresh+'.csv') # zip(im_name, hr, lr, bic, sr)
 
         ## for non- parallel
     #im_out=group_classify(sourcedir_SR, sourcedir_R, outdir, name)
