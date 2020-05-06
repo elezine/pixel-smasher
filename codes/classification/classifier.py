@@ -6,6 +6,7 @@ import sys
 import numpy as np
 import cv2
 from multiprocessing import Pool
+import multiprocessing as mp
 
 
 # example output paths: /data_dir/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images/716222_1368610_2017-08-27_0e0f_BGRN_Analytic_s0984
@@ -37,16 +38,21 @@ def group_classify(sourcedir_SR, sourcedir_R, outdir, name, threshold=10): # fil
     Bic_out_pth = os.path.join(outdir, 'Bic', 'x' + str(up_scale), name+ '.png')
 
         # run classification procedure
-    classify(SR_in_pth, SR_out_pth)
-    classify(HR_in_pth, HR_out_pth)
-    classify(LR_in_pth, LR_out_pth)
-    classify(Bic_in_pth, Bic_out_pth)
+    # if 
+    if os.path.isfile(Bic_out_pth)==False: # only write if file doesn't exist\
+        print('No.{} -- Classifying {}'.format(i, name)) # printf: end='' # somehow i is in this functions namespace...?
+        classify(SR_in_pth, SR_out_pth)
+        classify(HR_in_pth, HR_out_pth)
+        classify(LR_in_pth, LR_out_pth)
+        classify(Bic_in_pth, Bic_out_pth)
+    else:# elif os.path.isfile(saveHRpath+os.sep+filename)==True: 
+        print('Skipping: {}.'.format(name))
     # save out put to row
 
 def classify(pth_in, pth_out, threshold=10):
         # classify procedure
     img = cv2.imread(pth_in, cv2.IMREAD_UNCHANGED) # HERE change
-    ndvi = np.array(img[:,:,0]-img[:,:,2], dtype='int16')
+    ndvi = np.array((img[:,:,0]-img[:,:,2])/(img[:,:,0]+img[:,:,2]), dtype='int16')
     bw=ndvi>threshold # output mask from classifier
         # count pixels
 
@@ -61,12 +67,20 @@ if __name__ == '__main__':
     # print('File:\t{}\nOutput:\t{}\n'.format(pth_in, pth_out))
     # im_out=classify(pth_in, pth_out)
 
+        # print
+    print('Starting classification.  Files will be in {}'.format(outdir))
         # loop over files
     dirpaths = [f for f in os.listdir(sourcedir_SR) ] # removed: if f.endswith('.png')
     num_files = len(dirpaths)
-
-    for i in [1]: #range(num_files): # switch for testing
+    pool = Pool(mp.cpu_count())
+    for i in range(30): #range(num_files): # switch for testing
         name = dirpaths[i]
-        
-        print('No.{} -- Classifying {}'.format(i, name)) # printf: end=''
-        im_out=group_classify(sourcedir_SR, sourcedir_R, outdir, name)
+
+        # parallel
+        pool.apply_async(group_classify, args=(sourcedir_SR, sourcedir_R, outdir, name, 10)) # , callback=update
+    pool.close()
+    pool.join()
+    print('All subprocesses done.')
+
+        ## for non- parallel
+    #im_out=group_classify(sourcedir_SR, sourcedir_R, outdir, name)
