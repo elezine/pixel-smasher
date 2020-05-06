@@ -28,17 +28,20 @@ def group_classify(sourcedir_SR, sourcedir_R, outdir, name, threshold=10): # fil
     SR_in_pth=sourcedir_SR+os.sep+name+os.sep+name+'_'+str(iter)+'.png'
     HR_in_pth=os.path.join(sourcedir_R, 'HR', 'x' + str(up_scale), name+ '.png')
     LR_in_pth=os.path.join(sourcedir_R, 'LR', 'x' + str(up_scale), name+ '.png')
-    Bic_in_path=os.path.join(sourcedir_R, 'Bic', 'x' + str(up_scale), name+ '.png')
+    Bic_in_pth=os.path.join(sourcedir_R, 'Bic', 'x' + str(up_scale), name+ '.png')
 
         # out paths
     SR_out_pth = os.path.join(outdir, 'SR', 'x' + str(up_scale), name+ '.png')
     HR_out_pth = os.path.join(outdir, 'HR', 'x' + str(up_scale), name+ '.png')
     LR_out_pth = os.path.join(outdir, 'LR', 'x' + str(up_scale), name+ '.png')
-    Bic_out_path = os.path.join(outdir, 'Bic', 'x' + str(up_scale), name+ '.png')
+    Bic_out_pth = os.path.join(outdir, 'Bic', 'x' + str(up_scale), name+ '.png')
 
         # run classification procedure
     classify(SR_in_pth, SR_out_pth)
-    
+    classify(HR_in_pth, HR_out_pth)
+    classify(LR_in_pth, LR_out_pth)
+    classify(Bic_in_pth, Bic_out_pth)
+    # save out put to row
 
 def classify(pth_in, pth_out, threshold=10):
         # classify procedure

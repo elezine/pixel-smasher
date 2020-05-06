@@ -17,8 +17,8 @@ def generate_mod_LR_bic():
     # set parameters
     # Why is this not multi-threaded (parallel)?
     n_thread=8 # num cores
-    up_scale = 4
-    mod_scale = 4
+    up_scale = 8
+    mod_scale = 8
     stretch_multiplier=1.5 # to increase total dynamic range
     # set data dir
     if getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
