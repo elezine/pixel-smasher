@@ -21,51 +21,77 @@ sourcedir_R='/data_dir/valid_mod' # HERE update
 outdir='/data_dir/classify/valid_mod'
 up_scale=4
 iter=100000 # quick fix to get latest validation image in folder
-thresh=2
+thresh= [-0.1, -0.05, 0, 0.05, 0.1, 0.2, 0.3] # [-10, -5, -2, 0, 2, 5, 10] #2
+apply_radiometric_correction=False # set to zero if already calibrated
+
+# auto I/O
+if apply_radiometric_correction:
+    f=open("cal_hash.pkl", "rb")
+    global hash
+    hash=pickle.load(f)
 
 def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2): # filstrucutre is pre-defined
     '''
     A simple classification function for high-resolution, low-resolution, and  super resolution images.  Takes input path and write To output path (pre-– formatted).
     '''
-
         # init
-    int_res=[None, None, None, None, None, None] #intermediate result
+    int_res=[None, None] + [None]*len(thresh)*4 #intermediate result
         # in paths
     SR_in_pth=sourcedir_SR+os.sep+name+os.sep+name+'_'+str(iter)+'.png'
     HR_in_pth=os.path.join(sourcedir_R, 'HR', 'x' + str(up_scale), name+ '.png')
     LR_in_pth=os.path.join(sourcedir_R, 'LR', 'x' + str(up_scale), name+ '.png')
     Bic_in_pth=os.path.join(sourcedir_R, 'Bic', 'x' + str(up_scale), name+ '.png')
 
-        # out paths
-    SR_out_pth = os.path.join(outdir, 'SR', 'x' + str(up_scale), name+ '.png')
-    HR_out_pth = os.path.join(outdir, 'HR', 'x' + str(up_scale), name+ '.png')
-    LR_out_pth = os.path.join(outdir, 'LR', 'x' + str(up_scale), name+ '.png')
-    Bic_out_pth = os.path.join(outdir, 'Bic', 'x' + str(up_scale), name+ '.png')
-
-        # run classification procedure
-    # if 
-    if 1==1: #os.path.isfile(Bic_out_pth)==False: # only write if file doesn't exist\ # HERE change back
-        print('No.{} -- Classifying {}'.format(i, name)) # printf: end='' # somehow i is in this functions namespace...?
-        int_res[2]=classify(SR_in_pth, SR_out_pth,thresh)
-        int_res[3]=classify(HR_in_pth, HR_out_pth,thresh)
-        int_res[4]=classify(LR_in_pth, LR_out_pth,thresh)
-        int_res[5]=classify(Bic_in_pth, Bic_out_pth,thresh)
-    else:# elif os.path.isfile(saveHRpath+os.sep+filename)==True: 
-        print('Skipping: {}.'.format(name))
     # save out put to row
     int_res[0]=i
     int_res[1]=name
+
+    for n in range(len(thresh)):
+        current_thresh=thresh[n]
+        # print('---------------------------')
+            # out paths
+        SR_out_pth = os.path.join(outdir, 'SR', 'x' + str(up_scale), name+'_T'+str(current_thresh)+ '.png')
+        HR_out_pth = os.path.join(outdir, 'HR', 'x' + str(up_scale), name+'_T'+str(current_thresh)+ '.png')
+        LR_out_pth = os.path.join(outdir, 'LR', 'x' + str(up_scale), name+'_T'+str(current_thresh)+ '.png')
+        Bic_out_pth = os.path.join(outdir, 'Bic', 'x' + str(up_scale), name+'_T'+str(current_thresh)+ '.png')
+
+            # run classification procedure
+        # if 
+        if 1==1: #os.path.isfile(Bic_out_pth)==False: # only write if file doesn't exist\ # HERE change back
+            if n==0:
+                print('No.{} -- Classifying {}: '.format(i, name), end='') # printf: end='' # somehow i is in this functions namespace...?
+            int_res[2 + 4*n]=classify(SR_in_pth, SR_out_pth,current_thresh)
+            int_res[3 + 4*n]=classify(HR_in_pth, HR_out_pth,current_thresh)
+            int_res[4 + 4*n]=classify(LR_in_pth, LR_out_pth,current_thresh)
+            int_res[5 + 4*n]=classify(Bic_in_pth, Bic_out_pth,current_thresh)
+        else:# elif os.path.isfile(saveHRpath+os.sep+filename)==True: 
+            if n==0:
+                print('Skipping: {}.'.format(name))
+        print('{}'.format(current_thresh), end=' ')
+    print('')
     return int_res
 
 def classify(pth_in, pth_out, threshold=2):
         # classify procedure
     img = cv2.imread(pth_in, cv2.IMREAD_UNCHANGED) # HERE change
-    ndvi = np.array((img[:,:,0]-img[:,:,2])/(img[:,:,0]+img[:,:,2]), dtype='int16')
-    bw=ndvi>threshold # output mask from classifier
+
+    if apply_radiometric_correction:
+        b=[3,2,4]
+        image_cal=np.array(np.zeros(image.shape), dtype='double')
+        ID=filename[:-10]
+        coeffs=hash[ID]
+        for j in range(3):
+            image_cal[:,:,j]=image[:,:,j]*coeffs[b[j]]*255*stretch_multiplier
+        image=image_cal.astype(np.uint8)
+
+        #continue
+    img=np.int16(img)
+    ndwi = (img[:,:,0]-img[:,:,2])/(img[:,:,0]+img[:,:,2])
+    bw=ndwi>threshold # output mask from classifier
         # count pixels
     nWaterPix=np.sum(bw)
         # write out
-    cv2.imwrite(pth_out, np.array(255*bw, 'uint8'))
+    cv2.imwrite(pth_out, np.array(255*bw, 'uint8'))  # HERE
     #pass # Why is this necessary?  It's not
     return nWaterPix
 
@@ -89,7 +115,7 @@ if __name__ == '__main__':
     # global results
     results = {} # init
     pool = Pool(mp.cpu_count())
-    for i in range(num_files): # switch for testing # range(30): #
+    for i in range(30): #range(num_files): # switch for testing # range(30): #
         name = dirpaths[i]
 
         # parallel
@@ -100,9 +126,14 @@ if __name__ == '__main__':
 
 
     # save result
-
-    df = pd.DataFrame(list(results.values()), columns =['num','name','sr','hr','lr','bic'])
-df.to_csv('classification_stats_T'+thresh+'.csv') # zip(im_name, hr, lr, bic, sr)
+    cols_fmt=['num','name']+['TBD']*len(thresh)*4 # formatted c olumn names
+    for n in range(len(thresh)):
+        cols_fmt[2 + 4*n]= 'SR'+'_T'+str(thresh[n]) #hr lr bic
+        cols_fmt[3 + 4*n]= 'HR'+'_T'+str(thresh[n])
+        cols_fmt[4 + 4*n]= 'LR'+'_T'+str(thresh[n])
+        cols_fmt[5 + 4*n]= 'Bic'+'_T'+str(thresh[n])
+    df = pd.DataFrame(list(results.values()), columns =cols_fmt)
+df.to_csv('classification_stats.csv') # zip(im_name, hr, lr, bic, sr)
 
         ## for non- parallel
     #im_out=group_classify(sourcedir_SR, sourcedir_R, outdir, name)
