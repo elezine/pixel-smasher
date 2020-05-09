@@ -69,7 +69,7 @@ def plot_max(): # for analysis
     pass
 
 if __name__ == "__main__": # uncomment to swith between analysis and calculations
-    # view_max_vals() # calculate/save
+    view_max_vals() # calculate/save
     plot_max() # view/analyze
 
 
