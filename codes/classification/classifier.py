@@ -135,7 +135,7 @@ if __name__ == '__main__':
         cols_fmt[4 + 4*n]= 'LR'+'_T'+str(thresh[n])
         cols_fmt[5 + 4*n]= 'Bic'+'_T'+str(thresh[n])
     df = pd.DataFrame(list(results.values()), columns =cols_fmt)
-df.to_csv('classification_stats'+str(up_scale)+str(iter)+'.csv') # zip(im_name, hr, lr, bic, sr)
+df.to_csv('classification_stats_x'+str(up_scale)+'_'+str(iter)+'.csv') # zip(im_name, hr, lr, bic, sr)
 
         ## for non- parallel
     #im_out=group_classify(sourcedir_SR, sourcedir_R, outdir, name)
