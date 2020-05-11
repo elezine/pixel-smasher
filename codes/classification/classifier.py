@@ -16,21 +16,20 @@ import pandas as pd
 # TODO: apply calibration if needed, multiple thresh?
 
 # I/O
-sourcedir_SR='/data_dir/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
-sourcedir_R='/data_dir/valid_mod' # HERE update
-outdir='/data_dir/classify/valid_mod'
-up_scale=4
-iter=100000 # quick fix to get latest validation image in folder
+sourcedir_SR='/data_dir/pixel-smasher/experiments/003_RRDB_ESRGANx8_PLANET/val_images' #'/data_dir/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
+sourcedir_R='/data_dir/valid_mod_cal' #'/data_dir/valid_mod' # HERE update
+outdir='/data_dir/classify/valid_mod_cal'
+up_scale=8
+iter=60000 # quick fix to get latest validation image in folder
 thresh= [-0.1, -0.05, 0, 0.05, 0.1, 0.2, 0.3] # [-10, -5, -2, 0, 2, 5, 10] #2
 apply_radiometric_correction=False # set to zero if already calibrated
 
 # auto I/O
 if apply_radiometric_correction:
     f=open("cal_hash.pkl", "rb")
-    global hash
     hash=pickle.load(f)
 
-def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2): # filstrucutre is pre-defined
+def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2, hash=None): # filstrucutre is pre-defined
     '''
     A simple classification function for high-resolution, low-resolution, and  super resolution images.  Takes input path and write To output path (pre-– formatted).
     '''
@@ -60,10 +59,10 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2): # f
         if 1==1: #os.path.isfile(Bic_out_pth)==False: # only write if file doesn't exist\ # HERE change back
             if n==0:
                 print('No.{} -- Classifying {}: '.format(i, name), end='') # printf: end='' # somehow i is in this functions namespace...?
-            int_res[2 + 4*n]=classify(SR_in_pth, SR_out_pth,current_thresh)
-            int_res[3 + 4*n]=classify(HR_in_pth, HR_out_pth,current_thresh)
-            int_res[4 + 4*n]=classify(LR_in_pth, LR_out_pth,current_thresh)
-            int_res[5 + 4*n]=classify(Bic_in_pth, Bic_out_pth,current_thresh)
+            int_res[2 + 4*n]=classify(SR_in_pth, SR_out_pth,current_thresh, name, hash)
+            int_res[3 + 4*n]=classify(HR_in_pth, HR_out_pth,current_thresh, name, hash)
+            int_res[4 + 4*n]=classify(LR_in_pth, LR_out_pth,current_thresh, name, hash)
+            int_res[5 + 4*n]=classify(Bic_in_pth, Bic_out_pth,current_thresh, name, hash)
         else:# elif os.path.isfile(saveHRpath+os.sep+filename)==True: 
             if n==0:
                 print('Skipping: {}.'.format(name))
@@ -71,18 +70,21 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2): # f
     print('')
     return int_res
 
-def classify(pth_in, pth_out, threshold=2):
+def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None):
         # classify procedure
-    img = cv2.imread(pth_in, cv2.IMREAD_UNCHANGED) # HERE change
+    img = cv2.imread(pth_in, cv2.IMREAD_UNCHANGED)
 
+        # rad correction
     if apply_radiometric_correction:
+        stretch_multiplier=1
         b=[3,2,4]
-        image_cal=np.array(np.zeros(image.shape), dtype='double')
-        ID=filename[:-10]
+        img_uint16=cv2.normalize(img, None, 0, 2**16-1, cv2.NORM_MINMAX, dtype=cv2.CV_16U) #img_uint16=img.astype(np.uint16)
+        img_cal=np.array(np.zeros(img.shape), dtype='double')
+        ID=name[:-6]
         coeffs=hash[ID]
         for j in range(3):
-            image_cal[:,:,j]=image[:,:,j]*coeffs[b[j]]*255*stretch_multiplier
-        image=image_cal.astype(np.uint8)
+            img_cal[:,:,j]=img_uint16[:,:,j]*coeffs[b[j]]*255*stretch_multiplier
+        img=img_cal.astype(np.uint8)
 
         #continue
     img=np.int16(img)
@@ -115,11 +117,11 @@ if __name__ == '__main__':
     # global results
     results = {} # init
     pool = Pool(mp.cpu_count())
-    for i in range(30): #range(num_files): # switch for testing # range(30): #
+    for i in range(num_files): #range(num_files): # switch for testing # range(30): #
         name = dirpaths[i]
 
         # parallel
-        results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, thresh)).get() # , , callback=collect_result
+        results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash)).get() # , , callback=collect_result
     pool.close()
     pool.join()
     print('All subprocesses done.')
@@ -133,7 +135,7 @@ if __name__ == '__main__':
         cols_fmt[4 + 4*n]= 'LR'+'_T'+str(thresh[n])
         cols_fmt[5 + 4*n]= 'Bic'+'_T'+str(thresh[n])
     df = pd.DataFrame(list(results.values()), columns =cols_fmt)
-df.to_csv('classification_stats.csv') # zip(im_name, hr, lr, bic, sr)
+df.to_csv('classification_stats'+str(up_scale)+str(iter)+'.csv') # zip(im_name, hr, lr, bic, sr)
 
         ## for non- parallel
     #im_out=group_classify(sourcedir_SR, sourcedir_R, outdir, name)
