@@ -13,7 +13,7 @@ for folder in Bic  HR  LR; do
         #mkdir -p $mv_folder
         #cat valid_shuf.txt | while read file; do mv $input/$file $mv_folder/$file; done
         # # mv $input/*.png /data_dir/train_mod_cal/$folder/$suffix/$file # too long...
-        mkdir -p train_mod_cal/$folder/$suffix
-        ls $input  | while read file; do mv $input/$file /data_dir/train_mod_cal/$folder/$suffix/$file; done
+        # mkdir -p train_mod_cal/$folder/$suffix
+        # ls $input  | while read file; do mv $input/$file /data_dir/train_mod_cal/$folder/$suffix/$file; done
     done
 done
