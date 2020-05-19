@@ -26,7 +26,7 @@ names=['622194_1368808_2017-07-14_102d_BGRN_Analytic_s0562', '622194_1368808_201
 
 # clouds: 660535_1066622_2017-08-01_1041_BGRN_Analytic_s1002 660535_1066622_2017-08-01_1041_BGRN_Analytic_s1002 581200_1368610_2017-06-26_1030_BGRN_Analytic_s0389
 #%% loop
-fig1, axes = plt.subplots(nrows=len(names),ncols=5, figsize=plt.figaspect(len(names)/5*1))
+fig1, axes = plt.subplots(ncols=len(names),nrows=5, figsize=plt.figaspect(5/len(names)*1))
 
 for i in range(len(names)):
         
@@ -46,11 +46,11 @@ for i in range(len(names)):
     # class_HR_in = cv2.imread(SR_in_pth, cv2.IMREAD_UNCHANGED)
 
 # TODO: plot accuracy metrics, too
-    axes[i,0].imshow(SR_in*rescale_factor) # norme=
-    axes[i,1].imshow(HR_in*rescale_factor)
-    axes[i,2].imshow(LR_in*rescale_factor)
-    axes[i,3].imshow(Bic_in*rescale_factor)
-    axes[i,4].imshow(class_SR_in, cmap='Greys')
+    axes[0,i].imshow(SR_in*rescale_factor) # norme=
+    axes[1,i].imshow(HR_in*rescale_factor)
+    axes[2,i].imshow(LR_in*rescale_factor)
+    axes[3,i].imshow(Bic_in*rescale_factor)
+    axes[4,i].imshow(class_SR_in, cmap='Greys')
     
     for j in range(5):
         # plot
@@ -61,11 +61,11 @@ for i in range(len(names)):
         # axes.tick_params...
         # fig1.subplots_adjust(wspace=0.5, hspace=0.3, left=0.125, right=0.9, top=0.9, bottom=0.1)
         
-        axes[i,j].axis('off')
+        axes[j,i].axis('off')
         plt.axis('off')
         
-        if i==0:
-            axes[i,j].set(title='title')
+        if j==0:
+            axes[j,i].set(title='title')
 
 #%% plot and save
 fig1.tight_layout()
