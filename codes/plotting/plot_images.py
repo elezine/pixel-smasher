@@ -26,7 +26,7 @@ names=['622194_1368808_2017-07-14_102d_BGRN_Analytic_s0562', '622194_1368808_201
 
 # clouds: 660535_1066622_2017-08-01_1041_BGRN_Analytic_s1002 660535_1066622_2017-08-01_1041_BGRN_Analytic_s1002 581200_1368610_2017-06-26_1030_BGRN_Analytic_s0389
 #%% loop
-fig3, axes = plt.subplots(nrows=len(names),ncols=5, figsize=plt.figaspect(len(names)/5*1))
+fig1, axes = plt.subplots(nrows=len(names),ncols=5, figsize=plt.figaspect(len(names)/5*1))
 
 for i in range(len(names)):
         
@@ -59,13 +59,18 @@ for i in range(len(names)):
         # axes[i,j].imshow(cv2.normalize(SR_in, norm_type=cv2.NORM_MINMAX))
         # axes[i,j].imshow(cv2.normalize(SR_in, None, 1.0, 0.0, cv2.NORM_L1))
         # axes.tick_params...
-        # fig3.subplots_adjust(wspace=0.5, hspace=0.3, left=0.125, right=0.9, top=0.9, bottom=0.1)
+        # fig1.subplots_adjust(wspace=0.5, hspace=0.3, left=0.125, right=0.9, top=0.9, bottom=0.1)
+        
         axes[i,j].axis('off')
         plt.axis('off')
+        
+        if i==0:
+            axes[i,j].set(title='title')
 
 #%% plot and save
-fig3.tight_layout()
-plt.savefig('fig3')
+fig1.tight_layout()
+fig1.show()
+fig1.savefig('Fig_subsets.png')
 print('done')
     
 
