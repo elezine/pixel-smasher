@@ -22,6 +22,10 @@ current_thresh=0.2
 iter=60000 # quick fix to get latest validation image in folder
 rescale_factor=8 # quick and dirty rescale
 names=['622194_1368808_2017-07-14_102d_BGRN_Analytic_s0562', '622194_1368808_2017-07-14_102d_BGRN_Analytic_s0699', '584870_1368808_2017-06-27_1038_BGRN_Analytic_s0110']
+labels=['A','B','C']
+ylabels=('HR','LR','Bic','SR','SR water mask')
+za=(125, 380, 200) #100 # zoom bound A
+zb=(225, 480, 300) #300; # zoom bound B
 #    
 
 # clouds: 660535_1066622_2017-08-01_1041_BGRN_Analytic_s1002 660535_1066622_2017-08-01_1041_BGRN_Analytic_s1002 581200_1368610_2017-06-26_1030_BGRN_Analytic_s0389
@@ -46,12 +50,14 @@ for i in range(len(names)):
     # class_HR_in = cv2.imread(SR_in_pth, cv2.IMREAD_UNCHANGED)
 
 # TODO: plot accuracy metrics, too
-    axes[0,i].imshow(SR_in*rescale_factor) # norme=
-    axes[1,i].imshow(HR_in*rescale_factor)
-    axes[2,i].imshow(LR_in*rescale_factor)
-    axes[3,i].imshow(Bic_in*rescale_factor)
-    axes[4,i].imshow(class_SR_in, cmap='Greys')
+    axes[0,i].imshow(HR_in[za[i]:zb[i],za[i]:zb[i]:]*rescale_factor)
+    axes[1,i].imshow(LR_in[np.int(za[i]/up_scale):np.int(zb[i]/up_scale),np.int(za[i]/up_scale):np.int(zb[i]/up_scale):]*rescale_factor)
+    axes[2,i].imshow(Bic_in[za[i]:zb[i],za[i]:zb[i]:]*rescale_factor) # <----- HERE: fix scaling for LR !
+    axes[3,i].imshow(SR_in[za[i]:zb[i],za[i]:zb[i]:]*rescale_factor, extent=(100.5, 150.5, 150.5,100.5)) # norm=
+    axes[4,i].imshow(class_SR_in[za[i]:zb[i],za[i]:zb[i]:], cmap='Greys')
     
+    
+
     for j in range(5):
         # plot
         # fig=plt.figure()
@@ -61,16 +67,19 @@ for i in range(len(names)):
         # axes.tick_params...
         # fig1.subplots_adjust(wspace=0.5, hspace=0.3, left=0.125, right=0.9, top=0.9, bottom=0.1)
         
-        axes[j,i].axis('off')
-        plt.axis('off')
-        
+        # axes[j,i].axis('off')
+        axes[j,i].xaxis.set(ticks=(), ticklabels=())
+        axes[j,i].yaxis.set(ticks=(), ticklabels=())
+        # plt.axis('off')
+        if i==0:
+            axes[j,i].set(ylabel=ylabels[j])
         if j==0:
-            axes[j,i].set(title='title')
+            axes[j,i].set(title=labels[i]) # (title=names[i]
 
 #%% plot and save
 fig1.tight_layout()
 fig1.show()
-fig1.savefig('Fig_subsets.png')
+fig1.savefig('Fig_subsets.png', dpi=300)
 print('done')
     
 
