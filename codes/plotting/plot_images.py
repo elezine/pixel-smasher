@@ -42,10 +42,10 @@ for i in range(len(names)):
     class_SR_in_pth=os.path.join(classdir, 'SR', 'x' + str(up_scale), names[i]+'_T'+str(current_thresh)+ '.png')
 
     # load
-    SR_in = cv2.imread(SR_in_pth)
-    HR_in = cv2.imread(HR_in_pth)
-    LR_in = cv2.imread(LR_in_pth)
-    Bic_in = cv2.imread(Bic_in_pth)
+    SR_in = cv2.imread(SR_in_pth)[:,:,(0,2,1)]
+    HR_in = cv2.imread(HR_in_pth)[:,:,(0,2,1)]
+    LR_in = cv2.imread(LR_in_pth)[:,:,(0,2,1)]
+    Bic_in = cv2.imread(Bic_in_pth)[:,:,(0,2,1)]
     class_SR_in = cv2.imread(class_SR_in_pth, cv2.IMREAD_UNCHANGED) # load as greyscale
     # class_HR_in = cv2.imread(SR_in_pth, cv2.IMREAD_UNCHANGED)
 
@@ -91,10 +91,10 @@ for i in range(len(names)):
     class_SR_in_pth=os.path.join(classdir, 'SR', 'x' + str(up_scale), names[i]+'_T'+str(current_thresh)+ '.png')
 
     # load
-    SR_in = cv2.imread(SR_in_pth)
-    HR_in = cv2.imread(HR_in_pth)
-    LR_in = cv2.imread(LR_in_pth)
-    Bic_in = cv2.imread(Bic_in_pth)
+    SR_in = cv2.imread(SR_in_pth)[:,:,(0,2,1)]
+    HR_in = cv2.imread(HR_in_pth)[:,:,(0,2,1)]
+    LR_in = cv2.imread(LR_in_pth)[:,:,(0,2,1)]
+    Bic_in = cv2.imread(Bic_in_pth)[:,:,(0,2,1)]
     class_SR_in = cv2.imread(class_SR_in_pth, cv2.IMREAD_UNCHANGED) # load as greyscale
     # class_HR_in = cv2.imread(SR_in_pth, cv2.IMREAD_UNCHANGED)
 
