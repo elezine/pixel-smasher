@@ -16,11 +16,12 @@ def generate_mod_LR_bic():
     # set parameters
     up_scale = 4
     mod_scale = 4
-    stretch_multiplier=1 # to increase total dynamic range
+    # stretch_multiplier=1 # to increase total dynamic range
+
     # set data dir
     if getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
         sourcedir = '/data_dir/planet_sub'
-        savedir = '/data_dir/planet_sub_LR_cal'
+        savedir = '/data_dir/planet_sub_LR'
     else: # other
         raise ValueError('input_folder not specified!')
         pass
@@ -61,9 +62,9 @@ def generate_mod_LR_bic():
     num_files = len(filepaths)
 
     ## load hash
-    f=open("cal_hash.pkl", "rb")
-    hash=pickle.load(f)
-    b=[3,2,4]
+    # f=open("cal_hash.pkl", "rb")
+    # hash=pickle.load(f)
+    # b=[3,2,4]
 
     # prepare data with augementation
     for i in range(num_files):
@@ -72,17 +73,9 @@ def generate_mod_LR_bic():
         # read image
         image = cv2.imread(os.path.join(sourcedir, filename), cv2.IMREAD_UNCHANGED) # apparently, this loads as 8-bit bit depth... Changed!
 
-        ## apply correction
-        image_cal=np.array(np.zeros(image.shape), dtype='double')
-        ID=filename[:-10]
-        coeffs=hash[ID]
-        for j in range(3):
-            image_cal[:,:,j]=image[:,:,j]*coeffs[b[j]]*255*stretch_multiplier
-        image=image_cal.astype(np.uint8)
-
         ## continue
-        width = int(np.floor(image.shape[1] / mod_scale))
-        height = int(np.floor(image.shape[0] / mod_scale))
+        width = int(np.floor(image.shape[1] / mod_scale)) # LR width
+        height = int(np.floor(image.shape[0] / mod_scale)) # LR height
         # modcrop
         if len(image.shape) == 3:
             image_HR = image[0:mod_scale * height, 0:mod_scale * width, :] # this simply makes the dimenions of the image even if they weren't originally

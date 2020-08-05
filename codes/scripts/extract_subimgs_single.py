@@ -12,20 +12,19 @@ except ImportError as e:
     print('Error caught: '+str(e))
     pass
 
-
 def main():
     """A multi-thread tool to crop sub imags."""
     if getpass.getuser()=='ekyzivat': # on ethan local
         input_folder = 'F:\ComputerVision\Planet'
         save_folder = 'F:\ComputerVision\Planet_sub'
     elif getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
-        input_folder = '/data_dir/planet_scenes'
+        input_folder = '/data_dir/Scenes'
         save_folder = '/data_dir/planet_sub'
     else: # other
         raise ValueError('input_folder not specified!')
         pass
 
-    n_thread = 20
+    n_thread = 8 #20
     crop_sz = 480 # num px in x and y
     step = 240
     thres_sz = 48
@@ -42,9 +41,11 @@ def main():
         #pass # uncomment above two lines for ease of working, if necessary
 
     img_list = []
-    for root, _, file_list in sorted(os.walk(input_folder)):
-        path = [os.path.join(root, x) for x in file_list]  # assume only images in the input_folder
-        img_list.extend(path)
+    for root, _, file_list in sorted(os.walk(input_folder)): # +'/*SR.tif'
+        for x in file_list:  # assume only images in the input_folder
+            if x.endswith("SR.tif"):
+                path = os.path.join(root, x) 
+                img_list.append(path)
 
     def update(arg):
         pbar.update(arg)
@@ -64,6 +65,18 @@ def main():
 def worker(path, save_folder, crop_sz, step, thres_sz, compression_level):
     img_name = os.path.basename(path)
     img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+
+        # for reflectance scaling
+    reflectance_lower=0
+    reflectance_upper=6000
+
+        ## apply reflectance scaling correction
+    image_cal=np.ones(img.shape, dtype='single')
+    # ID=filename[:-10]
+    # coeffs=hash[ID]
+    image_cal=np.minimum((img.astype(np.single)-reflectance_lower)/(reflectance_upper-reflectance_lower), image_cal) ## need to modify if refl_lower is > 0...
+    # image=cv2.normalize(image_cal, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U) # this method uses min of empircal data as original min bound, so is not uniform between images
+    img=(image_cal*255).astype(np.uint8)
 
     n_channels = len(img.shape)
     if n_channels == 2:
@@ -94,7 +107,7 @@ def worker(path, save_folder, crop_sz, step, thres_sz, compression_level):
             if ~np.any(crop_img==0):
                 cv2.imwrite(
                     os.path.join(save_folder, img_name.replace('.tif', '_s{:04d}.png'.format(index))),
-                    crop_img[:,:,(2,1,3)], [cv2.IMWRITE_PNG_COMPRESSION, compression_level]) # 2,1,3 for RGN, 2,1,0 for RGB
+                    crop_img[:,:,(2,1,3)], [cv2.IMWRITE_PNG_COMPRESSION, compression_level]) # 2,1,3 for RGN, 2,1,0 for RGB (original = BGRN)
                 index += 1
             else:
                 print('\tSome No Data pixels in: {:d}, {:d}.  Skipping.'.format(x,y))

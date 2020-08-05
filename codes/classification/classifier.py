@@ -11,14 +11,14 @@ import pickle
 import pandas as pd
 
 
-# example output paths: /data_dir/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images/716222_1368610_2017-08-27_0e0f_BGRN_Analytic_s0984
+# example output paths: /data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images/716222_1368610_2017-08-27_0e0f_BGRN_Analytic_s0984
 
 # TODO: apply calibration if needed, multiple thresh?
 
 # I/O
-sourcedir_SR='/data_dir/pixel-smasher/experiments/003_RRDB_ESRGANx8_PLANET/val_images' #'/data_dir/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
-sourcedir_R='/data_dir/valid_mod_cal' #'/data_dir/valid_mod' # HERE update
-outdir='/data_dir/classify/valid_mod_cal'
+sourcedir_SR='/data_dir/pixel-smasher/experiments/003_RRDB_ESRGANx8_PLANET/val_images' #'/data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
+sourcedir_R='/data_dir/ClassProject/valid_mod_cal' #'/data_dir/ClassProject/valid_mod' # HERE update
+outdir='/data_dir/ClassProject/classify/valid_mod_cal'
 up_scale=8
 iter=60000 # quick fix to get latest validation image in folder
 thresh= [-0.1, -0.05, 0, 0.05, 0.1, 0.2, 0.3] # [-10, -5, -2, 0, 2, 5, 10] #2
@@ -75,7 +75,7 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None):
     img = cv2.imread(pth_in, cv2.IMREAD_UNCHANGED)
 
         # rad correction
-    if apply_radiometric_correction:
+    if apply_radiometric_correction: #HERE update
         stretch_multiplier=1
         b=[3,2,4]
         img_uint16=cv2.normalize(img, None, 0, 2**16-1, cv2.NORM_MINMAX, dtype=cv2.CV_16U) #img_uint16=img.astype(np.uint16)
@@ -89,7 +89,15 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None):
         #continue
     img=np.int16(img)
     ndwi = (img[:,:,0]-img[:,:,2])/(img[:,:,0]+img[:,:,2])
-    bw=ndwi>threshold # output mask from classifier
+
+        # convert nan to zero
+    ndwi[np.isnan(ndwi)]=0 # now, I can ignore RuntimeWarnings about dividing by zero
+    
+    try:
+        bw=ndwi>threshold # output mask from classifier
+    except RuntimeWarning:
+        pass
+
         # count pixels
     nWaterPix=np.sum(bw)
         # write out
@@ -103,12 +111,13 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None):
 
 if __name__ == '__main__':
 
-        # for testing
-    # pth_in, pth_out= '/data_dir/valid_mod/HR/x4/492899_1166117_2017-05-06_1041_BGRN_Analytic_s0029.png', 'test.png' #'/data_dir/classify/valid_mod/HR/x4/492899_1166117_2017-05-06_1041_BGRN_Analytic_s0029C.png'
-    # print('Running classifier.')
-    # print('File:\t{}\nOutput:\t{}\n'.format(pth_in, pth_out))
-    # im_out=classify(pth_in, pth_out)
-
+        # for testing #####################
+    pth_in, pth_out= '/data_dir/ClassProject/valid_mod/HR/x4/492899_1166117_2017-05-06_1041_BGRN_Analytic_s0029.png', 'test.png' #'/data_dir/ClassProject/classify/valid_mod/HR/x4/492899_1166117_2017-05-06_1041_BGRN_Analytic_s0029C.png'
+    print('Running classifier.')
+    print('File:\t{}\nOutput:\t{}\n'.format(pth_in, pth_out))
+    im_out=classify(pth_in, pth_out)
+        ##################################
+        
         # print
     print('Starting classification.  Files will be in {}'.format(outdir))
         # loop over files
@@ -121,7 +130,7 @@ if __name__ == '__main__':
         name = dirpaths[i]
 
         # parallel
-        results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash)).get() # , , callback=collect_result
+        results[i] = pool.apply(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash))# , , callback=collect_result
     pool.close()
     pool.join()
     print('All subprocesses done.')
