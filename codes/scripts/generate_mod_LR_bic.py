@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import getpass
 import pickle
+import multiprocessing
 
 try:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -11,6 +12,26 @@ try:
 except ImportError:
     pass
 
+def worker(filename, sourcedir, mod_scale, up_scale, saveHRpath, saveLRpath, saveBicpath):
+    # read image
+    image = cv2.imread(os.path.join(sourcedir, filename), cv2.IMREAD_UNCHANGED) # apparently, this loads as 8-bit bit depth... Changed!
+
+    ## continue
+    width = int(np.floor(image.shape[1] / mod_scale)) # LR width
+    height = int(np.floor(image.shape[0] / mod_scale)) # LR height
+    # modcrop
+    if len(image.shape) == 3:
+        image_HR = image[0:mod_scale * height, 0:mod_scale * width, :] # this simply makes the dimenions of the image even if they weren't originally
+    else:
+        image_HR = image[0:mod_scale * height, 0:mod_scale * width]
+    # LR
+    image_LR = imresize_np(image_HR, 1 / up_scale, True)
+    # bic
+    image_Bic = imresize_np(image_LR, up_scale, True) # uses bicubic resampling to recreate the HR image from the LR naively (the GAN will do this better)
+
+    cv2.imwrite(os.path.join(saveHRpath, filename), image_HR) 
+    cv2.imwrite(os.path.join(saveLRpath, filename), image_LR)
+    cv2.imwrite(os.path.join(saveBicpath, filename), image_Bic)
 
 def generate_mod_LR_bic():
     # set parameters
@@ -67,28 +88,15 @@ def generate_mod_LR_bic():
     # b=[3,2,4]
 
     # prepare data with augementation
+    n_thread=multiprocessing.cpu_count()
+    pool = multiprocessing.Pool(n_thread)
     for i in range(num_files):
-        filename = filepaths[i]
-        print('No.{} -- Processing {}'.format(i, filename))
-        # read image
-        image = cv2.imread(os.path.join(sourcedir, filename), cv2.IMREAD_UNCHANGED) # apparently, this loads as 8-bit bit depth... Changed!
-
-        ## continue
-        width = int(np.floor(image.shape[1] / mod_scale)) # LR width
-        height = int(np.floor(image.shape[0] / mod_scale)) # LR height
-        # modcrop
-        if len(image.shape) == 3:
-            image_HR = image[0:mod_scale * height, 0:mod_scale * width, :] # this simply makes the dimenions of the image even if they weren't originally
-        else:
-            image_HR = image[0:mod_scale * height, 0:mod_scale * width]
-        # LR
-        image_LR = imresize_np(image_HR, 1 / up_scale, True)
-        # bic
-        image_Bic = imresize_np(image_LR, up_scale, True) # uses bicubic resampling to recreate the HR image from the LR naively (the GAN will do this better)
-
-        cv2.imwrite(os.path.join(saveHRpath, filename), image_HR) 
-        cv2.imwrite(os.path.join(saveLRpath, filename), image_LR)
-        cv2.imwrite(os.path.join(saveBicpath, filename), image_Bic)
+        print('No.{} -- Processing {}'.format(i, filepaths[i]))
+        pool.apply_async(worker,
+                         args=(filepaths[i], sourcedir, mod_scale, up_scale, saveHRpath, saveLRpath, saveBicpath))
+    pool.close()
+    pool.join()
+    print('All subprocesses done.')
 
 
 if __name__ == "__main__":
