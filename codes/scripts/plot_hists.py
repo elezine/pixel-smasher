@@ -67,7 +67,7 @@ def main():
     def update(arg):
         pbar.update(arg)
 
-    img_list=img_list[:30] # to start in middle
+    # img_list=img_list[:30] # to start in middle
     pbar = ProgressBar(len(img_list))
 
     pool = Pool(n_thread)

@@ -87,8 +87,9 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None):
         img=img_cal.astype(np.uint8)
 
         #continue
-    img=np.int16(img)
-    ndwi = (img[:,:,0]-img[:,:,2])/(img[:,:,0]+img[:,:,2])
+    img=np.single(img)
+    ndwi_bands=(2,1)
+    ndwi = (img[:,:,ndwi_bands[1]]-img[:,:,ndwi_bands[0]])/(img[:,:,ndwi_bands[1]]+img[:,:,ndwi_bands[0]]) # NRG images: so 2-0 # RGN images: so (G-N)/(G+N)
 
         # convert nan to zero
     ndwi[np.isnan(ndwi)]=0 # now, I can ignore RuntimeWarnings about dividing by zero
@@ -98,10 +99,20 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None):
     except RuntimeWarning:
         pass
 
-        # count pixels
+        # stats: count pixels, etc
     nWaterPix=np.sum(bw)
-        # write out
+    mean_ndwi=np.mean(ndwi)
+    median_ndwi=np.median(ndwi)
+    min_ndwi=np.min(ndwi)
+    max_ndwi=np.max(ndwi)
+
+        # write out ndwi ( for testing)
+    # img_ndwi=np.minimum(np.maximum((ndwi+0.4)/0.8, np.zeros(ndwi.shape, dtype=ndwi.dtype)), np.ones(ndwi.shape, dtype=ndwi.dtype))
+    # cv2.imwrite(pth_out, img_as_ubyte(img_ndwi))  # HERE np.array(255*bw, 'uint8')
+
+        # write out bw
     cv2.imwrite(pth_out, np.array(255*bw, 'uint8'))  # HERE
+
     #pass # Why is this necessary?  It's not
     return nWaterPix
 
@@ -126,7 +137,7 @@ if __name__ == '__main__':
     # global results
     results = {} # init
     pool = Pool(mp.cpu_count())
-    for i in range(num_files): #range(num_files): # switch for testing # range(30): #
+    for i in range(num_files): # switch for testing # range(30):
         name = dirpaths[i]
 
         # parallel
@@ -144,7 +155,11 @@ if __name__ == '__main__':
         cols_fmt[4 + 4*n]= 'LR'+'_T'+str(thresh[n])
         cols_fmt[5 + 4*n]= 'Bic'+'_T'+str(thresh[n])
     df = pd.DataFrame(list(results.values()), columns =cols_fmt)
-df.to_csv('classification_stats_x'+str(up_scale)+'_'+str(iter)+'.csv') # zip(im_name, hr, lr, bic, sr)
-
+    try:
+        csv_out='classification_stats_x'+str(up_scale)+'_'+str(iter)+'.csv'
+        df.to_csv(csv_out) # zip(im_name, hr, lr, bic, sr)
+        print('Saved classification stats csv: {}'.format(csv_out))
+    except NameError:
+        print('No CSV printed')
         ## for non- parallel
     #im_out=group_classify(sourcedir_SR, sourcedir_R, outdir, name)

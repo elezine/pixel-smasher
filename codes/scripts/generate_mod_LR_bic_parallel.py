@@ -12,18 +12,20 @@ try:
 except ImportError:
     pass
 
+adjust_stretch=False # whether or not to change TDR in this step
 
-def generate_mod_LR_bic():
+def generate_mod_LR_bic(top_dir):
     # set parameters
-    # Why is this not multi-threaded (parallel)?
+    print(f'Top dir: {top_dir}')
     n_thread=8 # num cores
-    up_scale = 8
-    mod_scale = 8
-    stretch_multiplier=1.5 # to increase total dynamic range
+    up_scale = 4
+    mod_scale = 4
+    stretch_multiplier=1 # to increase total dynamic range
+
     # set data dir
     if getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
-        sourcedir = '/data_dir/planet_sub'
-        savedir = '/data_dir/planet_sub_LR_cal'
+        sourcedir = os.path.join('/data_dir/planet_sub', top_dir)
+        savedir = os.path.join('/data_dir/', top_dir)
     else: # other
         raise ValueError('input_folder not specified!')
         pass
@@ -89,14 +91,15 @@ def worker(i, filename, sourcedir, saveHRpath, saveLRpath, saveBicpath, up_scale
     # read image
     image = cv2.imread(os.path.join(sourcedir, filename), cv2.IMREAD_UNCHANGED) # apparently, this loads as 8-bit bit depth... Changed!
 
-    ## apply correction
-    b=[3,2,4]
-    image_cal=np.array(np.zeros(image.shape), dtype='double')
-    ID=filename[:-10]
-    coeffs=hash[ID]
-    for j in range(3):
-        image_cal[:,:,j]=image[:,:,j]*coeffs[b[j]]*255*stretch_multiplier
-    image=image_cal.astype(np.uint8)
+    if adjust_stretch:
+        ## apply correction
+        b=[3,2,4]
+        image_cal=np.array(np.zeros(image.shape), dtype='double')
+        ID=filename[:-10]
+        coeffs=hash[ID]
+        for j in range(3):
+            image_cal[:,:,j]=image[:,:,j]*coeffs[b[j]]*255*stretch_multiplier
+        image=image_cal.astype(np.uint8)
 
     ## continue
     width = int(np.floor(image.shape[1] / mod_scale))
@@ -118,4 +121,6 @@ def worker(i, filename, sourcedir, saveHRpath, saveLRpath, saveBicpath, up_scale
     return 'No.{} -- Processed {}'.format(i, filename)
 
 if __name__ == "__main__":
-    generate_mod_LR_bic()
+    generate_mod_LR_bic('train_mod')
+    generate_mod_LR_bic('valid_mod')
+    generate_mod_LR_bic('hold_mod')
