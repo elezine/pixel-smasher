@@ -12,6 +12,13 @@ We have updated model tunings for high-resolution satellite data.  See [Datasets
 
 These new changes are authored by Ethan D. Kyzivat and Ekaterina Lezine.
 
+## Image import and preprocessing workflow
+
+1. Download images to Scenes folder
+2. [extract_subimgs_single.py](codes/scripts/extract_subimgs_single.py) > Divides satellite scenes into subsets
+3. [rand_shuf.sh](codes/utils/rand_shuf.sh) > Randomly creates training and validation partitions
+4. [generate_mod_LR_bic_parallel.py](/codes/scripts/generate_mod_LR_bic_parallel.py) > Upscales and downscales subsets via a number of methods
+
 ## Dependencies and Installation
 - Python 3 (Recommend to use [Anaconda](https://www.anaconda.com/download/#linux))
 - [PyTorch >= 1.0](https://pytorch.org/)
