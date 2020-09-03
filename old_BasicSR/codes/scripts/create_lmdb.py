@@ -17,7 +17,7 @@ lmdb_save_path = '/data_dir/train_mod/PLANET_HR_x4_train.lmdb'
 meta_info = {'name': 'PLANET_HR_x4_train'}
 mode = 2  # 1 for reading all the images to memory and then writing to lmdb (more memory);
 # 2 for reading several images and then writing to lmdb, loop over (less memory)
-batch = 1000  # Used in mode 2. After batch images, lmdb commits.
+batch = 10000  # Used in mode 2. After batch images, lmdb commits.
 ###########################################
 if not lmdb_save_path.endswith('.lmdb'):
     raise ValueError("lmdb_save_path must end with \'lmdb\'.")
