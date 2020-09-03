@@ -1,4 +1,4 @@
-'''Plot hists of each scene. Uncomment relevatnt areas to switch Between absolute and relative reflectances.'''
+'''Plot hists of each scene. Uncomment relevatnt areas to switch Between absolute and relative reflectances. Includes switch to compute hist stats for each image. Written for parallel loop.'''
 
 import os
 import os.path as osp
@@ -9,6 +9,7 @@ import multiprocessing
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
+sys.path.insert(1, '/home/ethan_kyzivat/code/pixel-smasher/codes/scripts/')
 from extract_subimgs_single import rescale_reflectance # for relative reflectance
 from extract_subimgs_single import rescale_reflectance_equal # for absolute reflectance
 
@@ -19,14 +20,22 @@ except ImportError as e:
     print('Error caught: '+str(e))
     pass
 
+    ## USER PARAMS
 btm_percentile=2 # for relative reflectance
 top_percentile=95 # for relative reflectance
 reflectance_upper=3000 # for absolute reflectance
 band_order=(3,2,1)  # 3,2,1 for NRG, 2,1,3 for RGN, 2,1,0 for RGB (original = BGRN) # NOTE this is reversed bc not using cv2 to write out!
 ndwi_bands=(1,2) # (1,3) # used to determine maximum or (n-percentile) brightness in scene
+save_fig=False # save output hist /stretch fig?
+save_hist=True # record histogram for each image, save every save_freq images and at end
+hist_length=15000 #15000 #15000 # if using
+save_freq=30 # only matters if save_hist is True #30
+n_thread = multiprocessing.cpu_count()
+##################
 
-##
-
+    ## validate I/O
+if ~(save_fig or save_hist):
+    EnvironmentError('Save_fig or save_hist must be True')
 
 def main():
     """A multi-thread tool to crop sub imags."""
@@ -35,12 +44,10 @@ def main():
         save_folder = 'F:\ComputerVision\Planet_sub'
     elif getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
         input_folder = '/data_dir/Scenes'
-        save_folder = '/data_dir/other/hists/histsv5'
+        save_folder = '/data_dir/other/hists/histsv6_test'
     else: # other
         raise ValueError('input_folder not specified!')
         pass
-
-    n_thread = multiprocessing.cpu_count()
     crop_sz = 480 # num px in x and y
     step = 240
     thres_sz = 48
@@ -71,13 +78,22 @@ def main():
     pbar = ProgressBar(len(img_list))
 
     pool = Pool(n_thread)
+    hist_results=np.zeros((hist_length,4,len(img_list)), dtype='single') # init, TODO: make dynamic
+    j=0
     for path in img_list:
-        pool.apply_async(worker,
-                         args=(path, save_folder, crop_sz, step, thres_sz, compression_level),
-                         callback=update)
+        print(f'Image {j}:\t{path}')
+        hist_results[:,:,j] = pool.apply_async(worker, #
+                         args=(path, save_folder, crop_sz, step, thres_sz, compression_level)).get() # ,callback=update
+        if j % save_freq==0:
+            np.save('histograms_temp.npy', hist_results)
+            print('Temp histograms saved to hists_temp.npy')
+        j+=1
+
     pool.close()
     pool.join()
     print('All subprocesses done.')
+    np.save('histograms.npy', hist_results)
+    print('Histograms saved to hists.npy')
 
 def worker(path, save_folder, crop_sz, step, thres_sz, compression_level):
     img_name = os.path.basename(path)
@@ -91,23 +107,36 @@ def worker(path, save_folder, crop_sz, step, thres_sz, compression_level):
 
     f, ax = plt.subplots(img.shape[2], 2, sharex=True)
     # dfb.rem
+    hist=np.zeros((hist_length, img.shape[2])) # TODO: make 1500 dynamic
     for i in range(img.shape[2]):
-        ax[i,1].hist(img[:,:,i][img[:,:,i]>0].flatten(),bins=np.linspace(0,10000,101))
-        ax[i,1].set_title('band: {}'.format(i))
-#
-    f.add_subplot(1,2,1)
+        if save_fig:
+            ax[i,1].hist(img[:,:,i][img[:,:,i]>0].flatten(),bins=np.linspace(0,10000,101))
+            ax[i,1].set_title('band: {}'.format(i))
+        if save_hist:
+            h=[] # init histogram
+            h.append(ax[i,1].hist(img[:,:,i][img[:,:,i]>0].flatten(),bins=np.linspace(0,hist_length,hist_length+1))) # HERE figure out how to use plot or create an if branch
+            hist[:,i]=h[0][0]
+            pass
 
         # for relative reflectance
     # img=rescale_reflectance(img[:,:,band_order], btm_percentile, top_percentile) 
 
         # for absolute reflectance
-    img=rescale_reflectance_equal(img[:,:,band_order], reflectance_upper) 
 
-    plt.imshow(img, resample=True)
-    ax[0,0].set_title(img_name)
-    plt.savefig(os.path.join(save_folder, img_name.replace('.tif', '_hist.png')))
+    
+    if save_fig:
+        f.add_subplot(1,2,1)
+        ax[0,0].set_title(img_name)
+        img=rescale_reflectance_equal(img[:,:,band_order], reflectance_upper) 
+        plt.imshow(img, resample=True)
+        plt.savefig(os.path.join(save_folder, img_name.replace('.tif', '_hist.png')))
     plt.close()
     print(f'\t{img_name} hist\tSaved.')
+
+    if save_hist:
+        return hist # HERE: which orientation?
+    else: 
+        return 0
 
 if __name__ == '__main__':
     main()

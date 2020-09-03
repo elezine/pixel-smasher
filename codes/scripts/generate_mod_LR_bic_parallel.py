@@ -5,6 +5,7 @@ import numpy as np
 import getpass
 import pickle
 from multiprocessing import Pool
+import multiprocessing
 
 try:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -17,7 +18,7 @@ adjust_stretch=False # whether or not to change TDR in this step
 def generate_mod_LR_bic(top_dir):
     # set parameters
     print(f'Top dir: {top_dir}')
-    n_thread=8 # num cores
+    n_thread=multiprocessing.cpu_count() # num cores 8
     up_scale = 4
     mod_scale = 4
     stretch_multiplier=1 # to increase total dynamic range
@@ -66,8 +67,8 @@ def generate_mod_LR_bic(top_dir):
     num_files = len(filepaths)
 
     ## load hash
-    f=open("cal_hash.pkl", "rb")
-    hash=pickle.load(f)
+    #f=open("cal_hash.pkl", "rb")
+    #hash=pickle.load(f)
 
     ## new parallel ##########################
 

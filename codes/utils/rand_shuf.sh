@@ -3,7 +3,7 @@
 BASE_DIR=/data_dir/planet_sub
 
 # choose random subsets of files to move
-NUM_IMAGES=$(ls $BASE_DIR/*.png | wc -l)
+NUM_IMAGES=$(find $BASE_DIR -maxdepth 1 -name "*.png" | wc -l) # modified to use find instead of ls, which fails for large lists
 echo "Number of images total:" $NUM_IMAGES
 VALSIZE=$(( $NUM_IMAGES * 150 / 1000 )) # number of validation files + holdout files
 HOLDSIZE=$(( $NUM_IMAGES * 1 / 1000 )) # number of holdout files (rest for training)
@@ -11,7 +11,7 @@ echo "Number of images for validation:" $VALSIZE
 echo "Number of images for holdout:" $HOLDSIZE
 
 # compute filenamesmes
-ls $BASE_DIR/*.png > all10.txt
+find $BASE_DIR -name "*.png" | cut -d'/' -f4 > all10.txt # TODO make this a less sloppy fix by dynamically referencing file names
 shuf all10.txt -n $VALSIZE > valid_shuf10.txt
 shuf valid_shuf10.txt -n $HOLDSIZE > hold_shuf10.txt
 
@@ -22,10 +22,10 @@ mkdir -p $BASE_DIR/hold_mod
 
 ## move files
 cat hold_shuf10.txt | while read file; do
-    mv $file $BASE_DIR/hold_mod
+    mv $BASE_DIR/$file $BASE_DIR/hold_mod
 done
 cat valid_shuf10.txt | while read file; do
-    mv $file $BASE_DIR/valid_mod # expect Errors because some files have already been moved
+    mv $BASE_DIR/$file $BASE_DIR/valid_mod # expect Errors because some files have already been moved
 done
 for file in $BASE_DIR/*.png; do
     mv $file $BASE_DIR/train_mod

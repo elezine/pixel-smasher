@@ -16,10 +16,18 @@ except ImportError as e:
     print('Error caught: '+str(e))
     pass
 
+    # for relative stretch
 btm_percentile=2
 top_percentile=99
-band_order=(2,1,3)  # 3,2,1 for NRG, 2,1,3 for RGN, 2,1,0 for RGB (original = BGRN)
 ndwi_bands=(1,3) # (1,3) # used to determine maximum or (n-percentile) brightness in scene
+
+    # for abs stretch
+reflectance_upper=3000
+band_order=(2,1,3)  # 3,2,1 for NRG, 2,1,3 for RGN, 2,1,0 for RGB (original = BGRN)
+
+    # load 
+quantile_val=np.load('/home/ethan_kyzivat/code/pixel-smasher/quantile_matrix.npy')
+print(f'Loaded quantiles values:\n{quantile_val}')
 
 def main():
     """A multi-thread tool to crop sub imags."""
@@ -33,7 +41,7 @@ def main():
         raise ValueError('input_folder not specified!')
         pass
 
-    n_thread = n_thread = multiprocessing.cpu_count() #1
+    n_thread = multiprocessing.cpu_count() #1
     crop_sz = 480 # num px in x and y
     step = 240
     thres_sz = 48
@@ -59,7 +67,7 @@ def main():
     # img_list = ['/data_dir/Scenes/20190619_191648_25_106f_3B_AnalyticMS_SR.tif'] # for testing
     def update(arg):
         pbar.update(arg)
-    # img_list=img_list[:9] # for testing
+    # img_list=img_list[238:270] # for testing
     pbar = ProgressBar(len(img_list))
 
     pool = Pool(n_thread)
@@ -94,16 +102,35 @@ def rescale_reflectance(img, btm_percentile=2, top_percentile=98):
     img=img_as_ubyte(img) #(img/65535*255).astype(np.uint8) # 
     return img
 
-def worker(path, save_folder, crop_sz, step, thres_sz, compression_level):
+def rescale_reflectance_equal_per_band(img, limits):
+    '''Rescales each band given in the input matrix, 'limits'
+    limits: top row: btm limits, bottom row: top limits. Columns=bands 
+    Sets (0,0,0) to 0 with no rescaling'''
+        # Contrast stretching
+    mask=np.sum(img,axis=2)==0 # nodata mask
+    for i in range(img.shape[2]):
+        img[:,:,i] = exposure.rescale_intensity(img[:,:,i], in_range=(limits[0,i], limits[1,i])) # TODO: vectorize this part! Maybe need to use my own rescaling function...
+    # (img/65535*255).astype(np.uint8) # 
+    img=img_as_ubyte(img)
+    img[img<255]+=1
+    img[mask]=0 # set nodata==0
+    return img
+
+def worker(path, save_folder, crop_sz, step, thres_sz, compression_level): # HERE TODO: load matrix
     img_name = os.path.basename(path)
     img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
-    reflectance_lower=np.percentile(img[:,:,ndwi_bands][img[:,:,ndwi_bands]>0], btm_percentile) # Compute maximum reflectance from entire 
-    reflectance_upper=np.percentile(img[:,:,ndwi_bands][img[:,:,ndwi_bands]>0], top_percentile) # Compute maximum reflectance from entire scene, not individual subsets
+        # for relative stretch 
+    # reflectance_lower=np.percentile(img[:,:,ndwi_bands][img[:,:,ndwi_bands]>0], btm_percentile) # Compute maximum reflectance from entire 
+    # reflectance_upper=np.percentile(img[:,:,ndwi_bands][img[:,:,ndwi_bands]>0], top_percentile) # Compute maximum reflectance from entire scene, not individual subsets
     print(f'\n\nLoaded image:\t{img_name}')
-    print(f'Rescaling reflectance to: {reflectance_lower:.1f} - {reflectance_upper:.1f} ish\n')
 
-       # rescale and overwrite to img
-    img=rescale_reflectance(img[:,:,band_order], btm_percentile, top_percentile)
+       # rescale and overwrite to img : for relative stretch
+    # img=rescale_reflectance(img[:,:,band_order], btm_percentile, top_percentile)
+    # print(f'Rescaling reflectance to: {reflectance_lower:.1f} - {reflectance_upper:.1f} ish\n')
+    
+       # rescale and overwrite to img : for abs stretch
+    img=rescale_reflectance_equal_per_band(img[:,:,band_order], quantile_val[:, band_order])
+    print(f'Rescaling reflectance to: {reflectance_upper:.1f}\n')
 
     n_channels = len(img.shape)
     if n_channels == 2:
