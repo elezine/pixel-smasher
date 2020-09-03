@@ -1,25 +1,25 @@
 # general settings
-name: 052_ESRGAN_x4_f64b23_DIV2K_400k_B16G1_051pretrain_wandb
+name: 052_ESRGAN_x4_PLANET_wandb_noGPU
 model_type: ESRGANModel
 scale: 4
-num_gpu: 1  # set num_gpu: 0 for cpu mode
+num_gpu: 0  # set num_gpu: 0 for cpu mode
 manual_seed: 0
 
 # dataset and data loader settings
 datasets:
   train:
-    name: DIV2K
+    name: PLANET
     type: PairedImageDataset
-    dataroot_gt: datasets/DIV2K/DIV2K_train_HR_sub
-    dataroot_lq: datasets/DIV2K/DIV2K_train_LR_bicubic/X4_sub
+    #dataroot_gt: #HR
+    #dataroot_lq: #LR
     # (for lmdb)
-    # dataroot_gt: datasets/DIV2K/DIV2K_train_HR_sub.lmdb
-    # dataroot_lq: datasets/DIV2K/DIV2K_train_LR_bicubic_X4_sub.lmdb
+    dataroot_gt: datasets/DIV2K/DIV2K_train_HR_sub.lmdb #HR
+    dataroot_lq: datasets/DIV2K/DIV2K_train_LR_bicubic_X4_sub.lmdb #LR
     filename_tmpl: '{}'
     io_backend:
-      type: disk
+      #type: disk
       # (for lmdb)
-      # type: lmdb
+      type: lmdb
 
     gt_size: 128
     use_flip: true
@@ -35,8 +35,8 @@ datasets:
   val:
     name: Set14
     type: PairedImageDataset
-    dataroot_gt: datasets/Set14/GTmod12
-    dataroot_lq: datasets/Set14/LRbicx4
+    dataroot_gt: #datasets/Set14/GTmod12 HR
+    dataroot_lq: #datasets/Set14/LRbicx4 LR
     io_backend:
       type: disk
 
@@ -55,7 +55,7 @@ network_d:
 
 # path
 path:
-  pretrain_model_g: experiments/051_RRDBNet_PSNR_x4_f64b23_DIV2K_1000k_B16G1_wandb/models/net_g_1000000.pth
+  pretrain_model_g: #experiments/051_RRDBNet_PSNR_x4_f64b23_DIV2K_1000k_B16G1_wandb/models/net_g_1000000.pth
   strict_load: true
   resume_state: ~
 
@@ -122,7 +122,7 @@ logger:
   save_checkpoint_freq: !!float 5e3
   use_tb_logger: true
   wandb:
-    project: ~
+    project: elezine/pixelsmasher
     resume_id: ~
 
 # dist training settings
