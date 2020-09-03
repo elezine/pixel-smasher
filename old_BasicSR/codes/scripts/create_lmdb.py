@@ -38,11 +38,11 @@ else:
 
 key_l = []
 resolution_l = []
-pbar = ProgressBar(len(img_list))
+#pbar = ProgressBar(len(img_list))
 env = lmdb.open(lmdb_save_path, map_size=data_size * 10)
 txn = env.begin(write=True)  # txn is a Transaction object
 for i, v in enumerate(img_list):
-    pbar.update('Write {}'.format(v))
+    #pbar.update('Write {}'.format(v))
     base_name = osp.splitext(osp.basename(v))[0]
     key = base_name.encode('ascii')
     data = dataset[i] if mode == 1 else cv2.imread(v, cv2.IMREAD_UNCHANGED)
