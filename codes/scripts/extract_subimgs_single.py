@@ -25,6 +25,10 @@ ndwi_bands=(1,3) # (1,3) # used to determine maximum or (n-percentile) brightnes
 reflectance_upper=3000
 band_order=(2,1,3)  # 3,2,1 for NRG, 2,1,3 for RGN, 2,1,0 for RGB (original = BGRN)
 
+    # load 
+quantile_val=np.load('/home/ethan_kyzivat/code/pixel-smasher/quantile_matrix.npy')
+print(f'Loaded quantiles values:\n{quantile_val}')
+
 def main():
     """A multi-thread tool to crop sub imags."""
     if getpass.getuser()=='ekyzivat': # on ethan local
@@ -63,7 +67,7 @@ def main():
     # img_list = ['/data_dir/Scenes/20190619_191648_25_106f_3B_AnalyticMS_SR.tif'] # for testing
     def update(arg):
         pbar.update(arg)
-    # img_list=img_list[:9] # for testing
+    # img_list=img_list[238:270] # for testing
     pbar = ProgressBar(len(img_list))
 
     pool = Pool(n_thread)
@@ -98,7 +102,21 @@ def rescale_reflectance(img, btm_percentile=2, top_percentile=98):
     img=img_as_ubyte(img) #(img/65535*255).astype(np.uint8) # 
     return img
 
-def worker(path, save_folder, crop_sz, step, thres_sz, compression_level):
+def rescale_reflectance_equal_per_band(img, limits):
+    '''Rescales each band given in the input matrix, 'limits'
+    limits: top row: btm limits, bottom row: top limits. Columns=bands 
+    Sets (0,0,0) to 0 with no rescaling'''
+        # Contrast stretching
+    mask=np.sum(img,axis=2)==0 # nodata mask
+    for i in range(img.shape[2]):
+        img[:,:,i] = exposure.rescale_intensity(img[:,:,i], in_range=(limits[0,i], limits[1,i])) # TODO: vectorize this part! Maybe need to use my own rescaling function...
+    # (img/65535*255).astype(np.uint8) # 
+    img=img_as_ubyte(img)
+    img[img<255]+=1
+    img[mask]=0 # set nodata==0
+    return img
+
+def worker(path, save_folder, crop_sz, step, thres_sz, compression_level): # HERE TODO: load matrix
     img_name = os.path.basename(path)
     img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
         # for relative stretch 
@@ -111,7 +129,7 @@ def worker(path, save_folder, crop_sz, step, thres_sz, compression_level):
     # print(f'Rescaling reflectance to: {reflectance_lower:.1f} - {reflectance_upper:.1f} ish\n')
     
        # rescale and overwrite to img : for abs stretch
-    img=rescale_reflectance_equal(img[:,:,band_order], reflectance_upper)
+    img=rescale_reflectance_equal_per_band(img[:,:,band_order], quantile_val[:, band_order])
     print(f'Rescaling reflectance to: {reflectance_upper:.1f}\n')
 
     n_channels = len(img.shape)

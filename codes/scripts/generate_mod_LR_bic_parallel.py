@@ -67,8 +67,8 @@ def generate_mod_LR_bic(top_dir):
     num_files = len(filepaths)
 
     ## load hash
-    f=open("cal_hash.pkl", "rb")
-    hash=pickle.load(f)
+    #f=open("cal_hash.pkl", "rb")
+    #hash=pickle.load(f)
 
     ## new parallel ##########################
 
