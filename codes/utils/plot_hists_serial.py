@@ -1,11 +1,11 @@
-'''Plot hists of each scene. Uncomment relevatnt areas to switch Between absolute and relative reflectances. Includes switch to compute hist stats for each image. Written for parallel loop.'''
+'''Plot hists of each scene. Uncomment relevatnt areas to switch Between absolute and relative reflectances. Includes switch to compute hist stats for each image. Written for serial loop, not parallel.'''
 
 import os
 import os.path as osp
 import sys
 import getpass
-from multiprocessing import Pool
-import multiprocessing
+# from multiprocessing import Pool
+# import multiprocessing
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
@@ -29,8 +29,8 @@ ndwi_bands=(1,2) # (1,3) # used to determine maximum or (n-percentile) brightnes
 save_fig=False # save output hist /stretch fig?
 save_hist=True # record histogram for each image, save every save_freq images and at end
 hist_length=15000 #15000 #15000 # if using
-save_freq=30 # only matters if save_hist is True #30
-n_thread = multiprocessing.cpu_count()
+save_freq=10 # only matters if save_hist is True #30
+# n_thread = multiprocessing.cpu_count()
 ##################
 
     ## validate I/O
@@ -77,20 +77,19 @@ def main():
     # img_list=img_list[:30] # to start in middle
     pbar = ProgressBar(len(img_list))
 
-    pool = Pool(n_thread)
+    # pool = Pool(n_thread)
     hist_results=np.zeros((hist_length,4,len(img_list)), dtype='single') # init, TODO: make dynamic
     j=0
     for path in img_list:
         print(f'Image {j}:\t{path}')
-        hist_results[:,:,j] = pool.apply_async(worker, #
-                         args=(path, save_folder, crop_sz, step, thres_sz, compression_level)).get() # ,callback=update
+        hist_results[:,:,j] = worker(path, save_folder, crop_sz, step, thres_sz, compression_level) # ,callback=update
         if j % save_freq==0:
-            np.save('histograms_temp.npy', hist_results)
+            np.save('histograms_temp_serial.npy', hist_results)
             print('Temp histograms saved to hists_temp.npy')
         j+=1
 
-    pool.close()
-    pool.join()
+    # pool.close()
+    # pool.join()
     print('All subprocesses done.')
     np.save('histograms.npy', hist_results)
     print('Histograms saved to hists.npy')

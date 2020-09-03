@@ -1,6 +1,9 @@
 # folder
 .vscode
 
+# text files
+*.txt
+
 experiments/*
 !experiments/pretrained_models
 experiments/pretrained_models/*
