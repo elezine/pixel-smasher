@@ -8,6 +8,4 @@ opencv-python
 pyyaml
 scipy
 tb-nightly
-torch>=1.3
-torchvision
 yapf
