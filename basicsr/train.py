@@ -10,16 +10,20 @@ from os import path as osp
 
 import sys
 sys.path.insert(0, '/data_dir/pixel-smasher/basicsr/data')
+sys.path.insert(0, '/data_dir/pixel-smasher/basicsr/data/data_sampler')
+sys.path.insert(0, '/data_dir/pixel-smasher/basicsr/data/prefetch_dataloader')
+sys.path.insert(0, '/data_dir/pixel-smasher/basicsr/models')
+sys.path.insert(0, '/data_dir/pixel-smasher/basicsr/utils')
+sys.path.insert(0, '/data_dir/pixel-smasher/basicsr/utils/options')
 
 from data import create_dataloader, create_dataset
-print('got this far')
-from basicsr.data.data_sampler import EnlargedSampler
-from basicsr.data.prefetch_dataloader import CPUPrefetcher, CUDAPrefetcher
-from basicsr.models import create_model
-from basicsr.utils import (MessageLogger, check_resume, get_env_info,
+from data_sampler import EnlargedSampler
+from prefetch_dataloader import CPUPrefetcher, CUDAPrefetcher
+from models import create_model
+from utils import (MessageLogger, check_resume, get_env_info,
                            get_root_logger, init_tb_logger, init_wandb_logger,
                            make_exp_dirs, mkdir_and_rename, set_random_seed)
-from basicsr.utils.options import dict2str, parse
+from options import dict2str, parse
 
 
 def main():
