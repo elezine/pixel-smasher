@@ -13,8 +13,8 @@ datasets:
     #dataroot_gt: datasets/DIV2K/DIV2K_train_HR_sub
     #dataroot_lq: datasets/DIV2K/DIV2K_train_LR_bicubic/X4_sub
     # (for lmdb)
-    dataroot_gt: #HR #datasets/DIV2K/DIV2K_train_HR_sub.lmdb
-    dataroot_lq: #LR #datasets/DIV2K/DIV2K_train_LR_bicubic_X4_sub.lmdb
+    dataroot_gt: /data_dir/train_mod/PLANET_HR_x4_train.lmdb #HR #datasets/DIV2K/DIV2K_train_HR_sub.lmdb
+    dataroot_lq:/data_dir/train_mod/PLANET_LR_x4_train.lmdb #LR #datasets/DIV2K/DIV2K_train_LR_bicubic_X4_sub.lmdb
     filename_tmpl: '{}'
     io_backend:
       #type: disk
@@ -35,10 +35,10 @@ datasets:
   val:
     name: PLANET_VAL
     type: PairedImageDataset
-    dataroot_gt: #HR #datasets/Set14/GTmod12
-    dataroot_lq: #LR #datasets/Set14/LRbicx4
+    dataroot_gt: /data_dir/valid_mod/HR/x4 #HR #datasets/Set14/GTmod12
+    dataroot_lq: /data_dir/valid_mod/LR/x4 #LR #datasets/Set14/LRbicx4
     io_backend:
-      type: lmdb #disk
+      type: disk
 
 # network structures
 network_g:
