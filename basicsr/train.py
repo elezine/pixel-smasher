@@ -12,7 +12,7 @@ import sys
 
 sys.path.insert(1, '/data_dir/pixel-smasher/')
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 print(torch.cuda.is_available())
 
 from basicsr.data import create_dataloader, create_dataset
