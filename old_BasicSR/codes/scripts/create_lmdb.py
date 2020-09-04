@@ -12,9 +12,9 @@ except ImportError:
     pass
 
 # configurations
-img_folder = '/data_dir/train_mod/HR/x4/*.png'  # glob matching pattern
-lmdb_save_path = '/data_dir/train_mod/PLANET_HR_x4_train.lmdb'
-meta_info = {'name': 'PLANET_HR_x4_train'}
+img_folder = '/data_dir/train_mod/LR/x4/*.png'  # glob matching pattern
+lmdb_save_path = '/data_dir/train_mod/PLANET_LR_x4_train.lmdb'
+meta_info = {'name': 'PLANET_LR_x4_train'}
 mode = 2  # 1 for reading all the images to memory and then writing to lmdb (more memory);
 # 2 for reading several images and then writing to lmdb, loop over (less memory)
 batch = 10000  # Used in mode 2. After batch images, lmdb commits.
