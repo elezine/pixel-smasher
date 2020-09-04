@@ -1,5 +1,5 @@
 #### general settings
-name: 003_RRDB_ESRGANx8_PLANET
+name: 000_RRDB_ESRGANx4_PLANET_old
 use_tb_logger: true
 model: srgan
 distortion: sr
@@ -9,10 +9,10 @@ gpu_ids: [0]
 #### datasets
 datasets:
   train:
-    name: PLANET
+    name: PLANET_TRAIN
     mode: LQGT
-    dataroot_GT: /data_dir/train_HR_cal_x8.lmdb
-    dataroot_LQ: /data_dir/train_LR_cal_x8.lmdb
+    dataroot_GT: /data_dir/train_mod/PLANET_HR_x4_train.lmdb
+    dataroot_LQ: /data_dir/train_mod/PLANET_LR_x4_train.lmdb
 
     use_shuffle: true
     n_workers: 8  # per GPU
@@ -22,10 +22,10 @@ datasets:
     use_rot: true
     color: RGB
   val:
-    name: val_set14_part
+    name: PLANET_VAL
     mode: LQGT
-    dataroot_GT: /data_dir/valid_mod_cal/HR/x8/ #/mnt/SSD/xtwang/BasicSR_datasets/val_set14_part/Set14
-    dataroot_LQ: /data_dir/valid_mod_cal/LR/x8/ #/mnt/SSD/xtwang/BasicSR_datasets/val_set14_part/Set14_bicLRx4
+    dataroot_GT: /data_dir/valid_mod/HR/x4 #/mnt/SSD/xtwang/BasicSR_datasets/val_set14_part/Set14
+    dataroot_LQ: /data_dir/valid_mod/LR/x4 #/mnt/SSD/xtwang/BasicSR_datasets/val_set14_part/Set14_bicLRx4
 
 #### network structures
 network_G:
@@ -44,9 +44,9 @@ path:
   #edited for resume state 500
   #/home/ekaterina_lezine/pixel-smasher/RRDB_PSNR_x4.pth
   #/home/ekaterina_lezine/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/training_state/21500.state
-  pretrain_model_G: ~
+  pretrain_model_G: /data_dir/pixel-smasher/RRDB_PSNR_x4.pth
   strict_load: true
-  resume_state: /data_dir/pixel-smasher/experiments/003_RRDB_ESRGANx8_PLANET/training_state/80000.state
+  resume_state: ~ #/data_dir/pixel-smasher/experiments/003_RRDB_ESRGANx8_PLANET/training_state/80000.state
 
 #### training settings: learning rate scheme, loss
 train:
@@ -76,9 +76,9 @@ train:
   D_init_iters: 0
 
   manual_seed: 10
-  val_freq: 5000 #!!float 5e3
+  val_freq: 5e3 #!!float 5e3
 
 #### logger
 logger:
   print_freq: 100
-  save_checkpoint_freq: 5000
+  save_checkpoint_freq: 5e3
