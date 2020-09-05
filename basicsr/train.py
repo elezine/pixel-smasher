@@ -10,7 +10,7 @@ from os import path as osp
 import os
 import sys
 
-sys.path.insert(1, '/data_dir/pixel-smasher/')
+#sys.path.insert(1, '/data_dir/pixel-smasher/')
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 print(torch.cuda.is_available())
