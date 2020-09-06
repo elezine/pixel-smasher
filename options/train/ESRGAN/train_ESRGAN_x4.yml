@@ -55,9 +55,9 @@ network_d:
 
 # path
 path:
-  pretrain_model_g: /data_dir/pixel-smasher/ESRGAN_PSNR_SRx4_DF2K_official-150ff491.pth #experiments/051_RRDBNet_PSNR_x4_f64b23_DIV2K_1000k_B16G1_wandb/models/net_g_1000000.pth
+  pretrain_model_g: ~ #/data_dir/pixel-smasher/ESRGAN_PSNR_SRx4_DF2K_official-150ff491.pth #experiments/051_RRDBNet_PSNR_x4_f64b23_DIV2K_1000k_B16G1_wandb/models/net_g_1000000.pth
   strict_load: true
-  resume_state: ~
+  resume_state: /data_dir/pixel-smasher/experiments/002_ESRGAN_x4_PLANET_pretrainDF2K_wandb_sep5/training_states/10000.state
 
 # training settings
 train:
@@ -123,7 +123,7 @@ logger:
   use_tb_logger: true
   wandb:
     project: pixelsmasher
-    resume_id: ~
+    resume_id: resume_0
 
 # dist training settings
 dist_params:
