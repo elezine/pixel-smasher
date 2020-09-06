@@ -1,5 +1,5 @@
 # general settings
-name: 003_ESRGAN_x4_PLANET_pretrainDF2K_wandb_sep5
+name: 003_ESRGAN_x4_PLANET_pretrainDF2K_wandb_sep6
 model_type: ESRGANModel
 scale: 4
 num_gpu: 1  # set num_gpu: 0 for cpu mode
