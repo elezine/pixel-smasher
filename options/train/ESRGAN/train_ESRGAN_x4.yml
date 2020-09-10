@@ -57,7 +57,7 @@ network_d:
 path:
   pretrain_model_g: ~ #/data_dir/pixel-smasher/ESRGAN_PSNR_SRx4_DF2K_official-150ff491.pth #experiments/051_RRDBNet_PSNR_x4_f64b23_DIV2K_1000k_B16G1_wandb/models/net_g_1000000.pth
   strict_load: true
-  resume_state: /data_dir/pixel-smasher/experiments/003_ESRGAN_x4_PLANET_pretrainDF2K_wandb_sep6/training_states/190000.state
+  resume_state: /data_dir/pixel-smasher/experiments/003_ESRGAN_x4_PLANET_pretrainDF2K_wandb_sep6/training_states/210000.state
 
 # training settings
 train:
