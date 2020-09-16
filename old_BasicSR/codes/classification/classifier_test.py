@@ -18,8 +18,8 @@ from classifier import classify
 # TODO: apply calibration if needed, multiple thresh?
 
 # I/O
-sourcedir='/data_dir/planet_sub/'
-outdir='/data_dir/classified/'
+sourcedir='/data_dir/hold_mod/'
+outdir='/data_dir/other/classified_test' #'/data_dir/classified/'
 apply_radiometric_correction=False # set to zero if already calibrated
 
 # params

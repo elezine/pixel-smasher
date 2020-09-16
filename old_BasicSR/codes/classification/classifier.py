@@ -19,7 +19,7 @@ import pandas as pd
 sourcedir_SR='/data_dir/pixel-smasher/experiments/003_RRDB_ESRGANx8_PLANET/val_images' #'/data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
 sourcedir_R='/data_dir/ClassProject/valid_mod_cal' #'/data_dir/ClassProject/valid_mod' # HERE update
 outdir='/data_dir/ClassProject/classify/valid_mod_cal'
-up_scale=8
+up_scale=4
 iter=60000 # quick fix to get latest validation image in folder
 thresh= [-0.1, -0.05, 0, 0.05, 0.1, 0.2, 0.3] # [-10, -5, -2, 0, 2, 5, 10] #2
 apply_radiometric_correction=False # set to zero if already calibrated
