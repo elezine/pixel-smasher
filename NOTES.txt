@@ -1,0 +1,9 @@
+20200423_082122_06_1065_3B_AnalyticMS_SR_s0118_45000.png
+
+for file in .; do echo ${file%.png}
+
+find /data_dir/valid_mod/ -name "*20200423_082122_06_1065_3B_AnalyticMS_SR_s0118*"
+
+cp `find visualization/ -name "*45000.png" | shuf -n 2000` ~/data_dir/visualization &
+
+for file in `ls`; do cp /data_dir/valid_mod/HR/x4/${file%_400000.png}.png ../valid_mod/HR/x4/; done 
