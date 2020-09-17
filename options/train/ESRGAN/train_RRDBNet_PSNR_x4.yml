@@ -1,5 +1,5 @@
 # general settings
-name: 004_RRDBNet_PSNR_x4_PLANET_Bic_wandb
+name: 004_RRDBNet_PSNR_x4_PLANET_Bic_scratch_wandb
 model_type: SRModel
 scale: 4
 num_gpu: 1  # set num_gpu: 0 for cpu mode
@@ -96,7 +96,7 @@ logger:
   use_tb_logger: true
   wandb:
     project: pixelsmasher
-    resume_id: resume_2
+    resume_id: RRDB_PSNR_Bic_0
 
 # dist training settings
 dist_params:
