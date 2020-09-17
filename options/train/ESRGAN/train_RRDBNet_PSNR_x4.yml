@@ -1,5 +1,5 @@
 # general settings
-name: 004_RRDBNet_PSNR_x4_PLANET_Bic_scratch_wandb
+name: 004_RRDBNet_PSNR_x4_PLANET_scratch_wandb
 model_type: SRModel
 scale: 4
 num_gpu: 1  # set num_gpu: 0 for cpu mode
@@ -11,7 +11,7 @@ datasets:
     name: PLANET_TRAIN
     type: PairedImageDataset
     dataroot_gt: /data_dir/train_mod/HR/x4
-    dataroot_lq: /data_dir/train_mod/Bic/x4
+    dataroot_lq: /data_dir/train_mod/LR/x4
     # (for lmdb)
     # dataroot_gt: datasets/DIV2K/DIV2K_train_HR_sub.lmdb
     # dataroot_lq: datasets/DIV2K/DIV2K_train_LR_bicubic_X4_sub.lmdb
@@ -36,7 +36,7 @@ datasets:
     name: PLANET_VAL
     type: PairedImageDataset
     dataroot_gt: /data_dir/valid_mod/HR/x4
-    dataroot_lq: /data_dir/valid_mod/Bic/x4
+    dataroot_lq: /data_dir/valid_mod/LR/x4
     io_backend:
       type: disk
 
