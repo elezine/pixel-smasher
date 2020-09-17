@@ -96,7 +96,7 @@ logger:
   use_tb_logger: true
   wandb:
     project: pixelsmasher
-    resume_id: RRDB_PSNR_Bic_0
+    resume_id: RRDB_PSNR_0
 
 # dist training settings
 dist_params:
