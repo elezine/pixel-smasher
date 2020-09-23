@@ -1,5 +1,5 @@
 # general settings
-name: 003_ESRGAN_x4_PLANET_pretrainDF2K_wandb_sep6
+name: 005_ESRGAN_x4_PLANET_pretrainPLANET_wandb_sep23
 model_type: ESRGANModel
 scale: 4
 num_gpu: 1  # set num_gpu: 0 for cpu mode
@@ -55,9 +55,9 @@ network_d:
 
 # path
 path:
-  pretrain_model_g: ~ #/data_dir/pixel-smasher/ESRGAN_PSNR_SRx4_DF2K_official-150ff491.pth #experiments/051_RRDBNet_PSNR_x4_f64b23_DIV2K_1000k_B16G1_wandb/models/net_g_1000000.pth
+  pretrain_model_g: /data_dir/pixel-smasher/experiments/004_RRDBNet_PSNR_x4_PLANET_scratch_wandb/models/net_g_445000.pth #/data_dir/pixel-smasher/ESRGAN_PSNR_SRx4_DF2K_official-150ff491.pth 
   strict_load: true
-  resume_state: /data_dir/pixel-smasher/experiments/003_ESRGAN_x4_PLANET_pretrainDF2K_wandb_sep6/training_states/390000.state
+  resume_state: ~ #/data_dir/pixel-smasher/experiments/003_ESRGAN_x4_PLANET_pretrainDF2K_wandb_sep6/training_states/390000.state
 
 # training settings
 train:
@@ -123,7 +123,7 @@ logger:
   use_tb_logger: true
   wandb:
     project: pixelsmasher
-    resume_id: resume_0
+    resume_id: resume_sep23
 
 # dist training settings
 dist_params:
