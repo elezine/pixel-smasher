@@ -9,7 +9,8 @@ from multiprocessing import Pool
 import multiprocessing as mp
 import pickle
 import pandas as pd
-from copy import deepcopy
+from sklearn.metrics import cohen_kappa_score
+import matplotlib.pyplot as plt
 
 
 # example output paths: /data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images/716222_1368610_2017-08-27_0e0f_BGRN_Analytic_s0984
@@ -26,6 +27,7 @@ for j in ['HR','SR','LR','Bic']:
 iter=400000 # quick fix to get latest validation image in folder
 thresh= [-0.1, -0.05, 0, 0.05, 0.1, 0.2, 0.3] # [-10, -5, -2, 0, 2, 5, 10] #2
 apply_radiometric_correction=False # set to zero if already calibrated
+num_metrics=10  # TAG depends-on-num-metrics
 
 # auto I/O
 if apply_radiometric_correction:
@@ -38,19 +40,16 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2, hash
     A simple classification function for high-resolution, low-resolution, and  super resolution images.  Takes input path and write To output path (pre-– formatted).
     '''
         # init
-    int_res_SR=[None, None] + [None]*len(thresh)*4 #intermediate result # HERE
+    int_res=[None, None] + [None]*len(thresh)*num_metrics #+ [None]*2 #intermediate result # TAG depends-on-num-metrics
         # in paths
     SR_in_pth=sourcedir_SR+os.sep+name+'_'+str(iter)+'.png' # HERE changed for seven-steps
     HR_in_pth=os.path.join(sourcedir_R, 'HR', 'x' + str(up_scale), name+ '.png')
     LR_in_pth=os.path.join(sourcedir_R, 'LR', 'x' + str(up_scale), name+ '.png')
     Bic_in_pth=os.path.join(sourcedir_R, 'Bic', 'x' + str(up_scale), name+ '.png')
 
-    # save out put to row : order: i, name, res, thresh, n_px, ndwi_mean..., kappa
-    int_res_SR[0]=i
-    int_res_SR[1]=name
-    int_res_HR=deepcopy(int_res_SR)
-    int_res_LR=deepcopy(int_res_SR)
-    int_res_Bic=deepcopy(int_res_SR)
+    # save out put to row
+    int_res[0]=i
+    int_res[1]=name
 
     for n in range(len(thresh)):
         current_thresh=thresh[n]
@@ -71,18 +70,20 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2, hash
             write=False
             if n==0:
                 print('No.{} -- Exists {}: '.format(i, name), end='')
-        int_res_SR[3]=classify(SR_in_pth, SR_out_pth,current_thresh, name, write=write)
-        int_res_HR[3]=classify(HR_in_pth, HR_out_pth,current_thresh, name, write=write)
-        int_res_LR[3 + 4*n]=classify(LR_in_pth, LR_out_pth,current_thresh, name, write=write)
-        int_res_Bic[3 + 4*n]=classify(Bic_in_pth, Bic_out_pth,current_thresh, name, write=write)
-        
+        int_res[2 + 10*n], bw_SR, int_res[8 + 10*n]=classify(SR_in_pth, SR_out_pth,current_thresh, name, write=write) # TAG depends-on-num-metrics
+        int_res[3 + 10*n], bw_HR, int_res[9 + 10*n]=classify(HR_in_pth, HR_out_pth,current_thresh, name, write=write)
+        int_res[4 + 10*n] , _, int_res[10 + 10*n]=classify(LR_in_pth, LR_out_pth,current_thresh, name, write=write)
+        int_res[5 + 10*n], bw_Bic, int_res[11 + 10*n]=classify(Bic_in_pth, Bic_out_pth,current_thresh, name, write=write)
+        int_res[6 + 10*n]=compute_kappa(bw_HR, bw_SR)
+        int_res[7 + 10*n]=compute_kappa(bw_HR, bw_Bic)
+        # int_res[7 + 10*n]=compute_kappa(bw_HR, bw_Bic)
         print('{}'.format(current_thresh), end=' ')
     print('')
     return int_res
 
 def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True):
         # classify procedure
-    ''' Write= whether or not to write classified file '''
+    ''' Write= whether or not to write classified file. Returns classified matrix as second output '''
     img = cv2.imread(pth_in, cv2.IMREAD_UNCHANGED)
 
         # check
@@ -114,8 +115,8 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True):
     except RuntimeWarning:
         pass
 
-        # stats: count pixels, etc
-    nWaterPix=np.sum(bw)
+        # stats: count pixels, etc # TAG depends-on-num-metrics
+    nWaterPix=np.sum(bw) 
     mean_ndwi=np.mean(ndwi)
     median_ndwi=np.median(ndwi)
     min_ndwi=np.min(ndwi)
@@ -130,11 +131,17 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True):
         cv2.imwrite(pth_out, np.array(255*bw, 'uint8'))  # HERE
 
     #pass # Why is this necessary?  It's not
-    return nWaterPix, mean_ndwi, median_ndwi, min_ndwi, max_ndwi 
+    return nWaterPix, bw, mean_ndwi
 
 # def collect_result(result):
 #     global results
 #     results.append(result)
+def compute_kappa(HR_in, test_in):
+    ''' Takes in two matrices, flattens, and computes kappa'''
+            # kappa score
+    # if img.shape[0]==480: # if SR or HR or Bic image
+    kappa=cohen_kappa_score(HR_in.flatten()+1, test_in.flatten()+1) # +1 added to prevent div by zero
+    return kappa
 
 if __name__ == '__main__':
 
@@ -150,7 +157,7 @@ if __name__ == '__main__':
     os.makedirs(outdir, exist_ok=True)
         # loop over files
     dirpaths = [f for f in os.listdir(sourcedir_SR) ] # removed: if f.endswith('.png')
-    num_files = 30 # len(dirpaths) # HERE change back
+    num_files = 15 # len(dirpaths) # HERE change back
     # global results
     results = {} # init
     # pool = Pool(mp.cpu_count())
@@ -165,12 +172,18 @@ if __name__ == '__main__':
 
 
     # save result
-    cols_fmt=['num','name']+['TBD']*len(thresh)*4 # formatted c olumn names
+    cols_fmt=['num','name']+['TBD']*len(thresh)*num_metrics # formatted c olumn names # TAG depends-on-num-metrics
     for n in range(len(thresh)):
-        cols_fmt[2 + 4*n]= 'SR'+'_T'+str(thresh[n]) #hr lr bic
-        cols_fmt[3 + 4*n]= 'HR'+'_T'+str(thresh[n])
-        cols_fmt[4 + 4*n]= 'LR'+'_T'+str(thresh[n])
-        cols_fmt[5 + 4*n]= 'Bic'+'_T'+str(thresh[n])
+        cols_fmt[2 + 10*n]= 'SR'+'_T'+str(thresh[n]) #hr lr bic
+        cols_fmt[3 + 10*n]= 'HR'+'_T'+str(thresh[n])
+        cols_fmt[4 + 10*n]= 'LR'+'_T'+str(thresh[n])
+        cols_fmt[5 + 10*n]= 'Bic'+'_T'+str(thresh[n])
+        cols_fmt[6 + 10*n]= 'SR'+'_K'+str(thresh[n]) # kappa
+        cols_fmt[7 + 10*n]= 'Bic'+'_K'+str(thresh[n]) 
+        cols_fmt[8 + 10*n]= 'SR'+'_M'+str(thresh[n]) # mean
+        cols_fmt[9 + 10*n]= 'HR'+'_M'+str(thresh[n])
+        cols_fmt[10 + 10*n]= 'LR'+'_M'+str(thresh[n])
+        cols_fmt[11 + 10*n]= 'Bic'+'_M'+str(thresh[n])
     df = pd.DataFrame(list(results.values()), columns =cols_fmt)
     try:
         csv_out='classification_stats_x'+str(up_scale)+'_'+str(iter)+'.csv'
