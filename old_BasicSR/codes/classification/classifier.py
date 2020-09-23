@@ -16,7 +16,7 @@ import pandas as pd
 # TODO: 9/16: long format? Add kappa, add nearest neighbor upsample?, record overall image ndwi brightness
 
 # I/O
-sourcedir_SR='/home/ethan_kyzivat/data_dir/visualization' # note: shuf2k is just a 2000 image shuffling #'/data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
+sourcedir_SR='/home/ethan_kyzivat/data_dir/visualization_shuf2k' # note: shuf2k is just a 2000 image shuffling #'/data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
 sourcedir_R='/home/ethan_kyzivat/data_dir/valid_mod' #'/data_dir/ClassProject/valid_mod'
 outdir='/home/ethan_kyzivat/data_dir/classified/valid_mod'
 up_scale=4
@@ -76,6 +76,10 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2, hash
 def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None):
         # classify procedure
     img = cv2.imread(pth_in, cv2.IMREAD_UNCHANGED)
+
+        # check
+    if np.any(img==None): # I have to create my own error bc cv2 wont... :(
+        raise ValueError(f'Unable to load image: path doesn\'t exist: {pth_in}')
 
         # rad correction
     if apply_radiometric_correction: #HERE update
@@ -140,14 +144,14 @@ if __name__ == '__main__':
     num_files = 50 # len(dirpaths) # HERE change back
     # global results
     results = {} # init
-    pool = Pool(mp.cpu_count())
+    # pool = Pool(mp.cpu_count())
     for i in range(num_files): # switch for testing # range(30):
         name = dirpaths[i].replace('_'+str(iter)+'.png', '') # HERE changed for seven-steps from `dirpaths[i]`
 
         # parallel
-        results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash))# , , callback=collect_result
-    pool.close()
-    pool.join()
+        results[i] = group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash)# , , callback=collect_result
+    # pool.close()
+    # pool.join()
     print('All subprocesses done.')
 
 
