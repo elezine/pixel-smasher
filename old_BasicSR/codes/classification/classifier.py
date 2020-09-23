@@ -60,21 +60,25 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2, hash
             # run classification procedure
         # if 
         if os.path.isfile(Bic_out_pth)==False: # only write if file doesn't exist
+            write=True
             if n==0:
                 print('No.{} -- Classifying {}: '.format(i, name), end='') # printf: end='' # somehow i is in this functions namespace...?
-            int_res[2 + 4*n]=classify(SR_in_pth, SR_out_pth,current_thresh, name, hash)
-            int_res[3 + 4*n]=classify(HR_in_pth, HR_out_pth,current_thresh, name, hash)
-            int_res[4 + 4*n]=classify(LR_in_pth, LR_out_pth,current_thresh, name, hash)
-            int_res[5 + 4*n]=classify(Bic_in_pth, Bic_out_pth,current_thresh, name, hash)
         else:# elif os.path.isfile(saveHRpath+os.sep+filename)==True: 
+            write=False
             if n==0:
-                print('Skipping: {}.'.format(name))
+                print('No.{} -- Exists {}: '.format(i, name), end='')
+        int_res[2 + 4*n]=classify(SR_in_pth, SR_out_pth,current_thresh, name, write=write)
+        int_res[3 + 4*n]=classify(HR_in_pth, HR_out_pth,current_thresh, name, write=write)
+        int_res[4 + 4*n]=classify(LR_in_pth, LR_out_pth,current_thresh, name, write=write)
+        int_res[5 + 4*n]=classify(Bic_in_pth, Bic_out_pth,current_thresh, name, write=write)
+        
         print('{}'.format(current_thresh), end=' ')
     print('')
     return int_res
 
-def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None):
+def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True):
         # classify procedure
+    ''' Write= whether or not to write classified file '''
     img = cv2.imread(pth_in, cv2.IMREAD_UNCHANGED)
 
         # check
@@ -118,7 +122,8 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None):
     # cv2.imwrite(pth_out, img_as_ubyte(img_ndwi))  # HERE np.array(255*bw, 'uint8')
 
         # write out bw
-    cv2.imwrite(pth_out, np.array(255*bw, 'uint8'))  # HERE
+    if write:
+        cv2.imwrite(pth_out, np.array(255*bw, 'uint8'))  # HERE
 
     #pass # Why is this necessary?  It's not
     return nWaterPix
@@ -141,7 +146,7 @@ if __name__ == '__main__':
     os.makedirs(outdir, exist_ok=True)
         # loop over files
     dirpaths = [f for f in os.listdir(sourcedir_SR) ] # removed: if f.endswith('.png')
-    num_files = 50 # len(dirpaths) # HERE change back
+    num_files = 30 # len(dirpaths) # HERE change back
     # global results
     results = {} # init
     # pool = Pool(mp.cpu_count())
