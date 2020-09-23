@@ -9,6 +9,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 import pickle
 import pandas as pd
+from copy import deepcopy
 
 
 # example output paths: /data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images/716222_1368610_2017-08-27_0e0f_BGRN_Analytic_s0984
@@ -37,16 +38,19 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2, hash
     A simple classification function for high-resolution, low-resolution, and  super resolution images.  Takes input path and write To output path (pre-– formatted).
     '''
         # init
-    int_res=[None, None] + [None]*len(thresh)*4 #intermediate result
+    int_res_SR=[None, None] + [None]*len(thresh)*4 #intermediate result # HERE
         # in paths
     SR_in_pth=sourcedir_SR+os.sep+name+'_'+str(iter)+'.png' # HERE changed for seven-steps
     HR_in_pth=os.path.join(sourcedir_R, 'HR', 'x' + str(up_scale), name+ '.png')
     LR_in_pth=os.path.join(sourcedir_R, 'LR', 'x' + str(up_scale), name+ '.png')
     Bic_in_pth=os.path.join(sourcedir_R, 'Bic', 'x' + str(up_scale), name+ '.png')
 
-    # save out put to row
-    int_res[0]=i
-    int_res[1]=name
+    # save out put to row : order: i, name, res, thresh, n_px, ndwi_mean..., kappa
+    int_res_SR[0]=i
+    int_res_SR[1]=name
+    int_res_HR=deepcopy(int_res_SR)
+    int_res_LR=deepcopy(int_res_SR)
+    int_res_Bic=deepcopy(int_res_SR)
 
     for n in range(len(thresh)):
         current_thresh=thresh[n]
@@ -67,10 +71,10 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2, hash
             write=False
             if n==0:
                 print('No.{} -- Exists {}: '.format(i, name), end='')
-        int_res[2 + 4*n]=classify(SR_in_pth, SR_out_pth,current_thresh, name, write=write)
-        int_res[3 + 4*n]=classify(HR_in_pth, HR_out_pth,current_thresh, name, write=write)
-        int_res[4 + 4*n]=classify(LR_in_pth, LR_out_pth,current_thresh, name, write=write)
-        int_res[5 + 4*n]=classify(Bic_in_pth, Bic_out_pth,current_thresh, name, write=write)
+        int_res_SR[3]=classify(SR_in_pth, SR_out_pth,current_thresh, name, write=write)
+        int_res_HR[3]=classify(HR_in_pth, HR_out_pth,current_thresh, name, write=write)
+        int_res_LR[3 + 4*n]=classify(LR_in_pth, LR_out_pth,current_thresh, name, write=write)
+        int_res_Bic[3 + 4*n]=classify(Bic_in_pth, Bic_out_pth,current_thresh, name, write=write)
         
         print('{}'.format(current_thresh), end=' ')
     print('')
@@ -126,7 +130,7 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True):
         cv2.imwrite(pth_out, np.array(255*bw, 'uint8'))  # HERE
 
     #pass # Why is this necessary?  It's not
-    return nWaterPix
+    return nWaterPix, mean_ndwi, median_ndwi, min_ndwi, max_ndwi 
 
 # def collect_result(result):
 #     global results
