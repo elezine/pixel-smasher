@@ -13,14 +13,16 @@ import pandas as pd
 
 # example output paths: /data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images/716222_1368610_2017-08-27_0e0f_BGRN_Analytic_s0984
 
-# TODO: apply calibration if needed, multiple thresh?
+# TODO: 9/16: long format? Add kappa, add nearest neighbor upsample?, record overall image ndwi brightness
 
 # I/O
-sourcedir_SR='/data_dir/pixel-smasher/experiments/003_RRDB_ESRGANx8_PLANET/val_images' #'/data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
-sourcedir_R='/data_dir/ClassProject/valid_mod_cal' #'/data_dir/ClassProject/valid_mod' # HERE update
-outdir='/data_dir/ClassProject/classify/valid_mod_cal'
+sourcedir_SR='/home/ethan_kyzivat/data_dir/visualization' # note: shuf2k is just a 2000 image shuffling #'/data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
+sourcedir_R='/home/ethan_kyzivat/data_dir/valid_mod' #'/data_dir/ClassProject/valid_mod'
+outdir='/home/ethan_kyzivat/data_dir/classified/valid_mod'
 up_scale=4
-iter=60000 # quick fix to get latest validation image in folder
+for j in ['HR','SR','LR','Bic']:
+    os.makedirs(os.path.join(outdir, j, 'x'+str(up_scale)), exist_ok=True)
+iter=400000 # quick fix to get latest validation image in folder
 thresh= [-0.1, -0.05, 0, 0.05, 0.1, 0.2, 0.3] # [-10, -5, -2, 0, 2, 5, 10] #2
 apply_radiometric_correction=False # set to zero if already calibrated
 
@@ -28,6 +30,7 @@ apply_radiometric_correction=False # set to zero if already calibrated
 if apply_radiometric_correction:
     f=open("cal_hash.pkl", "rb")
     hash=pickle.load(f)
+else: hash=None
 
 def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2, hash=None): # filstrucutre is pre-defined
     '''
@@ -36,7 +39,7 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2, hash
         # init
     int_res=[None, None] + [None]*len(thresh)*4 #intermediate result
         # in paths
-    SR_in_pth=sourcedir_SR+os.sep+name+os.sep+name+'_'+str(iter)+'.png'
+    SR_in_pth=sourcedir_SR+os.sep+name+'_'+str(iter)+'.png' # HERE changed for seven-steps
     HR_in_pth=os.path.join(sourcedir_R, 'HR', 'x' + str(up_scale), name+ '.png')
     LR_in_pth=os.path.join(sourcedir_R, 'LR', 'x' + str(up_scale), name+ '.png')
     Bic_in_pth=os.path.join(sourcedir_R, 'Bic', 'x' + str(up_scale), name+ '.png')
@@ -56,7 +59,7 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2, hash
 
             # run classification procedure
         # if 
-        if 1==1: #os.path.isfile(Bic_out_pth)==False: # only write if file doesn't exist\ # HERE change back
+        if os.path.isfile(Bic_out_pth)==False: # only write if file doesn't exist
             if n==0:
                 print('No.{} -- Classifying {}: '.format(i, name), end='') # printf: end='' # somehow i is in this functions namespace...?
             int_res[2 + 4*n]=classify(SR_in_pth, SR_out_pth,current_thresh, name, hash)
@@ -123,25 +126,26 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None):
 if __name__ == '__main__':
 
         # for testing #####################
-    pth_in, pth_out= '/data_dir/ClassProject/valid_mod/HR/x4/492899_1166117_2017-05-06_1041_BGRN_Analytic_s0029.png', 'test.png' #'/data_dir/ClassProject/classify/valid_mod/HR/x4/492899_1166117_2017-05-06_1041_BGRN_Analytic_s0029C.png'
-    print('Running classifier.')
-    print('File:\t{}\nOutput:\t{}\n'.format(pth_in, pth_out))
-    im_out=classify(pth_in, pth_out)
+    # pth_in, pth_out= '/data_dir/ClassProject/valid_mod/HR/x4/492899_1166117_2017-05-06_1041_BGRN_Analytic_s0029.png', 'test.png' #'/data_dir/ClassProject/classify/valid_mod/HR/x4/492899_1166117_2017-05-06_1041_BGRN_Analytic_s0029C.png'
+    # print('Running classifier.')
+    # print('File:\t{}\nOutput:\t{}\n'.format(pth_in, pth_out))
+    # im_out=classify(pth_in, pth_out)
         ##################################
         
         # print
     print('Starting classification.  Files will be in {}'.format(outdir))
+    os.makedirs(outdir, exist_ok=True)
         # loop over files
     dirpaths = [f for f in os.listdir(sourcedir_SR) ] # removed: if f.endswith('.png')
-    num_files = len(dirpaths)
+    num_files = 50 # len(dirpaths) # HERE change back
     # global results
     results = {} # init
     pool = Pool(mp.cpu_count())
     for i in range(num_files): # switch for testing # range(30):
-        name = dirpaths[i]
+        name = dirpaths[i].replace('_'+str(iter)+'.png', '') # HERE changed for seven-steps from `dirpaths[i]`
 
         # parallel
-        results[i] = pool.apply(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash))# , , callback=collect_result
+        results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash))# , , callback=collect_result
     pool.close()
     pool.join()
     print('All subprocesses done.')
