@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 # TODO: 9/16: long format? Add kappa, add nearest neighbor upsample?, record overall image ndwi brightness
 
 # I/O
-sourcedir_SR='/home/ethan_kyzivat/data_dir/visualization_shuf2k' # note: shuf2k is just a 2000 image shuffling #'/data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
+sourcedir_SR='/home/ethan_kyzivat/data_dir/visualization' # note: shuf2k is just a 2000 image shuffling #'/data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
 sourcedir_R='/home/ethan_kyzivat/data_dir/valid_mod' #'/data_dir/ClassProject/valid_mod'
 outdir='/home/ethan_kyzivat/data_dir/classified/valid_mod'
 up_scale=4
