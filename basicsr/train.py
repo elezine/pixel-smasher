@@ -12,8 +12,8 @@ import sys
 
 #sys.path.insert(1, '/data_dir/pixel-smasher/')
 
-#os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
-#print(torch.cuda.is_available())
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+print(torch.cuda.is_available())
 
 from basicsr.data import create_dataloader, create_dataset
 from basicsr.data.data_sampler import EnlargedSampler
@@ -39,19 +39,20 @@ def main():
     opt = parse(args.opt, is_train=True)
 
     # distributed training settings
-    if args.launcher == 'none':  # non-distributed training
-        opt['dist'] = False
-        print('Disable distributed training.', flush=True)
+    #if args.launcher == 'none':  # non-distributed training
+    #    opt['dist'] = False
+    #    print('Disable distributed training.', flush=True)
+    #else:
+    opt['dist'] = True
+    if args.launcher == 'slurm' and 'dist_params' in opt:
+        init_dist(args.launcher, **opt['dist_params'])
     else:
-        opt['dist'] = True
-        if args.launcher == 'slurm' and 'dist_params' in opt:
-            init_dist(args.launcher, **opt['dist_params'])
-        else:
-            init_dist(args.launcher)
+        init_dist(args.launcher)
 
     rank, world_size = get_dist_info()
     opt['rank'] = rank
     opt['world_size'] = world_size
+    print('number of gpus is ' + str(world_size))
 
     # load resume states if exists
     if opt['path'].get('resume_state'):
