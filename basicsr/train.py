@@ -12,7 +12,7 @@ import sys
 
 #sys.path.insert(1, '/data_dir/pixel-smasher/')
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 print(torch.cuda.is_available())
 
 from basicsr.data import create_dataloader, create_dataset
@@ -39,15 +39,15 @@ def main():
     opt = parse(args.opt, is_train=True)
 
     # distributed training settings
-    #if args.launcher == 'none':  # non-distributed training
-    #    opt['dist'] = False
-    #    print('Disable distributed training.', flush=True)
-    #else:
-    opt['dist'] = True
-    if args.launcher == 'slurm' and 'dist_params' in opt:
-        init_dist(args.launcher, **opt['dist_params'])
+    if args.launcher == 'none':  # non-distributed training
+        opt['dist'] = False
+        print('Disable distributed training.', flush=True)
     else:
-        init_dist(args.launcher)
+      opt['dist'] = True
+      if args.launcher == 'slurm' and 'dist_params' in opt:
+          init_dist(args.launcher, **opt['dist_params'])
+      else:
+          init_dist(args.launcher)
 
     rank, world_size = get_dist_info()
     opt['rank'] = rank
