@@ -18,9 +18,9 @@ import matplotlib.pyplot as plt
 # TODO: 9/16: long format? Add kappa, add nearest neighbor upsample?, record overall image ndwi brightness
 
 # I/O
-sourcedir_SR='/home/ethan_kyzivat/data_dir/visualization' # note: shuf2k is just a 2000 image shuffling #'/data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
-sourcedir_R='/home/ethan_kyzivat/data_dir/valid_mod' #'/data_dir/ClassProject/valid_mod'
-outdir='/home/ethan_kyzivat/data_dir/classified/valid_mod'
+sourcedir_SR='/data_dir/pixel-smasher/experiments/003_ESRGAN_x4_PLANET_pretrainDF2K_wandb_sep6/visualization' # note: shuf2k is just a 2000 image shuffling #'/data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
+sourcedir_R='/data_dir/valid_mod' #'/data_dir/ClassProject/valid_mod'
+outdir='/data_dir/classified/valid_mod'
 up_scale=4
 for j in ['HR','SR','LR','Bic']:
     os.makedirs(os.path.join(outdir, j, 'x'+str(up_scale)), exist_ok=True)
@@ -42,7 +42,7 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2, hash
         # init
     # int_res=[None, None] + [None]*len(thresh)*num_metrics #+ [None]*2 #intermediate result # TAG depends-on-num-metrics
         # in paths
-    SR_in_pth=sourcedir_SR+os.sep+name+'_'+str(iter)+'.png' # HERE changed for seven-steps
+    SR_in_pth=sourcedir_SR+os.sep+name+os.sep+name+'_'+str(iter)+'.png' # HERE changed for seven-steps
     HR_in_pth=os.path.join(sourcedir_R, 'HR', 'x' + str(up_scale), name+ '.png')
     LR_in_pth=os.path.join(sourcedir_R, 'LR', 'x' + str(up_scale), name+ '.png')
     Bic_in_pth=os.path.join(sourcedir_R, 'Bic', 'x' + str(up_scale), name+ '.png')
