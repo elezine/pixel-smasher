@@ -27,9 +27,20 @@ ndwi_bands=(1,3) # (1,3) # used to determine maximum or (n-percentile) brightnes
     # for abs stretch
 reflectance_upper=3000
 band_order=(2,1,3)  # 3,2,1 for NRG, 2,1,3 for RGN, 2,1,0 for RGB (original = BGRN)
+if getpass.getuser()=='ekyzivat': # on ethan local
+    input_folder = 'F:\ComputerVision\Planet'
+    save_folder = 'F:\ComputerVision\Planet_sub'
+elif getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
+    input_folder = '/data_dir/Scenes'
+    save_folder = '/data_dir/planet_sub'
+else: # other
+    raise ValueError('input_folder not specified!')
+    pass
+input_mask_folder = '/data_dir/Water_mask' # None
 
 def main():
     """A multi-thread tool to crop sub imags."""
+<<<<<<< Updated upstream
     if getpass.getuser()=='ekyzivat': # on ethan local
         input_folder = 'F:\ComputerVision\Planet'
         save_folder = 'F:\ComputerVision\Planet_sub'
@@ -39,6 +50,8 @@ def main():
     else: # other
         raise ValueError('input_folder not specified!')
         pass
+=======
+>>>>>>> Stashed changes
 
     n_thread = multiprocessing.cpu_count() #1
     crop_sz = 480 # num px in x and y
@@ -71,8 +84,12 @@ def main():
 
     pool = Pool(n_thread)
     for path in img_list:
+        if input_mask_folder==None:
+            path_mask=None
+        else:
+            path_mask=name_lookup(path) # lookup mask path
         pool.apply_async(worker,
-                         args=(path, save_folder, crop_sz, step, thres_sz, compression_level),
+                         args=(path, save_folder, crop_sz, step, thres_sz, compression_level, path_mask),
                          callback=update)
     pool.close()
     pool.join()
@@ -115,7 +132,14 @@ def rescale_reflectance_equal_per_band(img, limits):
     img[mask]=0 # set nodata==0
     return img
 
-def worker(path, save_folder, crop_sz, step, thres_sz, compression_level): # HERE TODO: load matrix
+def name_lookup(name_scene):
+    '''
+    Uses global var 'input_mask_folder'
+    '''
+    name_mask_scene = name_scene.replace(input_folder , input_mask_folder ).replace('.tif', '_no_buffer_mask.tif')
+    return name_mask_scene
+
+def worker(path, save_folder, crop_sz, step, thres_sz, compression_level, path_mask=None): # HERE TODO: load matrix
     '''
     input: pixel-smasher/quantile_matrix.npy
     '''
@@ -124,6 +148,8 @@ def worker(path, save_folder, crop_sz, step, thres_sz, compression_level): # HER
     print(f'Loaded quantiles values:\n{quantile_val}')
     img_name = os.path.basename(path)
     img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+    if path_mask != None:
+        mask = cv2.imread(path_mask, cv2.IMREAD_UNCHANGED)
         # for relative stretch 
     # reflectance_lower=np.percentile(img[:,:,ndwi_bands][img[:,:,ndwi_bands]>0], btm_percentile) # Compute maximum reflectance from entire 
     # reflectance_upper=np.percentile(img[:,:,ndwi_bands][img[:,:,ndwi_bands]>0], top_percentile) # Compute maximum reflectance from entire scene, not individual subsets
