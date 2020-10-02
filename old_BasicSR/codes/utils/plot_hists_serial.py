@@ -1,4 +1,6 @@
-'''Plot hists of each scene. Uncomment relevatnt areas to switch Between absolute and relative reflectances. Includes switch to compute hist stats for each image. Written for serial loop, not parallel.'''
+'''Plot hists of each scene. Uncomment relevatnt areas to switch Between absolute and relative reflectances. Includes switch to compute hist stats for each image. Written for serial loop, not parallel.
+Preprocessing: run 1st 
+Output= 'histograms.npy' and histograms_temp.npy' '''
 
 import os
 import os.path as osp
@@ -9,8 +11,8 @@ import getpass
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
-sys.path.insert(1, '/home/ethan_kyzivat/code/pixel-smasher/codes/scripts/')
-from extract_subimgs_single import rescale_reflectance # for relative reflectance
+sys.path.insert(1, '/home/ethan_kyzivat/code/pixel-smasher/old_BasicSR/codes/scripts/')
+from extract_subimgs_single import rescale_reflectance # HERE # for relative reflectance
 from extract_subimgs_single import rescale_reflectance_equal # for absolute reflectance
 
 try:

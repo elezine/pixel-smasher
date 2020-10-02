@@ -18,7 +18,7 @@ from classifier import classify
 # TODO: apply calibration if needed, multiple thresh?
 
 # I/O
-sourcedir='/data_dir/hold_mod/'
+sourcedir='/data_dir/hold_mod/HR/x4' # /data_dir/hold_mod
 outdir='/data_dir/other/classified_test' #'/data_dir/classified/'
 apply_radiometric_correction=False # set to zero if already calibrated
 
@@ -49,12 +49,13 @@ dirpaths = [f for f in os.listdir(sourcedir) ] # removed: if f.endswith('.png')
 num_files = len(dirpaths)
 # global results
 results = {} # init
-pool = Pool(mp.cpu_count())
+# pool = Pool(1) #mp.cpu_count())
 for i in range(num_files): # switch for testing # range(30): #
     name = dirpaths[i]
     print(f'Classifying file: {name}')
     # parallel
-    results[i] = pool.apply(classify, args=(os.path.join(sourcedir, name), os.path.join(outdir, name), thresh, None))# , , callback=collect_result
-pool.close()
-pool.join()
+    # results[i] = pool.apply(classify, args=(os.path.join(sourcedir, name), os.path.join(outdir, name), thresh, None))# , , callback=collect_result
+    results[i]=classify(os.path.join(sourcedir, name), os.path.join(outdir, name), thresh, None, method='local')
+# pool.close()
+# pool.join()
 print('All subprocesses done.')
