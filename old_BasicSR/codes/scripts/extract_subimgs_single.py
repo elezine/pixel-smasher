@@ -1,3 +1,6 @@
+'''
+Preprocessing: run 3rd
+'''
 import os
 import os.path as osp
 import sys
@@ -24,10 +27,6 @@ ndwi_bands=(1,3) # (1,3) # used to determine maximum or (n-percentile) brightnes
     # for abs stretch
 reflectance_upper=3000
 band_order=(2,1,3)  # 3,2,1 for NRG, 2,1,3 for RGN, 2,1,0 for RGB (original = BGRN)
-
-    # load 
-quantile_val=np.load('/home/ethan_kyzivat/code/pixel-smasher/quantile_matrix.npy')
-print(f'Loaded quantiles values:\n{quantile_val}')
 
 def main():
     """A multi-thread tool to crop sub imags."""
@@ -117,6 +116,12 @@ def rescale_reflectance_equal_per_band(img, limits):
     return img
 
 def worker(path, save_folder, crop_sz, step, thres_sz, compression_level): # HERE TODO: load matrix
+    '''
+    input: pixel-smasher/quantile_matrix.npy
+    '''
+        # load 
+    quantile_val=np.load('/home/ethan_kyzivat/code/pixel-smasher/quantile_matrix.npy')
+    print(f'Loaded quantiles values:\n{quantile_val}')
     img_name = os.path.basename(path)
     img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
         # for relative stretch 

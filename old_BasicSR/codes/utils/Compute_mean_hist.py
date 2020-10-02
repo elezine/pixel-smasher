@@ -1,8 +1,12 @@
-''' Breadcrumb trail for recording computations to determine mean histogram stretch for all images. Quite sloppy and slow bc of loop, but now modified to be better with a tiny aproximation.'''
+''' Breadcrumb trail for recording computations to determine mean histogram stretch for all images. Quite sloppy and slow bc of loop, but now modified to be better with a tiny aproximation.
+Preprocessing: run 2nd
+
+Input = 'codes/utils/histograms.npy'
+OUtput = 'quantile_matrix.npy' '''
 import numpy as np
 from matplotlib import pyplot as plt
 
-h=np.load('codes/utils/histograms.npy')
+h=np.load('histograms.npy') # codes/utils/histograms.npy'
 h_mean=np.mean(h, 2)
 bands=['B','G','R','N']
 quantiles=(0.2, 0.95)

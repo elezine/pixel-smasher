@@ -1,4 +1,6 @@
-'''Plot hists of each scene. Uncomment relevatnt areas to switch Between absolute and relative reflectances. Includes switch to compute hist stats for each image. Written for parallel loop.'''
+'''Plot hists of each scene. Uncomment relevatnt areas to switch Between absolute and relative reflectances. 
+Includes switch to compute hist stats for each image. Written for parallel loop.
+Output= 'histograms.npy''''
 
 import os
 import os.path as osp

@@ -1,5 +1,6 @@
 # bash script to move files from generate_mod_LR_bic output to train / val folders
 # inputs
+# Preprocessing: run 4th
 BASE_DIR=/data_dir/planet_sub
 
 # choose random subsets of files to move
