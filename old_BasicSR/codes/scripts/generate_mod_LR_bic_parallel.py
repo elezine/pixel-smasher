@@ -72,7 +72,7 @@ def generate_mod_LR_bic(top_dir):
 
     ## new parallel ##########################
 
-    pool = Pool(n_thread)
+    pool = Pool(4) #n_thread)
     for i in range(num_files): # range(700): #
         filename = filepaths[i] # will this work?
         if os.path.isfile(saveHRpath+os.sep+filename)==False: # only write if file doesn't exist
@@ -122,6 +122,7 @@ def worker(i, filename, sourcedir, saveHRpath, saveLRpath, saveBicpath, up_scale
     return 'No.{} -- Processed {}'.format(i, filename)
 
 if __name__ == "__main__":
-    generate_mod_LR_bic('train_mod')
-    generate_mod_LR_bic('valid_mod')
-    generate_mod_LR_bic('hold_mod')
+    # generate_mod_LR_bic('train_mod')
+    # generate_mod_LR_bic('valid_mod')
+    # generate_mod_LR_bic('hold_mod')
+    generate_mod_LR_bic('hold_mod_shield') # for shield scenes

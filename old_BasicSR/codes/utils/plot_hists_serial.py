@@ -26,7 +26,7 @@ top_percentile=95 # for relative reflectance
 reflectance_upper=3000 # for absolute reflectance
 band_order=(3,2,1)  # 3,2,1 for NRG, 2,1,3 for RGN, 2,1,0 for RGB (original = BGRN) # NOTE this is reversed bc not using cv2 to write out!
 ndwi_bands=(1,2) # (1,3) # used to determine maximum or (n-percentile) brightness in scene
-save_fig=False # save output hist /stretch fig?
+save_fig=True # save output hist /stretch fig?
 save_hist=True # record histogram for each image, save every save_freq images and at end
 hist_length=15000 #15000 #15000 # if using
 save_freq=10 # only matters if save_hist is True #30
@@ -40,11 +40,11 @@ if ~(save_fig or save_hist):
 def main():
     """A multi-thread tool to crop sub imags."""
     if getpass.getuser()=='ekyzivat': # on ethan local
-        input_folder = 'F:\ComputerVision\Planet'
-        save_folder = 'F:\ComputerVision\Planet_sub'
+        input_folder = 'F:\ComputerVision\Planet-shield'
+        save_folder = 'F:\ComputerVision\Planet_sub_shield'
     elif getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
-        input_folder = '/data_dir/Scenes'
-        save_folder = '/data_dir/other/hists/histsv6_test'
+        input_folder = '/data_dir/Scenes-shield'
+        save_folder = '/data_dir/other/hists/hists_shield'
     else: # other
         raise ValueError('input_folder not specified!')
         pass
