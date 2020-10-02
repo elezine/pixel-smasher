@@ -5,12 +5,14 @@ import sys
 # from multiprocessing import Pool
 import numpy as np
 import cv2
+from skimage.filters import threshold_otsu, threshold_local
 from multiprocessing import Pool
 import multiprocessing as mp
 import pickle
 import pandas as pd
 from sklearn.metrics import cohen_kappa_score
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import draw, show, ion, ioff
 
 
 # example output paths: /data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images/716222_1368610_2017-08-27_0e0f_BGRN_Analytic_s0984
@@ -87,9 +89,11 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=2, hash
     data_frame_out.num=i # broadcast?
     return data_frame_out
 
-def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, res='NaN'):
+def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, res='NaN', method='thresh'):
         # classify procedure
-    ''' Write= whether or not to write classified file. Returns classified matrix as second output '''
+    ''' 
+    Write= whether or not to write classified file. Returns classified matrix as second output
+    Method: {thresh, local, local-masked}, where thresh is a series of thresholds, and local uses otsu or similar with adaptive binarization'''
     img = cv2.imread(pth_in, cv2.IMREAD_UNCHANGED)
 
         # check
@@ -116,10 +120,24 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
         # convert nan to zero
     ndwi[np.isnan(ndwi)]=0 # now, I can ignore RuntimeWarnings about dividing by zero
     
-    try:
-        bw=ndwi>threshold # output mask from classifier
-    except RuntimeWarning:
+    if method=='thresh': 
+        try:
+            bw=ndwi>threshold # output mask from classifier
+        except RuntimeWarning:
+            pass
+
+
+    elif method=='local': 
+        # bw=cv2.adaptiveThreshold(ndwi,1,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2) # https://docs.opencv.org/3.4/d7/d1b/group__imgproc__misc.html#ga72b913f352e4a1b1b397736707afcde3
+        thresh=threshold_local(ndwi, 75, offset=0, method='gaussian')
+        bw=ndwi>thresh
+        fig, axs = plt.subplots(1, 2, figsize=(7, 4), constrained_layout=True)
+        axs[0].imshow(ndwi), axs[0].set_title('ndwi')
+        axs[1].imshow(bw), axs[1].set_title('bw')
+        show()
+    elif method =='local-masked': # HERE add 
         pass
+    else: print(f'Unknown classifier method: {method}')
 
         # stats: count pixels, etc # TAG depends-on-num-metrics
     nWaterPix=np.sum(bw)
@@ -127,15 +145,11 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
     mean_ndwi=np.mean(ndwi)
     median_ndwi=np.median(ndwi)
     min_ndwi=np.min(ndwi)
-    max_ndwi=np.max(ndwi)
+    max_ndwi=np.max(ndwi) # HERE: remove when done testing...
 
-        # write out ndwi ( for testing)
+        # write out ndwi ( for testing)         
     # img_ndwi=np.minimum(np.maximum((ndwi+0.4)/0.8, np.zeros(ndwi.shape, dtype=ndwi.dtype)), np.ones(ndwi.shape, dtype=ndwi.dtype))
     # cv2.imwrite(pth_out, img_as_ubyte(img_ndwi))  # HERE np.array(255*bw, 'uint8')
-
-        # write out bw
-    if write:
-        cv2.imwrite(pth_out, np.array(255*bw, 'uint8'))  # HERE
 
     #define and fill output pandas df - this can all be simplified if I include a keywordarg in the ClassifierComparison class __init__
     dataframe_out=ClassifierComparison()
@@ -147,6 +161,10 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
     dataframe_out.min_ndwi=min_ndwi
     dataframe_out.max_ndwi=max_ndwi
     dataframe_out.res=res
+    
+        # write out bw
+    if write:
+        cv2.imwrite(pth_out, np.array(255*bw, 'uint8'))  # HERE
 
     return dataframe_out, bw
 
