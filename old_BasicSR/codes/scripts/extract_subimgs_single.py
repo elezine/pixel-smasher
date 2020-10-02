@@ -31,27 +31,16 @@ if getpass.getuser()=='ekyzivat': # on ethan local
     input_folder = 'F:\ComputerVision\Planet'
     save_folder = 'F:\ComputerVision\Planet_sub'
 elif getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
-    input_folder = '/data_dir/Scenes'
-    save_folder = '/data_dir/planet_sub'
+    input_folder = '/data_dir/Scenes-shield'
+    save_folder = '/data_dir/planet_sub/hold_mod_shield'
 else: # other
     raise ValueError('input_folder not specified!')
     pass
-input_mask_folder = '/data_dir/Water_mask' # None
+input_mask_folder = '/data_dir/Shield_Water_Mask' # None
+save_mask_folder = '/data_dir/planet_sub/hold_mod_shield_masks'
 
 def main():
     """A multi-thread tool to crop sub imags."""
-<<<<<<< Updated upstream
-    if getpass.getuser()=='ekyzivat': # on ethan local
-        input_folder = 'F:\ComputerVision\Planet'
-        save_folder = 'F:\ComputerVision\Planet_sub'
-    elif getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
-        input_folder = '/data_dir/Scenes-shield'
-        save_folder = '/data_dir/planet_sub/hold_mod_shield'
-    else: # other
-        raise ValueError('input_folder not specified!')
-        pass
-=======
->>>>>>> Stashed changes
 
     n_thread = multiprocessing.cpu_count() #1
     crop_sz = 480 # num px in x and y
@@ -64,6 +53,9 @@ def main():
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)
         print('mkdir [{:s}] ...'.format(save_folder))
+    if not os.path.exists(save_mask_folder):
+            os.makedirs(save_mask_folder)
+            print('mkdir [{:s}] ...'.format(save_mask_folder))
     else:
         # print('Folder [{:s}] already exists. Exit...'.format(save_folder))
         # sys.exit(1)
@@ -82,14 +74,14 @@ def main():
     # img_list=img_list[238:270] # for testing
     pbar = ProgressBar(len(img_list))
 
-    pool = Pool(n_thread)
+    pool = Pool(4) # (n_thread)
     for path in img_list:
         if input_mask_folder==None:
             path_mask=None
         else:
             path_mask=name_lookup(path) # lookup mask path
         pool.apply_async(worker,
-                         args=(path, save_folder, crop_sz, step, thres_sz, compression_level, path_mask),
+                         args=(path, save_folder, crop_sz, step, thres_sz, compression_level, path_mask, save_mask_folder),
                          callback=update)
     pool.close()
     pool.join()
@@ -139,7 +131,7 @@ def name_lookup(name_scene):
     name_mask_scene = name_scene.replace(input_folder , input_mask_folder ).replace('.tif', '_no_buffer_mask.tif')
     return name_mask_scene
 
-def worker(path, save_folder, crop_sz, step, thres_sz, compression_level, path_mask=None): # HERE TODO: load matrix
+def worker(path, save_folder, crop_sz, step, thres_sz, compression_level, path_mask=None, save_mask_folder=None): # HERE TODO: load matrix
     '''
     input: pixel-smasher/quantile_matrix.npy
     '''
@@ -149,7 +141,11 @@ def worker(path, save_folder, crop_sz, step, thres_sz, compression_level, path_m
     img_name = os.path.basename(path)
     img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
     if path_mask != None:
+        mask_name = os.path.basename(path_mask)
         mask = cv2.imread(path_mask, cv2.IMREAD_UNCHANGED)
+        print(f'\n\nLoaded image:\t{mask_name}')
+        if mask.shape[:2] != img.shape[:2]:
+            raise ValueError('Image and mask are different shapes.')
         # for relative stretch 
     # reflectance_lower=np.percentile(img[:,:,ndwi_bands][img[:,:,ndwi_bands]>0], btm_percentile) # Compute maximum reflectance from entire 
     # reflectance_upper=np.percentile(img[:,:,ndwi_bands][img[:,:,ndwi_bands]>0], top_percentile) # Compute maximum reflectance from entire scene, not individual subsets
@@ -183,9 +179,14 @@ def worker(path, save_folder, crop_sz, step, thres_sz, compression_level, path_m
         for y in w_space:
             if n_channels == 2:
                 crop_img = img[x:x + crop_sz, y:y + crop_sz]
+                if path_mask != None:
+                    crop_mask_img = mask[x:x + crop_sz, y:y + crop_sz]
             else:
                 crop_img = img[x:x + crop_sz, y:y + crop_sz, :]
+                if path_mask != None:
+                    crop_mask_img = mask[x:x + crop_sz, y:y + crop_sz] # samesies
             crop_img = np.ascontiguousarray(crop_img)
+            crop_mask_img = np.ascontiguousarray(crop_mask_img)*255 # for vis purposes
             # var = np.var(crop_img / 255)
             # if var > 0.008:
             #     print(img_name, index_str, var)
@@ -196,6 +197,10 @@ def worker(path, save_folder, crop_sz, step, thres_sz, compression_level, path_m
                     os.path.join(save_folder, img_name.replace('.tif', '_s{:04d}.png'.format(index))),
                     crop_img, [cv2.IMWRITE_PNG_COMPRESSION, compression_level])
                 print(f'\t{img_name}\tCropped: {x}, {y}.')
+                if path_mask != None:
+                    cv2.imwrite(
+                        os.path.join(save_mask_folder, mask_name.replace('.tif', '_s{:04d}.png'.format(index))),
+                        crop_mask_img, [cv2.IMWRITE_PNG_COMPRESSION, compression_level])
                 index += 1
             else:
                 # print('\tSome No Data pixels in: {:d}, {:d}.  Skipping.'.format(x,y))

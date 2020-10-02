@@ -378,13 +378,22 @@ def imresize(img, scale, antialiasing=True):
 
 
 def imresize_np(img, scale, antialiasing=True):
+    '''
+    Updated to work for 3-band OR 1-band images
+    '''
     # Now the scale should be the same for H and W
     # input: img: Numpy, HWC BGR [0,1]
     # output: HWC BGR [0,1] w/o round
     img = torch.from_numpy(img)
-
-    in_H, in_W, in_C = img.size()
-    _, out_H, out_W = in_C, math.ceil(in_H * scale), math.ceil(in_W * scale)
+    if img.dim()==3:
+        in_H, in_W, in_C = img.size()
+        _, out_H, out_W = in_C, math.ceil(in_H * scale), math.ceil(in_W * scale)
+    elif img.dim()==2:
+        in_H, in_W = img.size()
+        out_H, out_W = math.ceil(in_H * scale), math.ceil(in_W * scale)
+        in_C=1
+    else:
+        raise ValueError('Image has wrong dimensions.')
     kernel_width = 4
     kernel = 'cubic'
 
@@ -400,50 +409,78 @@ def imresize_np(img, scale, antialiasing=True):
         in_W, out_W, scale, kernel, kernel_width, antialiasing)
     # process H dimension
     # symmetric copying
-    img_aug = torch.FloatTensor(in_H + sym_len_Hs + sym_len_He, in_W, in_C)
+    if img.dim()==3:
+        img_aug = torch.FloatTensor(in_H + sym_len_Hs + sym_len_He, in_W, in_C)
+    else:
+        img_aug = torch.FloatTensor(in_H + sym_len_Hs + sym_len_He, in_W)
     img_aug.narrow(0, sym_len_Hs, in_H).copy_(img)
 
-    sym_patch = img[:sym_len_Hs, :, :]
+    if img.dim()==3:
+        sym_patch = img[:sym_len_Hs, :, :]
+    else:
+        sym_patch = img[:sym_len_Hs, :]
     inv_idx = torch.arange(sym_patch.size(0) - 1, -1, -1).long()
     sym_patch_inv = sym_patch.index_select(0, inv_idx)
     img_aug.narrow(0, 0, sym_len_Hs).copy_(sym_patch_inv)
 
-    sym_patch = img[-sym_len_He:, :, :]
+    if img.dim()==3:
+        sym_patch = img[-sym_len_He:, :, :]
+    else:
+        sym_patch = img[-sym_len_He:, :]
     inv_idx = torch.arange(sym_patch.size(0) - 1, -1, -1).long()
     sym_patch_inv = sym_patch.index_select(0, inv_idx)
     img_aug.narrow(0, sym_len_Hs + in_H, sym_len_He).copy_(sym_patch_inv)
 
-    out_1 = torch.FloatTensor(out_H, in_W, in_C)
+    if img.dim()==3:
+        out_1 = torch.FloatTensor(out_H, in_W, in_C)
+    else:
+        out_1 = torch.FloatTensor(out_H, in_W)
     kernel_width = weights_H.size(1)
     for i in range(out_H):
         idx = int(indices_H[i][0])
-        out_1[i, :, 0] = img_aug[idx:idx + kernel_width, :, 0].transpose(0, 1).mv(weights_H[i])
-        out_1[i, :, 1] = img_aug[idx:idx + kernel_width, :, 1].transpose(0, 1).mv(weights_H[i])
-        out_1[i, :, 2] = img_aug[idx:idx + kernel_width, :, 2].transpose(0, 1).mv(weights_H[i])
-
+        if img.dim()==3:
+            out_1[i, :, 0] = img_aug[idx:idx + kernel_width, :, 0].transpose(0, 1).mv(weights_H[i])
+            out_1[i, :, 1] = img_aug[idx:idx + kernel_width, :, 1].transpose(0, 1).mv(weights_H[i])
+            out_1[i, :, 2] = img_aug[idx:idx + kernel_width, :, 2].transpose(0, 1).mv(weights_H[i])
+        else:
+            out_1[i, :] = img_aug[idx:idx + kernel_width, :].transpose(0, 1).mv(weights_H[i])
     # process W dimension
     # symmetric copying
-    out_1_aug = torch.FloatTensor(out_H, in_W + sym_len_Ws + sym_len_We, in_C)
+    if img.dim()==3:
+        out_1_aug = torch.FloatTensor(out_H, in_W + sym_len_Ws + sym_len_We, in_C)
+    else:
+        out_1_aug = torch.FloatTensor(out_H, in_W + sym_len_Ws + sym_len_We)
     out_1_aug.narrow(1, sym_len_Ws, in_W).copy_(out_1)
 
-    sym_patch = out_1[:, :sym_len_Ws, :]
+    if img.dim()==3:
+        sym_patch = out_1[:, :sym_len_Ws, :]
+    else:
+        sym_patch = out_1[:, :sym_len_Ws]
     inv_idx = torch.arange(sym_patch.size(1) - 1, -1, -1).long()
     sym_patch_inv = sym_patch.index_select(1, inv_idx)
     out_1_aug.narrow(1, 0, sym_len_Ws).copy_(sym_patch_inv)
 
-    sym_patch = out_1[:, -sym_len_We:, :]
+    if img.dim()==3:
+        sym_patch = out_1[:, -sym_len_We:, :]
+    else:
+        sym_patch = out_1[:, -sym_len_We:]
     inv_idx = torch.arange(sym_patch.size(1) - 1, -1, -1).long()
     sym_patch_inv = sym_patch.index_select(1, inv_idx)
     out_1_aug.narrow(1, sym_len_Ws + in_W, sym_len_We).copy_(sym_patch_inv)
 
-    out_2 = torch.FloatTensor(out_H, out_W, in_C)
+    if img.dim()==3:
+        out_2 = torch.FloatTensor(out_H, out_W, in_C)
+    else:
+        out_2 = torch.FloatTensor(out_H, out_W)
     kernel_width = weights_W.size(1)
     for i in range(out_W):
         idx = int(indices_W[i][0])
-        out_2[:, i, 0] = out_1_aug[:, idx:idx + kernel_width, 0].mv(weights_W[i])
-        out_2[:, i, 1] = out_1_aug[:, idx:idx + kernel_width, 1].mv(weights_W[i])
-        out_2[:, i, 2] = out_1_aug[:, idx:idx + kernel_width, 2].mv(weights_W[i])
-
+        if img.dim()==3:
+            out_2[:, i, 0] = out_1_aug[:, idx:idx + kernel_width, 0].mv(weights_W[i])
+            out_2[:, i, 1] = out_1_aug[:, idx:idx + kernel_width, 1].mv(weights_W[i])
+            out_2[:, i, 2] = out_1_aug[:, idx:idx + kernel_width, 2].mv(weights_W[i])
+        else:
+            out_2[:, i] = out_1_aug[:, idx:idx + kernel_width].mv(weights_W[i])
     return out_2.numpy()
 
 

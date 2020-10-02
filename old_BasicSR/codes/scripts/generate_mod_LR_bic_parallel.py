@@ -75,12 +75,13 @@ def generate_mod_LR_bic(top_dir):
 
     ## new parallel ##########################
 
-    pool = Pool(4) #n_thread)
+    pool = Pool(n_thread)
     for i in range(num_files): # range(700): #
         filename = filepaths[i] # will this work?
         if os.path.isfile(saveHRpath+os.sep+filename)==False: # only write if file doesn't exist
             pool.apply_async(worker,
                             args=(i, filename, sourcedir, saveHRpath, saveLRpath, saveBicpath, up_scale, mod_scale, stretch_multiplier, hash)) # , callback=update
+            # worker(i, filename, sourcedir, saveHRpath, saveLRpath, saveBicpath, up_scale, mod_scale, stretch_multiplier, hash) # for debugging
         else: # elif os.path.isfile(saveHRpath+os.sep+filename)==True: 
             print('Skip no. {}.'.format(i))
     pool.close()
@@ -128,4 +129,5 @@ if __name__ == "__main__":
     # generate_mod_LR_bic('train_mod')
     # generate_mod_LR_bic('valid_mod')
     # generate_mod_LR_bic('hold_mod')
-    generate_mod_LR_bic('hold_mod_shield') # for shield scenes
+    # generate_mod_LR_bic('hold_mod_shield') # for shield scenes
+    generate_mod_LR_bic('hold_mod_shield_masks') # for shield scenes masks
