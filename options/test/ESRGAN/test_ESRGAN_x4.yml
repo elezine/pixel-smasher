@@ -24,7 +24,7 @@ network_g:
 
 # path
 path:
-  pretrain_model_g: data_dir/pixel-smasher/experiments/003_ESRGAN_x4_PLANET_pretrainDF2K_wandb_sep6/models/net_g_400000.pth
+  pretrain_model_g: /data_dir/pixel-smasher/experiments/003_ESRGAN_x4_PLANET_pretrainDF2K_wandb_sep6/models/net_g_400000.pth
   strict_load: true
 
 # validation settings
