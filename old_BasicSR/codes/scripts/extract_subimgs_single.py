@@ -28,7 +28,9 @@ ndwi_bands=(1,3) # (1,3) # used to determine maximum or (n-percentile) brightnes
     # for abs stretch
 reflectance_upper=None #3000 # only used if using function 'rescale_reflectance_equal'
 band_order=(2,1,3)  # If no opencv reversals: 3,2,1 for NRG, 2,1,3 for RGN, 2,1,0 for RGB (original = BGRN)
-# if opencv reversal (sees NRGB): 0,1,2 for NRG, 1,2,0 for RGN; 1,2,3 for RGB
+# if opencv reversal with write compensation (sees NRGB, then don't reverse bc it writes in reverse, but I flip output): 0,1,2 for NRG, 1,2,0 for RGN; 1,2,3 for RGB
+# if opencv reversal (sees NRGB, then reverse bc it writes in revers): 2,1,0 for NRG, 0,2,1 for RGN; 3,2,1 for RGB
+
 if getpass.getuser()=='ekyzivat': # on ethan local
     input_folder = 'F:\ComputerVision\Planet'
     save_folder = 'F:\ComputerVision\Planet_sub'
@@ -237,7 +239,7 @@ def worker(path, save_folder, crop_sz, step, thres_sz, compression_level, path_m
                 if path_mask != None:
                     cv2.imwrite(
                         os.path.join(save_mask_folder, mask_name.replace('.tif', '_s{:04d}.png'.format(index))),
-                        crop_mask_img, [cv2.IMWRITE_PNG_COMPRESSION, compression_level])
+                        crop_mask_img, [cv2.IMWRITE_PNG_COMPRESSION, compression_level]) # crop_mask_img[:,:,[2,1,0]]
                 index += 1
             else:
                 # print('\tSome No Data pixels in: {:d}, {:d}.  Skipping.'.format(x,y))
