@@ -1,7 +1,7 @@
 # general settings
-name: ~
+name: 008_ESRGAN_x8_PLANET_noPreTrain_wandb_2GPUs_Oct7
 model_type: ESRGANModel
-scale: 4
+scale: 8
 num_gpu: 2 # set num_gpu: 0 for cpu mode
 manual_seed: 0
 
@@ -21,7 +21,7 @@ datasets:
       # (for lmdb)
       #type: lmdb
 
-    gt_size: 128
+    gt_size: 160
     use_flip: true
     use_rot: true
 
@@ -45,13 +45,13 @@ network_g:
   type: RRDBNet
   num_in_ch: 3
   num_out_ch: 3
-  num_feat: 64
+  num_feat: 80
   num_block: 23
 
 network_d:
-  type: VGGStyleDiscriminator128
+  type: VGGStyleDiscriminator160
   num_in_ch: 3
-  num_feat: 64
+  num_feat: 80
 
 # path
 path:
@@ -123,7 +123,7 @@ logger:
   use_tb_logger: true
   wandb:
     project: pixelsmasher
-    resume_id: ~
+    resume_id: 8xUpsample
 
 # dist training settings
 dist_params:
