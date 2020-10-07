@@ -14,12 +14,12 @@ These new changes are authored by Ethan D. Kyzivat and Ekaterina Lezine.
 
 ## Image import and preprocessing workflow
 
-1. Download images to Scenes folder
+0. Download images to Scenes folder
 1. [plot_hists_serial.py](old_BasicSR/codes/utils/plot_hists_serial.py) > saves histogram for each scene
 2. [Compute_mean_hist.py](old_BasicSR/codes/utils/Compute_mean_hist.py) > averages these histograms
-2. [extract_subimgs_single.py](old_BasicSR/codes/scripts/extract_subimgs_single.py) > Divides satellite scenes into subsets
-3. [rand_shuf.sh](old_BasicSR/codes/utils/rand_shuf.sh) > Randomly creates training and validation partitions
-4. [generate_mod_LR_bic_parallel.py](old_BasicSR/codes/scripts/generate_mod_LR_bic_parallel.py) > Upscales and downscales subsets via a number of methods
+3. [extract_subimgs_single.py](old_BasicSR/codes/scripts/extract_subimgs_single.py) > Divides satellite scenes into subsets
+4. [rand_shuf.sh](old_BasicSR/codes/utils/rand_shuf.sh) > Randomly creates training and validation partitions
+5. [generate_mod_LR_bic_parallel.py](old_BasicSR/codes/scripts/generate_mod_LR_bic_parallel.py) > Upscales and downscales subsets via a number of methods
 
 ## Dependencies and Installation
 - Python 3 (Recommend to use [Anaconda](https://www.anaconda.com/download/#linux))
