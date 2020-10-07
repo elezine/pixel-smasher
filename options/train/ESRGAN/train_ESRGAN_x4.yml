@@ -1,7 +1,7 @@
 # general settings
-name: 007_ESRGAN_x4_PLANET_noPreTrain_wandb_Testing2GPUs
+name: 008_ESRGAN_x8_PLANET_noPreTrain_wandb_2GPUs_Oct7
 model_type: ESRGANModel
-scale: 4
+scale: 8
 num_gpu: 2 # set num_gpu: 0 for cpu mode
 manual_seed: 0
 
@@ -13,15 +13,15 @@ datasets:
     #dataroot_gt: datasets/DIV2K/DIV2K_train_HR_sub
     #dataroot_lq: datasets/DIV2K/DIV2K_train_LR_bicubic/X4_sub
     # (for lmdb)
-    dataroot_gt: /data_dir/train_mod/HR/x4 
-    dataroot_lq: /data_dir/train_mod/LR/x4 
+    dataroot_gt: /data_dir/train_mod/HR/x8
+    dataroot_lq: /data_dir/train_mod/LR/x8 
     filename_tmpl: '{}'
     io_backend:
       type: disk
       # (for lmdb)
       #type: lmdb
 
-    gt_size: 128
+    gt_size: 160
     use_flip: true
     use_rot: true
 
@@ -35,8 +35,8 @@ datasets:
   val:
     name: PLANET_VAL
     type: PairedImageDataset
-    dataroot_gt: /data_dir/valid_mod/HR/x4 
-    dataroot_lq: /data_dir/valid_mod/LR/x4 
+    dataroot_gt: /data_dir/valid_mod/HR/x8 
+    dataroot_lq: /data_dir/valid_mod/LR/x8 
     io_backend:
       type: disk
 
@@ -45,13 +45,13 @@ network_g:
   type: RRDBNet
   num_in_ch: 3
   num_out_ch: 3
-  num_feat: 64
+  num_feat: 80
   num_block: 23
 
 network_d:
-  type: VGGStyleDiscriminator128
+  type: VGGStyleDiscriminator160
   num_in_ch: 3
-  num_feat: 64
+  num_feat: 80
 
 # path
 path:
@@ -113,7 +113,7 @@ val:
   metrics:
     psnr: # metric name, can be arbitrary
       type: calculate_psnr
-      crop_border: 4
+      crop_border: 10
       test_y_channel: false
 
 # logging settings
@@ -123,7 +123,7 @@ logger:
   use_tb_logger: true
   wandb:
     project: pixelsmasher
-    resume_id: Testing2GPUs
+    resume_id: 8xUpsample
 
 # dist training settings
 dist_params:
