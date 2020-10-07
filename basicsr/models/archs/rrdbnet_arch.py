@@ -15,7 +15,7 @@ class ResidualDenseBlock(nn.Module):
         num_grow_ch (int): Channels for each growth.
     """
 
-    def __init__(self, num_feat=70, num_grow_ch=35):
+    def __init__(self, num_feat=80, num_grow_ch=40):
         super(ResidualDenseBlock, self).__init__()
         self.conv1 = nn.Conv2d(num_feat, num_grow_ch, 3, 1, 1)
         self.conv2 = nn.Conv2d(num_feat + num_grow_ch, num_grow_ch, 3, 1, 1)
@@ -51,7 +51,7 @@ class RRDB(nn.Module):
         num_grow_ch (int): Channels for each growth.
     """
 
-    def __init__(self, num_feat, num_grow_ch=35):
+    def __init__(self, num_feat, num_grow_ch=40):
         super(RRDB, self).__init__()
         self.rdb1 = ResidualDenseBlock(num_feat, num_grow_ch)
         self.rdb2 = ResidualDenseBlock(num_feat, num_grow_ch)
@@ -70,7 +70,7 @@ class RRDBNet(nn.Module):
     in ESRGAN.
 
     ESRGAN: Enhanced Super-Resolution Generative Adversarial Networks.
-    Currently, it supports x4 upsampling scale factor.
+    Currently, it supports x10 upsampling scale factor.
 
     Args:
         num_in_ch (int): Channel number of inputs.
@@ -84,9 +84,9 @@ class RRDBNet(nn.Module):
     def __init__(self,
                  num_in_ch,
                  num_out_ch,
-                 num_feat=70,
+                 num_feat=80,
                  num_block=23,
-                 num_grow_ch=35):
+                 num_grow_ch=40):
         super(RRDBNet, self).__init__()
         self.conv_first = nn.Conv2d(num_in_ch, num_feat, 3, 1, 1)
         self.body = make_layer(
