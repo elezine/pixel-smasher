@@ -39,7 +39,7 @@ method='local-masked'
     # I/O for create_buffer_mask function
 foreground_threshold=127
 buffer_additional=0
-ndwi_bands=(2,1)
+ndwi_bands=(2,1) #N,G
 water_index_type='ir'
 plots_dir='/data_dir/other/classified_shield_test_plots'
 

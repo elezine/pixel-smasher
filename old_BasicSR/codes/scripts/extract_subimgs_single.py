@@ -23,31 +23,28 @@ except ImportError as e:
     # for relative stretch
 btm_percentile=1
 top_percentile=95
-ndwi_bands=(1,3) # (1,3) # used to determine maximum or (n-percentile) brightness in scene
+ndwi_bands=(3,1) # (1,3) # used to determine maximum or (n-percentile) brightness in scene (N,G)- not important for writing
 
     # for abs stretch
 reflectance_upper=None #3000 # only used if using function 'rescale_reflectance_equal'
-band_order=(2,1,3)  # If no opencv reversals: 3,2,1 for NRG, 2,1,3 for RGN, 2,1,0 for RGB (original = BGRN)
-# if opencv reversal with write compensation (sees NRGB, then don't reverse bc it writes in reverse, but I flip output): 0,1,2 for NRG, 1,2,0 for RGN; 1,2,3 for RGB
-# if opencv reversal (sees NRGB, then reverse bc it writes in revers): 2,1,0 for NRG, 0,2,1 for RGN; 3,2,1 for RGB
+band_order=(0,1,3)  # (2,1,3) # If no opencv reversals: 3,2,1 for NRG, 2,1,3 for RGN, 2,1,0 for RGB (original = BGRN)
+# if opencv reversal with write compensation (sees RGBN, then don't reverse bc it writes in reverse, but I flip output): 1,0,3 for NRG, 3,1,0 for RGN; 2,1,0 for RGB
+# with opencv reversal (sees RGBN, then reverse bc it writes in revers): 3,0,1 for NRG, 0,1,3 for RGN; 0,1,2 for RGB
+# opencv load BGRN as RGBN!
 
-if getpass.getuser()=='ekyzivat': # on ethan local
-    input_folder = 'F:\ComputerVision\Planet'
-    save_folder = 'F:\ComputerVision\Planet_sub'
-elif getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
-    input_folder = '/data_dir/Scenes-shield'
-    save_folder = '/data_dir/planet_sub/hold_mod_shield_v2' # hold_mod_shield_v2 is for individ image rescaling, not global
-else: # other
-    raise ValueError('input_folder not specified!')
-    pass
-input_mask_folder = None #'/data_dir/Shield_Water_Mask' # set to None if not using masks
-save_mask_folder = '/data_dir/planet_sub/hold_mod_shield_masks'
-n_thread = 2 #multiprocessing.cpu_count() #1
+    # folder I/O
+input_folder = '/data_dir/Scenes' # '/data_dir/Scenes-shield'
+save_folder = '/data_dir/planet_sub_v2' # /data_dir/planet_sub/hold_mod_shield_v2.2 # planet_sub/hold_mod_shield_v2 is for individ image rescaling, not global
+input_mask_folder = None # '/data_dir/Shield_Water_Mask' # None #'/data_dir/Shield_Water_Mask' # set to None if not using masks
+save_mask_folder = '/data_dir/planet_sub_masks_v2' # /data_dir/planet_sub/hold_mod_shield_masks
+save_hist_plot_folder = '/data_dir/other/hists/hists_hold_mod_v2' # set to None to not save or plot
+
+    # parma I/O
+n_thread = multiprocessing.cpu_count() #1 # 2
 crop_sz = 480 # num px in x and y
 step = 240
 thres_sz = 48
 compression_level = 3  # 3 is the default value in cv2
-save_hist_plot_folder = '/data_dir/other/hists/hists_shield_v2' # set to None to not save or plot
 def main():
     """A multi-thread tool to crop sub imags."""
     # CV_IMWRITE_PNG_COMPRESSION from 0 to 9. A higher value means a smaller size and longer
@@ -115,14 +112,16 @@ def rescale_reflectance(img, btm_percentile=2, top_percentile=98, individual_ban
     '''Rescales each band in each image individualy (unless flag 'individual_band' is False), given input btm and top percentiles. Preserves input nodata value of 0.'''
         # Contrast stretching
     mask=np.sum(img,axis=2)==0
-    for i in range(img.shape[2]):
-        btm_val, top_val=[None]*img.shape[2], [None]*img.shape[2]
-        btm_val[i] = np.percentile(img[:,:,i][img[:,:,i]>0], btm_percentile)
-        top_val[i] = np.percentile(img[:,:,i][img[:,:,i]>0], top_percentile)
-        if individual_band==True:
+    btm_val, top_val=[None]*img.shape[2], [None]*img.shape[2] # init
+    if individual_band==True:
+        for i in range(img.shape[2]):
+            btm_val[i] = np.percentile(img[:,:,i][img[:,:,i]>0], btm_percentile)
+            top_val[i] = np.percentile(img[:,:,i][img[:,:,i]>0], top_percentile)
             img[:,:,i] = exposure.rescale_intensity(img[:,:,i], in_range=(btm_val[i], top_val[i]))
-    if individual_band==False:
-        img[:,:,i] = exposure.rescale_intensity(img, in_range=(np.mean(btm_val), np.mean(top_val)))
+    else:
+        btm_val = np.percentile(img[np.sum(img, 2)>0], btm_percentile)
+        top_val = np.percentile(img[np.sum(img, 2)>0], top_percentile)
+        img = exposure.rescale_intensity(img, in_range=(btm_val, top_val))
     img=img_as_ubyte(img) #(img/65535*255).astype(np.uint8) # 
 
             # preserve nodata value
@@ -162,16 +161,19 @@ def worker(path, save_folder, crop_sz, step, thres_sz, compression_level, path_m
     print(f'Loaded quantiles values:\n{quantile_val}')
     img_name = os.path.basename(path)
     img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+    if np.any(img==None):
+        raise ValueError(f'image {path} not found...')
+    else:
+        print(f'\n\nLoaded image :\t{img_name}')
     if path_mask != None:
         mask_name = os.path.basename(path_mask)
         mask = cv2.imread(path_mask, cv2.IMREAD_UNCHANGED)
-        print(f'\n\nLoaded image:\t{mask_name}')
+        print(f'\n\nLoaded mask:\t{mask_name}')
         if mask.shape[:2] != img.shape[:2]:
             raise ValueError('Image and mask are different shapes.')
         # for relative stretch 
     # reflectance_lower=np.percentile(img[:,:,ndwi_bands][img[:,:,ndwi_bands]>0], btm_percentile) # Compute maximum reflectance from entire 
     # reflectance_upper=np.percentile(img[:,:,ndwi_bands][img[:,:,ndwi_bands]>0], top_percentile) # Compute maximum reflectance from entire scene, not individual subsets
-    print(f'\n\nLoaded image:\t{img_name}')
 
        # rescale and overwrite to img : for relative stretch
     # img=rescale_reflectance(img[:,:,band_order], btm_percentile, top_percentile)
@@ -180,18 +182,18 @@ def worker(path, save_folder, crop_sz, step, thres_sz, compression_level, path_m
        # rescale and overwrite to img : for abs stretch
     # print(f'Rescaling reflectance to: {reflectance_upper:.1f}\n')
     print(f'Rescaling reflectance...')
-    img=rescale_reflectance(img[:,:,band_order], btm_percentile, top_percentile) # rescale_reflectance_equal_per_band(img[:,:,band_order], quantile_val[:, band_order])
+    img=rescale_reflectance(img[:,:,band_order], btm_percentile, top_percentile, individual_band=False) # rescale_reflectance_equal_per_band(img[:,:,band_order], quantile_val[:, band_order])
     
-        # save hist plots
+        # save hist plots: view in NGR as written to file, not as opencv sees it (RGN)
     if save_hist_plot_folder != None:
         print('Calculating histogram...')
         f, ax = plt.subplots(img.shape[2], 2, sharex=True)
         for i in range(img.shape[2]):
-            ax[i,1].hist(img[:,:,i][img[:,:,i]>0].flatten(),bins=np.linspace(0,255,256))
-            ax[i,1].set_title('band: {}'.format(i))
+            ax[i,1].hist(img[:,:,2-i][img[:,:,2-i]>0].flatten(),bins=np.linspace(0,255,256))
+            ax[i,1].set_title('Write band: {}'.format(i))
         f.add_subplot(1,2,1)
         ax[0,0].set_title(img_name)
-        plt.imshow(img, resample=True)
+        plt.imshow(img[:,:,[2,1,0]], resample=True)
         plt.savefig(os.path.join(save_hist_plot_folder, img_name.replace('.tif', '_hist.png')))
         plt.close()
         print(f'\t{img_name} hist\tSaved.')
