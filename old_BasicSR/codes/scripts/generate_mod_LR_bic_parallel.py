@@ -22,13 +22,13 @@ def generate_mod_LR_bic(top_dir):
     # set parameters
     print(f'Top dir: {top_dir}')
     n_thread=multiprocessing.cpu_count() # num cores 8
-    up_scale = 4
-    mod_scale = 4
+    up_scale = 10
+    mod_scale = 10
     stretch_multiplier=1 # to increase total dynamic range
 
     # set data dir
     if getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
-        sourcedir = os.path.join('/data_dir/planet_sub', top_dir)
+        sourcedir = os.path.join('/data_dir/planet_sub_v2', top_dir) # change HERE if updating
         savedir = os.path.join('/data_dir/', top_dir)
     else: # other
         raise ValueError('input_folder not specified!')
@@ -126,8 +126,8 @@ def worker(i, filename, sourcedir, saveHRpath, saveLRpath, saveBicpath, up_scale
     return 'No.{} -- Processed {}'.format(i, filename)
 
 if __name__ == "__main__":
-    # generate_mod_LR_bic('train_mod')
-    # generate_mod_LR_bic('valid_mod')
-    # generate_mod_LR_bic('hold_mod')
+    generate_mod_LR_bic('train_mod')
+    generate_mod_LR_bic('valid_mod')
+    generate_mod_LR_bic('hold_mod')
     # generate_mod_LR_bic('hold_mod_shield') # for shield scenes
-    generate_mod_LR_bic('hold_mod_shield_masks') # for shield scenes masks
+    # generate_mod_LR_bic('hold_mod_shield_masks') # for shield scenes masks

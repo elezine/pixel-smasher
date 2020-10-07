@@ -1,13 +1,13 @@
 # bash script to move files from generate_mod_LR_bic output to train / val folders
 # inputs
 # Preprocessing: run 4th
-BASE_DIR=/data_dir/planet_sub
+BASE_DIR=/data_dir/planet_sub_v2 # /data_dir/planet_sub
 
 # choose random subsets of files to move
 NUM_IMAGES=$(find $BASE_DIR -maxdepth 1 -name "*.png" | wc -l) # modified to use find instead of ls, which fails for large lists
 echo "Number of images total:" $NUM_IMAGES
 VALSIZE=$(( $NUM_IMAGES * 150 / 1000 )) # number of validation files + holdout files
-HOLDSIZE=$(( $NUM_IMAGES * 1 / 1000 )) # number of holdout files (rest for training)
+HOLDSIZE=$(( $NUM_IMAGES * 5 / 1000 )) # number of holdout files (rest for training)
 echo "Number of images for validation:" $VALSIZE
 echo "Number of images for holdout:" $HOLDSIZE
 
@@ -22,12 +22,15 @@ mkdir -p $BASE_DIR/valid_mod
 mkdir -p $BASE_DIR/hold_mod
 
 ## move files
+echo "mv $BASE_DIR/files $BASE_DIR/hold_mod"
 cat hold_shuf10.txt | while read file; do
     mv $BASE_DIR/$file $BASE_DIR/hold_mod
 done
+echo "mv $BASE_DIR/files $BASE_DIR/valid_mod"
 cat valid_shuf10.txt | while read file; do
     mv $BASE_DIR/$file $BASE_DIR/valid_mod # expect Errors because some files have already been moved
 done
+echo "mv $BASE_DIR/remaining files $BASE_DIR/train_mod"
 for file in $BASE_DIR/*.png; do
     mv $file $BASE_DIR/train_mod
 done
