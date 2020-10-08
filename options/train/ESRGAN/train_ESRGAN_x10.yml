@@ -107,7 +107,7 @@ train:
 
 # validation settings
 val:
-  val_freq: !!float 5e3
+  val_freq: !!float 25e3
   save_img: true
 
   metrics:
@@ -123,7 +123,7 @@ logger:
   use_tb_logger: true
   wandb:
     project: pixelsmasher
-    resume_id: 8xUpsample
+    resume_id: 10xUpsample
 
 # dist training settings
 dist_params:
