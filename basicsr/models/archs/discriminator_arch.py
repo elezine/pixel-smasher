@@ -82,19 +82,19 @@ class VGGStyleDiscriminator128(nn.Module):
         out = self.linear2(feat)
         return out
     
-class VGGStyleDiscriminator160(nn.Module):
-    """VGG style discriminator with input size 160 x 160.
+class VGGStyleDiscriminator320(nn.Module):
+    """VGG style discriminator with input size 320 x 320.
 
     It is used to train SRGAN and ESRGAN.
 
     Args:
         num_in_ch (int): Channel number of inputs. Default: 3.
         num_feat (int): Channel number of base intermediate features.
-            Default: 80.
+            Default: 160.
     """
 
     def __init__(self, num_in_ch, num_feat):
-        super(VGGStyleDiscriminator160, self).__init__()
+        super(VGGStyleDiscriminator320, self).__init__()
 
         self.conv0_0 = nn.Conv2d(num_in_ch, num_feat, 3, 1, 1, bias=True)
         self.conv0_1 = nn.Conv2d(num_feat, num_feat, 4, 2, 1, bias=False)
@@ -134,7 +134,7 @@ class VGGStyleDiscriminator160(nn.Module):
         self.lrelu = nn.LeakyReLU(negative_slope=0.2, inplace=True)
 
     def forward(self, x):
-        assert x.size(2) == 160 and x.size(3) == 160, (
+        assert x.size(2) == 320 and x.size(3) == 320, (
             f'Input spatial size must be 160x160, '
             f'but received {x.size()}.')
 
