@@ -1,5 +1,5 @@
 # general settings
-name: 008_ESRGAN_x10_PLANET_noPreTrain_wandb_2GPUs_Oct7
+name: 008_ESRGAN_x10_PLANET_noPreTrain_wandb_2GPUs_Oct8_test0
 model_type: ESRGANModel
 scale: 10
 num_gpu: 2 # set num_gpu: 0 for cpu mode
@@ -123,7 +123,7 @@ logger:
   use_tb_logger: true
   wandb:
     project: pixelsmasher
-    resume_id: 10xUpsample
+    resume_id: 10xUpsample_test0
 
 # dist training settings
 dist_params:
