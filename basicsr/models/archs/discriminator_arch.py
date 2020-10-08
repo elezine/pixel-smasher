@@ -94,7 +94,7 @@ class VGGStyleDiscriminator160(nn.Module):
     """
 
     def __init__(self, num_in_ch, num_feat):
-        super(VGGStyleDiscriminator120, self).__init__()
+        super(VGGStyleDiscriminator160, self).__init__()
 
         self.conv0_0 = nn.Conv2d(num_in_ch, num_feat, 3, 1, 1, bias=True)
         self.conv0_1 = nn.Conv2d(num_feat, num_feat, 4, 2, 1, bias=False)
