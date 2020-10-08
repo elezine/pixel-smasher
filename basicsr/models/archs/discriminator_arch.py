@@ -127,7 +127,7 @@ class VGGStyleDiscriminator320(nn.Module):
             num_feat * 8, num_feat * 8, 4, 2, 1, bias=False)
         self.bn4_1 = nn.BatchNorm2d(num_feat * 8, affine=True)
 
-        self.linear1 = nn.Linear(num_feat * 8 * 4 * 4, 100)
+        self.linear1 = nn.Linear(num_feat * 8 * 10 * 10, 100)
         self.linear2 = nn.Linear(100, 1)
 
         # activation function
@@ -142,41 +142,41 @@ class VGGStyleDiscriminator320(nn.Module):
         feat = self.lrelu(self.bn0_1(
             self.conv0_1(feat)))  # output spatial size: (160, 160)
         
-        print('size of feat after conv0_1 in discriminator:')
-        print(feat.size())
+        #print('size of feat after conv0_1 in discriminator:')
+        #print(feat.size())
 
         feat = self.lrelu(self.bn1_0(self.conv1_0(feat)))
         feat = self.lrelu(self.bn1_1(
             self.conv1_1(feat)))  # output spatial size: (80, 80)
         
-        print('size of feat after conv1_1 in discriminator:')
-        print(feat.size())
+        #print('size of feat after conv1_1 in discriminator:')
+        #print(feat.size())
 
         feat = self.lrelu(self.bn2_0(self.conv2_0(feat)))
         feat = self.lrelu(self.bn2_1(
             self.conv2_1(feat)))  # output spatial size: (40, 40)
         
-        print('size of feat after conv2_1 in discriminator:')
-        print(feat.size())
+        #print('size of feat after conv2_1 in discriminator:')
+        #print(feat.size())
 
         feat = self.lrelu(self.bn3_0(self.conv3_0(feat)))
         feat = self.lrelu(self.bn3_1(
             self.conv3_1(feat)))  # output spatial size: (20, 20)
         
-        print('size of feat after conv3_1 in discriminator:')
-        print(feat.size())
+        #print('size of feat after conv3_1 in discriminator:')
+        #print(feat.size())
 
         feat = self.lrelu(self.bn4_0(self.conv4_0(feat)))
         feat = self.lrelu(self.bn4_1(
             self.conv4_1(feat)))  # output spatial size: (10, 10)
 
-        print('size of feat after conv4_1 in discriminator:')
-        print(feat.size())
+        #print('size of feat after conv4_1 in discriminator:')
+        #print(feat.size())
         
         feat = feat.view(feat.size(0), -1)
         
-        print('size of feat after feat.view(feat.size(0), -1) in discriminator:')
-        print(feat.size())
+        #print('size of feat after feat.view(feat.size(0), -1) in discriminator:')
+        #print(feat.size())
         
         feat = self.lrelu(self.linear1(feat))
         out = self.linear2(feat)
