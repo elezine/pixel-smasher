@@ -1,5 +1,5 @@
 # general settings
-name: 008_ESRGAN_x10_PLANET_noPreTrain_wandb_2GPUs_Oct8_VGG160
+name: 008_ESRGAN_x10_PLANET_noPreTrain_wandb_2GPUs_Oct7
 model_type: ESRGANModel
 scale: 10
 num_gpu: 2 # set num_gpu: 0 for cpu mode
@@ -57,7 +57,7 @@ network_d:
 path:
   pretrain_model_g: ~ #/data_dir/pixel-smasher/experiments/004_RRDBNet_PSNR_x4_PLANET_scratch_wandb/models/net_g_445000.pth
   strict_load: true
-  resume_state: /data_dir/pixel-smasher/experiments/008_ESRGAN_x10_PLANET_noPreTrain_wandb_2GPUs_Oct8_VGG160/training_states/20000.state
+  resume_state: ~ #/data_dir/pixel-smasher/experiments/006_ESRGAN_x4_PLANET_noPreTrain_wandb_sep28/training_states/310000.state
 
 # training settings
 train:
@@ -107,7 +107,11 @@ train:
 
 # validation settings
 val:
+<<<<<<< HEAD
   val_freq: !!float 25e2
+=======
+  val_freq: !!float 25e3
+>>>>>>> d032696fa01e9e6cdc632ff16a127ad9ab82d5ce
   save_img: true
 
   metrics:
@@ -123,7 +127,7 @@ logger:
   use_tb_logger: true
   wandb:
     project: pixelsmasher
-    resume_id: 10xUpsample_VGG160
+    resume_id: 10xUpsample
 
 # dist training settings
 dist_params:
