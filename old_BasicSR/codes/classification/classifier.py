@@ -213,8 +213,6 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
                 # copy[i,j] = True
 
                 dist=0 # being lazy and modified from create_buffer_mask_fxn
-
-                selem = np.ones((dist*2+1,dist*2+1))
                 bbox_coords = region.bbox #(min_row, min_col, max_row, max_col)
                 if bbox_coords[0] - dist >= 0:
                     bbox_i_min = bbox_coords[0] - dist
@@ -247,11 +245,12 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
     else: print(f'Unknown classifier method: {method}')
     
         # plotting (uncomment for real HERE)
-    if res=='HR':
-        fig, axs = plt.subplots(1, 3, figsize=(15, 5), constrained_layout=True)
+    if (res=='HR') & (plots_dir != None):
+        fig, axs = plt.subplots(1, 4, figsize=(12, 3), constrained_layout=True)
         axs[0].imshow(img/255), axs[0].set_title('Image')
         axs[1].imshow(water_index, cmap='bone'), axs[1].set_title('Water index')
-        axs[2].imshow(bw, cmap='Greys_r'), axs[2].set_title('BW')
+        axs[3].imshow(bw, cmap='Greys_r'), axs[3].set_title('BW')
+        axs[2].imshow(og_mask, cmap='Greys_r'), axs[2].set_title('A priori BW')
         # show()
         plot_pth=os.path.join(plots_dir, 'PLOT_' + os.path.basename(pth_out))
         fig.savefig(plot_pth)
@@ -304,7 +303,7 @@ class ClassifierComparison(pd.DataFrame):
 
 def name_lookup_og_mask(name_scene):
     '''
-    Simple string replacement
+    Simple string replacement to go from i.e. 20200829_200110_99_105e_3B_AnalyticMS_SR_s0656 >>> 20200829_200110_99_105e_3B_AnalyticMS_SR_no_buffer_mask_s0656
     '''
     name_mask_scene = name_scene.replace('_SR_s', '_SR_no_buffer_mask_s')
     return name_mask_scene
@@ -326,21 +325,24 @@ if __name__ == '__main__':
     num_files = len(dirpaths) # #HERE change back
     # global results
     results = {} # init
-    # pool = Pool(mp.cpu_count())
+    pool = Pool(mp.cpu_count()) # Pool(mp.cpu_count())
     for i in range(num_files): #range(num_files): # switch for testing # range(30): # HERE switch
         name = dirpaths[i].replace('_'+str(iter)+'.png', '') # HERE changed for seven-steps from `dirpaths[i]`
         name_og_mask=name_lookup_og_mask(name)
+
+            # serial
+        # results[i] = group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash, method, sourcedir_R_mask)
+
         # parallel
-        results[i] = group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash, method, sourcedir_R_mask)
-        # results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash)).get()# , , callback=collect_result
-        if i % 100 == 0:
-            df = pd.concat(list(results.values()))
-            csv_out='classification_stats_x'+str(up_scale)+'_'+str(iter)+'_tmp.csv'
+        results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash, method, sourcedir_R_mask))# , , callback=collect_result # no .get()
+        if i % 250 == 0:
+            df = pd.concat(list(results.values())[i].get() for i in range(len(results))) # HERE fix
+            csv_out='classification_stats_x'+str(up_scale)+'_'+method+'_'+str(iter)+'_tmp.csv'
             df.to_csv(csv_out) # zip(im_name, hr, lr, bic, sr)
-            print('Saved temp. classification stats csv: {}'.format(csv_out))
+            print('Saved temp. classification stats (length {}) csv: {}'.format(df.shape[0], csv_out))
             del df
-    # pool.close()
-    # pool.join()
+    pool.close()
+    pool.join()
     print('All subprocesses done.')
 
 
@@ -357,9 +359,9 @@ if __name__ == '__main__':
     #     cols_fmt[9 + 10*n]= 'HR'+'_M'+str(thresh[n])
     #     cols_fmt[10 + 10*n]= 'LR'+'_M'+str(thresh[n])
     #     cols_fmt[11 + 10*n]= 'Bic'+'_M'+str(thresh[n])
-    df = pd.concat(list(results.values()))
+    df = pd.concat(list(results.values())[i].get() for i in range(len(results)))
     try:
-        csv_out='classification_stats_x'+str(up_scale)+'_'+str(iter)+'.csv'
+        csv_out='classification_stats_x'+str(up_scale)+'_'+method+'_'+str(iter)+'.csv'
         df.to_csv(csv_out) # zip(im_name, hr, lr, bic, sr)
         print('Saved classification stats csv: {}'.format(csv_out))
     except NameError:

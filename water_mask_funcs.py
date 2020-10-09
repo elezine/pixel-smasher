@@ -1,6 +1,6 @@
 from skimage import measure
 #from skimage.segmentation import find_boundaries
-from skimage.morphology import binary_dilation
+from skimage.morphology import binary_dilation, selem
 import numpy as np
 #import matplotlib.pyplot as plt
 #import rasterio as rio
@@ -8,6 +8,8 @@ import numpy as np
 #import glob as gl
 #from osgeo import gdal,ogr,osr,gdalconst
 
+# I/O:
+dilation_radius_step_sz=25
 '''
 
 def reproj_ras_to_ref(raster_path, reference_path, output_path):
@@ -176,8 +178,6 @@ def create_buffer_mask(og_mask, foreground_threshold=0, buffer_additional=0):
 
             dist = int(np.ceil(buffer))
 
-            selem = np.ones((dist*2+1,dist*2+1))
-
             bbox_coords = region.bbox #(min_row, min_col, max_row, max_col)
             if bbox_coords[0] - dist >= 0:
                 bbox_i_min = bbox_coords[0] - dist
@@ -198,8 +198,19 @@ def create_buffer_mask(og_mask, foreground_threshold=0, buffer_additional=0):
 
             #for i in range(0, int(np.ceil(buffer))):
             copy_x = copy[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max]
+            if dist > dilation_radius_step_sz*2:
+                dist_tmp = dilation_radius_step_sz
+                dist_remain = dist # init
+                while (dist_tmp > 0) & (dist_remain > 0):
+                    strelem = selem.disk(dist_tmp)
+                    copy_x = binary_dilation(copy_x, selem = strelem)
+                    dist_remain=dist_remain-dist_tmp # after this iter
+                    dist_tmp = np.min([dist_remain-dist_tmp, dilation_radius_step_sz]) # for next iter
 
-            copy_x = binary_dilation(copy_x, selem = selem)
+            else:
+                # strelem = np.ones((dist*2+1,dist*2+1)) # box
+                strelem = selem.disk(dist) # disk
+                copy_x = binary_dilation(copy_x, selem = strelem)
             copy[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max] = copy_x
             #bounds = find_boundaries(pekel_copy)
             #pekel_copy[bounds] = 1
