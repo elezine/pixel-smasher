@@ -51,7 +51,7 @@ class RRDB_x10(nn.Module):
     """
 
     def __init__(self, num_feat, num_grow_ch=40):
-        super(RRDB, self).__init__()
+        super(RRDB_x10, self).__init__()
         self.rdb1 = ResidualDenseBlock_x10(num_feat, num_grow_ch)
         self.rdb2 = ResidualDenseBlock_x10(num_feat, num_grow_ch)
         self.rdb3 = ResidualDenseBlock_x10(num_feat, num_grow_ch)
