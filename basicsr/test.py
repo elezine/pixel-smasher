@@ -11,6 +11,8 @@ from basicsr.utils import (get_env_info, get_root_logger, make_exp_dirs,
                            set_random_seed)
 from basicsr.utils.options import dict2str, parse
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+print(torch.cuda.is_available())
 
 def main():
     # options
