@@ -10,7 +10,6 @@ import numpy as np
 
 # I/O:
 dilation_radius_step_sz=25
-'''
 
 def reproj_ras_to_ref(raster_path, reference_path, output_path):
 
@@ -51,6 +50,7 @@ def buffer_mask(og_mask_path, ref_path, output_mask_path_buffer, output_mask_pat
     og_mask[og_mask>0] = 1
 
     #
+    '''
     labeled = measure.label(og_mask, background=0, connectivity=2)
     labeled = labeled*ref_int
     
@@ -115,7 +115,7 @@ def buffer_mask(og_mask_path, ref_path, output_mask_path_buffer, output_mask_pat
     mask = np.concatenate(mask_split)
     mask[mask>0] = 1
     mask = mask.astype(float)*ref_nan
-    #
+    '''
     
     with rio.Env():
         with rio.open(ref_path) as src:
@@ -134,14 +134,13 @@ def buffer_mask(og_mask_path, ref_path, output_mask_path_buffer, output_mask_pat
                 dst.write(og_mask.astype(rio.uint8), 1)
                 
                 
-#files = gl.glob('/data_dir/Scenes-shield/*.tif')
-#for file in files:
-#    name = (os.path.basename(os.path.normpath(file)))
-#    output_name_buffer = '/data_dir/Water_mask/' + str(name) + '_buffer_mask.tif'
-#    output_name_no_buffer =  '/data_dir/Water_mask/' + str(name) + '_no_buffer_mask.tif'
-#    buffer_mask('/data_dir/pixelsmasher/pekel.tif', file, output_name_buffer, output_name_no_buffer)
+files = gl.glob('/data_dir/Scenes-shield-gt/*SR.tif')
+for file in files:
+    name = (os.path.basename(os.path.normpath(file)))
+    output_name_buffer = '/data_dir/Shield_Water_Mask/Scenes-shield-gt/' + str(name) + '_buffer_mask.tif'
+    output_name_no_buffer =  '/data_dir/Shield_Water_Mask/Scenes-shield-gt/' + str(name) + '_no_buffer_mask.tif'
+    buffer_mask('/data_dir/pekel_mask/pekel_epsg4326.tif', file, output_name_buffer, output_name_no_buffer)
 
-'''
     
 def create_buffer_mask(og_mask, foreground_threshold=0, buffer_additional=0):
     '''
