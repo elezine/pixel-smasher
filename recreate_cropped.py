@@ -46,7 +46,7 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
     HR_img = cv2.imread(HR_path, cv2.IMREAD_UNCHANGED)
     HR_img_rio = rio.open(HR_path)
     
-    new_img = np.zeros(HR_img.shape)
+    new_img = np.zeros((HR_img.shape[0], HR_img.shape[1], 3))
     
     n_channels = len(HR_img.shape)
     if n_channels == 2:
@@ -84,9 +84,6 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
                     #print(os.path.exists(SR_path))
                 except:
                     SR_image = np.zeros(crop_img.shape)
-                
-                print(crop_img.shape)
-                print(SR_image.shape)
                 
                 if n_channels == 2:
                     new_img[x:x + crop_sz, y:y + crop_sz] = SR_image[:]
