@@ -7,7 +7,7 @@ import cv2
 import os
 import sys
 
-cropped_suffix = '_008_ESRGAN_x10_PLANET_noPreTrain_Test'
+cropped_suffix = '008_ESRGAN_x10_PLANET_noPreTrain_Test'
 save_folder = '/data_dir/SR_georef_test/'
 SR_folder = '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_Test/visualization/ShieldTestSet/'
 HR_folder = '/data_dir/Scenes/'
@@ -41,9 +41,7 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
     # load big image (HR):
     HR_name = os.path.basename(HR_path)
     print('HR path: ' + HR_path)
-    print('HR image path name: ' + HR_name)
     HR_img = cv2.imread(HR_path, cv2.IMREAD_UNCHANGED)
-    print('HR image shape: ' + str(np.shape(HR_img)))
     HR_img_rio = rio.open(HR_path)
     
     new_img = np.zeros(HR_img.shape)
@@ -87,6 +85,7 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
                 pass
     
     save_path = save_folder + HR_name
+    print('save path is: ' + save_path)
     profile = HR_img_rio.profile
 
     with rio.Env():
