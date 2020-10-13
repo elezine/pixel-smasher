@@ -73,6 +73,7 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
                 SR_path = str(cropped_SR_folder) + HR_name.replace('.tif', '_s{:04d}_'.format(index)) + str(cropped_suffix) + '.png'
                 print('SR path is : ' + SR_path)
                 SR_image = cv2.imread(SR_path)
+                print('SR image is shape : ' + str(np.shape(SR_image)))
                 
                 if n_channels == 2:
                     new_img[x:x + crop_sz, y:y + crop_sz] = SR_image[:]
