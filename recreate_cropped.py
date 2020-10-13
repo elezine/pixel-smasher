@@ -26,7 +26,7 @@ def main():
     #pool = Pool(4) # (n_thread)
     #for path in img_list:
     #    pool.apply_async(worker,
-                         args=(path, SR_folder, cropped_suffix, save_folder, crop_sz, step, thres_sz))
+                         #args=(path, SR_folder, cropped_suffix, save_folder, crop_sz, step, thres_sz))
     #pool.close()
     #pool.join()
     #print('All subprocesses done.')
