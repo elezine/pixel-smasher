@@ -13,6 +13,7 @@ SR_folder = '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_Te
 HR_folder = '/data_dir/Scenes/'
 
 img_list = gl.glob(HR_folder + '*.tif')
+print(img_list)
 
 def main():
     """A multi-thread tool to put cropped images back into full (non-cropped) array based on index."""
