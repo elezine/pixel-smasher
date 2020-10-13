@@ -45,7 +45,6 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
     HR_img = cv2.imread(HR_path, cv2.IMREAD_UNCHANGED)
     print('HR image shape: ' + str(np.shape(HR_img)))
     HR_img_rio = rio.open(HR_path)
-    print(HR_img_rio)
     
     new_img = np.zeros(HR_img.shape)
     
@@ -84,6 +83,7 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
                 
                 index += 1
             else:
+                print('all zero')
                 pass
     
     save_path = save_folder + HR_name
