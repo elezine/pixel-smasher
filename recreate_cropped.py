@@ -40,8 +40,10 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
     '''
     # load big image (HR):
     HR_name = os.path.basename(HR_path)
+    print('HR path: ' + HR_path)
     print('HR image path name: ' + HR_name)
     HR_img = cv2.imread(HR_path, cv2.IMREAD_UNCHANGED)
+    print('HR image shape: ' + str(np.shape(HR_image)))
     HR_img_rio = rio.open(HR_path)
     
     new_img = np.zeros(HR_img.shape)
