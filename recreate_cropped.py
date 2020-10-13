@@ -24,7 +24,7 @@ def main():
     step = 240
     thres_sz = 48
     
-    pool = Pool(4) # (n_thread)
+    pool = Pool(1) # (n_thread)
     for path in img_list:
         pool.apply_async(worker,
                          args=(path, SR_folder, cropped_suffix, save_folder, crop_sz, step, thres_sz))
@@ -88,7 +88,7 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
                 
                 index += 1
             else:
-                print('all zero')
+                #print('all zero')
                 pass
     
     save_path = save_folder + HR_name
