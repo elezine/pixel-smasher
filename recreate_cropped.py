@@ -40,7 +40,7 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
     '''
     # load big image (HR):
     HR_name = os.path.basename(HR_path)
-    print(HR_name)
+    print('HR image path name: ' + HR_name)
     HR_img = cv2.imread(HR_path, cv2.IMREAD_UNCHANGED)
     HR_img_rio = rio.open(HR_path)
     
@@ -71,7 +71,7 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
             crop_img = np.ascontiguousarray(crop_img)
             if ~np.any(np.sum(crop_img,axis=2)==0): # if all three bands == 0
                 SR_path = str(cropped_SR_folder) + HR_name.replace('.tif', '_s{:04d}_'.format(index)) + str(cropped_suffix) + '.png'
-                print(SR_path)
+                print('SR path is : ' + SR_path)
                 SR_image = cv2.imread(SR_path)
                 
                 if n_channels == 2:
