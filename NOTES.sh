@@ -21,5 +21,10 @@ for file in `find visualization/*/ -name "*s*_[2][1-9][1-9]*.png"`; do sudo rm $
 for file in `find visualization/*/ -name "*s*_2????.png"`; do sudo rm $file; done & # removes 20,000, but keeps 200,000 midpoint
 for file in `find visualization/*/ -name "*s*_5????.png"`; do sudo rm $file; done & # removes 50,000
 
+## to rm additional in the 200,000's:
+for file in `find visualization/*/ -name "*s*_2[1-9]????.png"`; do sudo rm $file; done & 
+
 ## workflow:
 python /home/ethan_kyzivat/code/pixel-smasher/old_BasicSR/codes/scripts/extract_subimgs_single.py && bash /home/ethan_kyzivat/code/pixel-smasher/old_BasicSR/codes/utils/rand_shuf.sh && python /home/ethan_kyzivat/code/pixel-smasher/old_BasicSR/codes/scripts/generate_mod_LR_bic_parallel.py
+
+We noticed you're using a conda environment. If you are experiencing issues with this environment in the integrated terminal, we recommend that you let the Python extension change "terminal.integrated.inheritEnv" to false in your user settings.

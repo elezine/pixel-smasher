@@ -9,7 +9,7 @@ import numpy as np
 #from osgeo import gdal,ogr,osr,gdalconst
 
 # I/O:
-dilation_radius_step_sz=25
+dilation_radius_step_sz=25 # largest possible dilation for one step
 '''
 
 def reproj_ras_to_ref(raster_path, reference_path, output_path):
