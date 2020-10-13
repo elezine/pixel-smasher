@@ -134,12 +134,12 @@ def buffer_mask(og_mask_path, ref_path, output_mask_path_buffer, output_mask_pat
                 dst.write(og_mask.astype(rio.uint8), 1)
                 
                 
-files = gl.glob('/data_dir/Scenes-shield-gt/*SR.tif')
-for file in files:
-    name = (os.path.basename(os.path.normpath(file)))
-    output_name_buffer = '/data_dir/Shield_Water_Mask/Scenes-shield-gt/' + str(name) + '_buffer_mask.tif'
-    output_name_no_buffer =  '/data_dir/Shield_Water_Mask/Scenes-shield-gt/' + str(name) + '_no_buffer_mask.tif'
-    buffer_mask('/data_dir/pekel_mask/pekel_epsg4326.tif', file, output_name_buffer, output_name_no_buffer)
+#files = gl.glob('/data_dir/Scenes-shield-gt/*SR.tif')
+#for file in files:
+#    name = (os.path.basename(os.path.normpath(file)))
+#    output_name_buffer = '/data_dir/Shield_Water_Mask/Scenes-shield-gt/' + str(name) + '_buffer_mask.tif'
+#    output_name_no_buffer =  '/data_dir/Shield_Water_Mask/Scenes-shield-gt/' + str(name) + '_no_buffer_mask.tif'
+#    buffer_mask('/data_dir/pekel_mask/pekel_epsg4326.tif', file, output_name_buffer, output_name_no_buffer)
 
     
 def create_buffer_mask(og_mask, foreground_threshold=0, buffer_additional=0):
