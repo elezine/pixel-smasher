@@ -46,7 +46,7 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
     HR_img = cv2.imread(HR_path, cv2.IMREAD_UNCHANGED)
     HR_img_rio = rio.open(HR_path)
     
-    new_img = np.zeros((HR_img.shape[0], HR_img.shape[1], 3))
+    new_img = np.zeros((HR_img.shape[0], HR_img.shape[1], 4))
     
     n_channels = len(HR_img.shape)
     if n_channels == 2:
@@ -88,7 +88,7 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
                 if n_channels == 2:
                     new_img[x:x + crop_sz, y:y + crop_sz] = SR_image[:]
                 else:
-                    new_img[x:x + crop_sz, y:y + crop_sz, :] = SR_image[:]
+                    new_img[x:x + crop_sz, y:y + crop_sz, 0:3] = SR_image[:]
                 
                 index += 1
             else:
