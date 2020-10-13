@@ -71,8 +71,8 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
             else:
                 crop_img = img[x:x + crop_sz, y:y + crop_sz, :]
             crop_img = np.ascontiguousarray(crop_img)
+            print('crop_img: ' + str(np.shape(crop_img)))
             if ~np.any(np.sum(crop_img,axis=2)==0): # if all three bands == 0
-                print('amde it here')
                 SR_path = str(cropped_SR_folder) + HR_name.replace('.tif', '_s{:04d}_'.format(index)) + str(cropped_suffix) + '.png'
                 print('SR path is : ' + SR_path)
                 SR_image = cv2.imread(SR_path)
