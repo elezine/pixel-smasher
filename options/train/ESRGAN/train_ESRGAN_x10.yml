@@ -42,7 +42,11 @@ datasets:
 
 # network structures
 network_g:
+<<<<<<< HEAD
   type: RRDBNet_10
+=======
+  type: RRDBNet_x10
+>>>>>>> b20c0aac2a2fa8c350c55d12833df11989242247
   num_in_ch: 3
   num_out_ch: 3
   num_feat: 80
@@ -57,7 +61,7 @@ network_d:
 path:
   pretrain_model_g: ~ #/data_dir/pixel-smasher/experiments/004_RRDBNet_PSNR_x4_PLANET_scratch_wandb/models/net_g_445000.pth
   strict_load: true
-  resume_state: /data_dir/pixel-smasher/experiments/008_ESRGAN_x10_PLANET_noPreTrain_wandb_2GPUs_Oct8_VGG160/training_states/100000.state
+  resume_state: /data_dir/pixel-smasher/experiments/008_ESRGAN_x10_PLANET_noPreTrain_wandb_2GPUs_Oct8_VGG160/training_states/130000.state
 
 # training settings
 train:

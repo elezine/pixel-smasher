@@ -7,10 +7,10 @@ import cv2
 import os
 import sys
 
-cropped_suffix = ''
-save_folder = ''
-SR_folder = ''
-HR_folder = ''
+cropped_suffix = '_008_ESRGAN_x10_PLANET_noPreTrain_Test'
+save_folder = '/data_dir/SR_georef_test/'
+SR_folder = '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_Test/visualization/ShieldTestSet/'
+HR_folder = '/data_dir/Scenes/'
 
 img_list = gl.glob(HR_folder + '*.tif')
 
