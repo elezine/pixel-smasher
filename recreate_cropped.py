@@ -98,12 +98,13 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
     save_path = save_folder + HR_name
     profile = HR_img_rio.profile
 
-    print(profile)
-    print(HR_img_rio.read().shape)
-    print(new_img.shape)
+    #print(profile)
+    #print(HR_img_rio.read().shape)
+    #print(new_img.shape)
     
     with rio.Env():
         with rio.open(save_path, 'w', **profile) as dst:
+            new_img = np.rollaxis(new_img, 2)
             dst.write(new_img)
     
     return 'Processing {:s} ...'.format(HR_name)
