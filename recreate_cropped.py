@@ -63,7 +63,9 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
     
     index = 1
     for x in h_space:
+        print(x)
         for y in w_space:
+            print(y)
             if n_channels == 2:
                 crop_img = HR_img[x:x + crop_sz, y:y + crop_sz]
             else:
