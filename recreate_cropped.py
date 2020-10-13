@@ -85,6 +85,9 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
                 except:
                     SR_image = np.zeros(crop_img.shape)
                 
+                print(crop_img.shape)
+                print(SR_image.shape)
+                
                 if n_channels == 2:
                     new_img[x:x + crop_sz, y:y + crop_sz] = SR_image[:]
                 else:
