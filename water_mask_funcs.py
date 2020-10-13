@@ -2,11 +2,11 @@ from skimage import measure
 #from skimage.segmentation import find_boundaries
 from skimage.morphology import binary_dilation, selem
 import numpy as np
-#import matplotlib.pyplot as plt
-#import rasterio as rio
-#import os
-#import glob as gl
-#from osgeo import gdal,ogr,osr,gdalconst
+import matplotlib.pyplot as plt
+import rasterio as rio
+import os
+import glob as gl
+from osgeo import gdal,ogr,osr,gdalconst
 
 # I/O:
 dilation_radius_step_sz=25
