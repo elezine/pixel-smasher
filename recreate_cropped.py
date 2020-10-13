@@ -99,7 +99,7 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
     profile = HR_img_rio.profile
 
     print(profile)
-    print(HR_img_rio.shape)
+    print(HR_img_rio.read(1).shape)
     print(new_img.shape)
     
     with rio.Env():
