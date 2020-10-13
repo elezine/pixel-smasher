@@ -62,12 +62,12 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
     w_space = np.arange(0, w - crop_sz + 1, step)
     if w - (w_space[-1] + crop_sz) > thres_sz:
         w_space = np.append(w_space, w - crop_sz)
-        
-    print('made it here?')
 
     index = 1
     for x in h_space:
+        print(x)
         for y in w_space:
+            print(y)
             if n_channels == 2:
                 crop_img = img[x:x + crop_sz, y:y + crop_sz]
             else:
