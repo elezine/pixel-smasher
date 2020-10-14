@@ -81,7 +81,7 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
                 try:
                     SR_image = cv2.imread(SR_path, cv2.IMREAD_UNCHANGED)
                     #print('SR image is shape : ' + str(np.shape(SR_image)))
-                    #print(os.path.exists(SR_path))
+                    print(os.path.exists(SR_path))
                 except:
                     SR_image = np.zeros(crop_img.shape)
                 
