@@ -7,7 +7,7 @@ import cv2
 import os
 import sys
 
-#cropped_suffix = '' #'008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
+cropped_suffix = '' #'008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
 save_folder = '/data_dir/SR_georef_test/Bic/'
 SR_folder = '/data_dir/hold_mod_shield_v2/Bic/x10/' #'/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2/'
 HR_folder = '/data_dir/Scenes-shield-gt/'
