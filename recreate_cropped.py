@@ -7,7 +7,7 @@ import cv2
 import os
 import sys
 
-cropped_suffix = '' #'008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
+#cropped_suffix = '' #'008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
 save_folder = '/data_dir/SR_georef_test/Bic/'
 SR_folder = '/data_dir/hold_mod_shield_v2/Bic/x10/' #'/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2/'
 HR_folder = '/data_dir/Scenes-shield-gt/'
@@ -75,7 +75,7 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
             crop_img = np.ascontiguousarray(crop_img)
             if ~np.any(np.sum(crop_img,axis=2)==0): # if all three bands == 0
                 
-                SR_path = str(cropped_SR_folder) + HR_name.replace('.tif', '_s{:04d}_'.format(index)) + str(cropped_suffix) + '.png'
+                SR_path = str(cropped_SR_folder) + HR_name.replace('.tif', '_s{:04d}_'.format(index)) + '.png' #str(cropped_suffix)
                 #print('SR path is : ' + SR_path)
                 
                 try:
