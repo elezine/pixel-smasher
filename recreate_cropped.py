@@ -8,8 +8,8 @@ import os
 import sys
 
 cropped_suffix = '008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
-save_folder = '/data_dir/SR_georef_test/'
-SR_folder = '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2/'
+save_folder = '/data_dir/SR_georef_test/Bic/'
+SR_folder = '/data_dir/hold_mod_shield_v2/Bic/x10/' #'/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2/'
 HR_folder = '/data_dir/Scenes-shield-gt/'
 
 img_list = gl.glob(HR_folder + '*SR.tif')
