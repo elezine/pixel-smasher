@@ -76,12 +76,12 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
             if ~np.any(np.sum(crop_img,axis=2)==0): # if all three bands == 0
                 
                 SR_path = str(cropped_SR_folder) + HR_name.replace('.tif', '_s{:04d}_'.format(index)) + '.png' #str(cropped_suffix)
-                #print('SR path is : ' + SR_path)
+                print('SR path is : ' + SR_path)
                 
                 try:
                     SR_image = cv2.imread(SR_path, cv2.IMREAD_UNCHANGED)
                     #print('SR image is shape : ' + str(np.shape(SR_image)))
-                    print(os.path.exists(SR_path))
+                    #print(os.path.exists(SR_path))
                 except:
                     SR_image = np.zeros(crop_img.shape)
                 
