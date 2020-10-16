@@ -1,30 +1,30 @@
-name: 008_ESRGAN_x4_PLANET_noPreTrain_Test
+name: 008_ESRGAN_x10_PLANET_noPreTrain_130k_Test
 model_type: ESRGANModel
-scale: 4
+scale: 10
 num_gpu: 2  # set num_gpu: 0 for cpu mode
 manual_seed: 0
 
 datasets:
   test_1:  # the 1st test dataset
-    name: ShieldTestSet
+    name: hold_mod_shield_v2
     type: PairedImageDataset
-    dataroot_gt: /data_dir/hold_mod_shield/HR/x4
-    dataroot_lq: /data_dir/hold_mod_shield/LR/x4
+    dataroot_gt: /data_dir/hold_mod_shield_v2/HR/x10
+    dataroot_lq: /data_dir/hold_mod_shield_v2/LR/x10
     io_backend:
       type: disk
 
 # network structures
 network_g:
-  type: RRDBNet_x4
+  type: RRDBNet_x10
   num_in_ch: 3
   num_out_ch: 3
-  num_feat: 64
+  num_feat: 80
   num_block: 23
-  num_grow_ch: 32
+  num_grow_ch: 40
 
 # path
 path:
-  pretrain_model_g: /data_dir/pixel-smasher/experiments/006_ESRGAN_x4_PLANET_noPreTrain_wandb_sep28/models/net_g_400000.pth
+  pretrain_model_g: /data_dir/pixel-smasher/experiments/008_ESRGAN_x10_PLANET_noPreTrain_wandb_2GPUs_Oct8_VGG160/models/net_g_130000.pth
   strict_load: true
 
 # validation settings
@@ -35,9 +35,9 @@ val:
   metrics:
     psnr: # metric name, can be arbitrary
       type: calculate_psnr
-      crop_border: 4
+      crop_border: 10
       test_y_channel: false
     ssim:
       type: calculate_ssim
-      crop_border: 4
+      crop_border: 10
       test_y_channel: false

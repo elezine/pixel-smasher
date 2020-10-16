@@ -2,11 +2,11 @@ from skimage import measure
 #from skimage.segmentation import find_boundaries
 from skimage.morphology import binary_dilation, selem
 import numpy as np
-#import matplotlib.pyplot as plt
-#import rasterio as rio
-#import os
-#import glob as gl
-#from osgeo import gdal,ogr,osr,gdalconst
+import matplotlib.pyplot as plt
+import rasterio as rio
+import os
+import glob as gl
+from osgeo import gdal,ogr,osr,gdalconst
 
 # I/O:
 dilation_radius_step_sz=25 # largest possible dilation for one step
@@ -134,12 +134,12 @@ def buffer_mask(og_mask_path, ref_path, output_mask_path_buffer, output_mask_pat
                 dst.write(og_mask.astype(rio.uint8), 1)
                 
                 
-#files = gl.glob('/data_dir/Scenes-shield/*.tif')
+#files = gl.glob('/data_dir/Scenes-shield-gt/*SR.tif')
 #for file in files:
 #    name = (os.path.basename(os.path.normpath(file)))
-#    output_name_buffer = '/data_dir/Water_mask/' + str(name) + '_buffer_mask.tif'
-#    output_name_no_buffer =  '/data_dir/Water_mask/' + str(name) + '_no_buffer_mask.tif'
-#    buffer_mask('/data_dir/pixelsmasher/pekel.tif', file, output_name_buffer, output_name_no_buffer)
+#    output_name_buffer = '/data_dir/Shield_Water_Mask/Scenes-shield-gt/' + str(name) + '_buffer_mask.tif'
+#    output_name_no_buffer =  '/data_dir/Shield_Water_Mask/Scenes-shield-gt/' + str(name) + '_no_buffer_mask.tif'
+#    buffer_mask('/data_dir/pekel_mask/pekel_epsg4326.tif', file, output_name_buffer, output_name_no_buffer)
 
 '''
     
