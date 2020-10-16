@@ -20,15 +20,16 @@ from water_mask_funcs import create_buffer_mask
 
 # example output paths: /data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images/716222_1368610_2017-08-27_0e0f_BGRN_Analytic_s0984
 
-# TODO: 9/16: long format? Add kappa, add nearest neighbor upsample?, record overall image ndwi brightness
+# TODO: 9/16:add nearest neighbor upsample?,
+# TODO: 10/13: fix sloppy file path parsing at "HERE" tags
 
 # I/O
 # sourcedir_SR='/data_dir/pixel-smasher/experiments/003_ESRGAN_x4_PLANET_pretrainDF2K_wandb_sep6/visualization' # note: shuf2k is just a 2000 image shuffling #'/data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
-sourcedir_SR='/data_dir/pixel-smasher/results/003_ESRGAN_x4_PLANET_pretrainDF2K_Test/visualization/ShieldTestSet' # from shield2 holdout
-sourcedir_R='/data_dir/hold_mod_shield' #'/data_dir/ClassProject/valid_mod'
-sourcedir_R_mask='/data_dir/hold_mod_shield_masks'
-outdir='/data_dir/classified_shield/hold_mod' # for shield
-up_scale=4
+sourcedir_SR='/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2' # from shield2 holdout
+sourcedir_R='/data_dir/hold_mod_shield_v2/' # should have folders for LR, HR, Bic #'/data_dir/ClassProject/valid_mod'
+sourcedir_R_mask='/data_dir/hold_mod_shield_v2_masks'
+outdir='/data_dir/classified_shield/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization' # for shield # /data_dir/classified_shield/hold_mod
+up_scale=10
 for j in ['HR','SR','LR','Bic']:
     os.makedirs(os.path.join(outdir, j, 'x'+str(up_scale)), exist_ok=True)
 iter=400000 # quick fix to get latest validation image in folder
@@ -41,7 +42,7 @@ foreground_threshold=127
 buffer_additional=0
 ndwi_bands=(2,1) #N,G
 water_index_type='ir'
-plots_dir='/data_dir/other/classified_shield_test_plots'
+plots_dir='/data_dir/other/classifier_plts/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots
 
 # auto I/O
 if apply_radiometric_correction:
@@ -59,7 +60,7 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, ha
         # in paths
     # SR_in_pth=sourcedir_SR+os.sep+name+os.sep+name+'_'+str(iter)+'.png' # HERE changed for seven-steps and for Shield holdout
     SR_in_pth=os.path.join(sourcedir_SR, name) # HERE changed for seven-steps and for Shield holdout
-    name=name.replace('_003_ESRGAN_x4_PLANET_pretrainDF2K_Test', '').replace('.png', '') # quick fix HERE
+    name=name.replace('_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test', '').replace('.png', '') # quick fix HERE
     HR_in_pth=os.path.join(sourcedir_R, 'HR', 'x' + str(up_scale), name+ '.png')
     LR_in_pth=os.path.join(sourcedir_R, 'LR', 'x' + str(up_scale), name+ '.png')
     Bic_in_pth=os.path.join(sourcedir_R, 'Bic', 'x' + str(up_scale), name+ '.png')
@@ -245,17 +246,30 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
     else: print(f'Unknown classifier method: {method}')
     
         # plotting (uncomment for real HERE)
-    if (res=='HR') & (plots_dir != None):
+    if (plots_dir != None): # (res==SR) 
         fig, axs = plt.subplots(1, 4, figsize=(12, 3), constrained_layout=True)
-        axs[0].imshow(img/255), axs[0].set_title('Image')
-        axs[1].imshow(water_index, cmap='bone'), axs[1].set_title('Water index')
-        axs[3].imshow(bw, cmap='Greys_r'), axs[3].set_title('BW')
+        axs[0].imshow(img/255), axs[0].set_title(res+' Image')
+        axs[1].imshow(water_index, cmap='bone'), axs[1].set_title(res+' Water index')
+        axs[3].imshow(bw, cmap='Greys_r'), axs[3].set_title(res+ ' BW')
         axs[2].imshow(og_mask, cmap='Greys_r'), axs[2].set_title('A priori BW')
         # show()
-        plot_pth=os.path.join(plots_dir, 'PLOT_' + os.path.basename(pth_out))
+        plot_pth=os.path.join(plots_dir, 'PLOT_' + os.path.basename(pth_out).replace('.png', '_'+res+'.png'))
         fig.savefig(plot_pth)
         plt.close()
 
+            ## plotting scrap
+        #     if (res==ires) & (plots_dir != None):
+        #     for k, ires in enumerate(['LR','Bic','HR','SR']):
+        #     fig, axs = plt.subplots(4, 4, figsize=(12, 12), constrained_layout=True)
+        #     axs[0+k].imshow(img/255), axs[0].set_title(ires+'Image')
+        #     axs[1+k].imshow(water_index, cmap='bone'), axs[1].set_title('Water index')
+        #     axs[3+k].imshow(bw, cmap='Greys_r'), axs[3].set_title(ires + 'BW')
+        #     axs[2+k].imshow(og_mask, cmap='Greys_r'), axs[2].set_title('A priori BW')
+        #     # show()
+        #     # plot_pth=os.path.join(plots_dir, 'PLOT_' + os.path.basename(pth_out).replace('.png', '_'+ires+'.png'))
+        # plot_pth=os.path.join(plots_dir, 'PLOT_' + os.path.basename(pth_out))
+        # fig.savefig(plot_pth)
+        # plt.close()
         # stats: count pixels, etc # TAG depends-on-num-metrics
     nWaterPix=np.sum(bw)
     percent_water=nWaterPix/bw.size*100
@@ -326,16 +340,16 @@ if __name__ == '__main__':
     # global results
     results = {} # init
     pool = Pool(mp.cpu_count()) # Pool(mp.cpu_count())
-    for i in range(num_files): #range(num_files): # switch for testing # range(30): # HERE switch
+    for i in range(1500, num_files): #range(num_files): # switch for testing # range(30): # HERE switch
         name = dirpaths[i].replace('_'+str(iter)+'.png', '') # HERE changed for seven-steps from `dirpaths[i]`
         name_og_mask=name_lookup_og_mask(name)
 
             # serial
         # results[i] = group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash, method, sourcedir_R_mask)
 
-        # parallel
+            # parallel
         results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash, method, sourcedir_R_mask))# , , callback=collect_result # no .get()
-        if i % 250 == 0:
+        if i % 150 == 0:
             df = pd.concat(list(results.values())[i].get() for i in range(len(results))) # HERE fix
             csv_out='classification_stats_x'+str(up_scale)+'_'+method+'_'+str(iter)+'_tmp.csv'
             df.to_csv(csv_out) # zip(im_name, hr, lr, bic, sr)
