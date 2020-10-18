@@ -33,11 +33,11 @@ band_order=(0,1,3)  # (2,1,3) # If no opencv reversals: 3,2,1 for NRG, 2,1,3 for
 # opencv load BGRN as RGBN!
 
     # folder I/O
-input_folder = '/data_dir/Scenes' # '/data_dir/Scenes-shield'
-save_folder = '/data_dir/planet_sub_v2' # /data_dir/planet_sub/hold_mod_shield_v2.2 # planet_sub/hold_mod_shield_v2 is for individ image rescaling, not global
-input_mask_folder = None # '/data_dir/Shield_Water_Mask' # None #'/data_dir/Shield_Water_Mask' # set to None if not using masks
-save_mask_folder = '/data_dir/planet_sub_masks_v2' # /data_dir/planet_sub/hold_mod_shield_masks
-save_hist_plot_folder = '/data_dir/other/hists/hists_hold_mod_v2' # set to None to not save or plot
+input_folder = '/data_dir/Scenes-shield-gt' # '/data_dir/Scenes-shield'
+save_folder = '/data_dir/planet_sub/hold_mod_shield_v2' # /data_dir/planet_sub/hold_mod_shield_v2.2 # planet_sub/hold_mod_shield_v2 is for individ image rescaling, not global
+input_mask_folder = '/data_dir/Shield_Water_Mask/Scenes-shield-gt' # '/data_dir/Shield_Water_Mask' # None #'/data_dir/Shield_Water_Mask' # set to None if not using masks
+save_mask_folder = '/data_dir/planet_sub/hold_mod_shield_v2_masks' # /data_dir/planet_sub/hold_mod_shield_masks
+save_hist_plot_folder = None # '/data_dir/other/hists/hists_hold_mod_shield_v2' # set to None to not save or plot, esp if xdisplay is not working...
 
     # parma I/O
 n_thread = multiprocessing.cpu_count() #1 # 2
