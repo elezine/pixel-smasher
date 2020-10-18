@@ -31,7 +31,7 @@ thresh= [0] # [-0.1, -0.05, 0, 0.05, 0.1, 0.2, 0.3] # [-10, -5, -2, 0, 2, 5, 10]
 apply_radiometric_correction=False # For v1 of applying lookup table values to convert to radiance. Set to zero if already calibrated
 plots_dir='/data_dir/other/classifier_plts/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR_panel_figs' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots
 method='local-masked'
-n_thread=mp.cpu_count() #mp.cpu_count() # use n_thread > 1 for multiprocessing
+n_thread=1 #mp.cpu_count() #mp.cpu_count() # use n_thread > 1 for multiprocessing
     # I/O for create_buffer_mask function
 # buffer_additional=0
 
@@ -141,12 +141,21 @@ def group_plot(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, hash=N
 
             ## make second diff plot
             if 1==1:
-                diff=np.full(tmp_output_XR_in[0].shape, 0, dtype='uint8')
+                    # make and plot diff image
+                diff=np.full(tmp_output_XR_mask[0].shape, 0, dtype='uint8')
                 diff[(tmp_output_XR_mask[1]>foreground_threshold) & (tmp_output_XR_mask[2]>foreground_threshold)]=2 # SR and Bic == water
                 diff[(tmp_output_XR_mask[1]>foreground_threshold) & (tmp_output_XR_mask[2]<=foreground_threshold)]=3 # SR == water and Bic == land
                 diff[(tmp_output_XR_mask[1]<=foreground_threshold) & (tmp_output_XR_mask[2]>foreground_threshold)]=1 # SR == land and Bic == water
-                plt.imshow(diff/3, cmap='Pastel1')
+                plt.imshow(diff, cmap='seismic',vmin=0, vmax=3, origin='lower') # vmin=0, vmax=3, 
+
+                    # add contour lines (perimeters) for HR boundary
+                perims=np.concatenate(measure.find_contours(tmp_output_XR_mask[0], foreground_threshold))
+                plt.plot(perims[::9,1], perims[::9,0], '.r', markersize=2.5)
+                    # save plot
                 plot_pth=os.path.join(plots_dir, 'DIFF_' + name + '.png')
+                plt.gca().invert_yaxis()
+                plt.gca().set_axis_off()
+                plt.gcf().tight_layout()
                 plt.savefig(plot_pth)
                 plt.close()
 
