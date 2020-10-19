@@ -3,7 +3,7 @@ from skimage import measure
 from skimage.morphology import binary_dilation, selem
 import numpy as np
 import matplotlib.pyplot as plt
-import rasterio as rio
+# import rasterio as rio
 import os
 import glob as gl
 from osgeo import gdal,ogr,osr,gdalconst
