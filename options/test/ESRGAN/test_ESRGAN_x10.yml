@@ -8,8 +8,8 @@ datasets:
   test_1:  # the 1st test dataset
     name: hold_mod_shield_v2
     type: PairedImageDataset
-    dataroot_gt: /data_dir/hold_mod_shield_v2/HR/x10
-    dataroot_lq: /data_dir/hold_mod_shield_v2/LR/x10
+    dataroot_gt: /data_dir/SR_whole_im_test/gt #/data_dir/hold_mod_shield_v2/HR/x10
+    dataroot_lq: /data_dir/SR_whole_im_test/lq #/data_dir/hold_mod_shield_v2/LR/x10
     io_backend:
       type: disk
 
