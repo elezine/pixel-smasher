@@ -1,4 +1,4 @@
-name: 008_ESRGAN_x10_PLANET_noPreTrain_130k_Test
+name: 008_ESRGAN_x10_PLANET_noPreTrain_130k_WholeImage_Test
 model_type: ESRGANModel
 scale: 10
 num_gpu: 2  # set num_gpu: 0 for cpu mode
