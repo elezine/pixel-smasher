@@ -105,9 +105,7 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
     
     with rio.Env():
         with rio.open(save_path, 'w', **profile) as dst:
-            print(profile)
-            if n_channels == 3:
-                new_uncropped_img = np.rollaxis(new_uncropped_img, 2)
+            new_uncropped_img = np.rollaxis(new_uncropped_img, 2)
             dst.write(new_uncropped_img.astype(rio.float64))
     
     return 'Processing {:s} ...'.format(uncropped_name)
