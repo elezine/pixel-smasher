@@ -7,12 +7,12 @@ import cv2
 import os
 import sys
 
-cropped_folder = '/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization/SR/x10/'
+cropped_folder = '/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization/HR/x10/'
 cropped_suffix = 'T0' #'008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
 
 uncropped_folder = '/data_dir/Scenes-shield-gt/'
 
-save_folder = '/data_dir/classified_shield_gt_georef/SR/10x/'
+save_folder = '/data_dir/classified_shield_gt_georef/HR/10x/'
 
 img_list = gl.glob(uncropped_folder + '*SR.tif')
 
