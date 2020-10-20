@@ -92,7 +92,7 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
                     cropped_img = np.zeros(crop_img.shape)
                 
                 if n_channels == 2:
-                    new_uncropped_img[x:x + crop_sz, y:y + crop_sz, :] = cropped_img[:]
+                    new_uncropped_img[x:x + crop_sz, y:y + crop_sz, 0] = cropped_img[:]
                 else:
                     new_uncropped_img[x:x + crop_sz, y:y + crop_sz, :] = cropped_img[:]
                 
