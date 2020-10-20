@@ -49,18 +49,22 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
     uncropped_img_rio = rio.open(uncropped_path)
     profile = uncropped_img_rio.profile
     
-    n_channels = len(uncropped_img.shape)
+    #get output size:
+    cropped_path = gl.glob(cropped_folder + '*.png')[0]
+    cropped_ex = cv2.imread(cropped_path, cv2.IMREAD_UNCHANGED)
+    
+    n_channels = len(cropped_ex.shape)
     if n_channels == 2:
-        h, w = uncropped_img.shape
+        h, w = cropped_ex.shape
         new_uncropped_img = np.zeros((h,w))
         profile.update(dtype = rio.float64, count = 1)
     elif n_channels == 3:
-        h, w, c = uncropped_img.shape
+        h, w, c = cropped_ex.shape
         new_uncropped_img = np.zeros((h,w,3))
         profile.update(dtype = rio.float64, count = 3)
     else:
         raise ValueError('Wrong image shape - {}'.format(n_channels))
-    
+
     h_space = np.arange(0, h - crop_sz + 1, step)
     if h - (h_space[-1] + crop_sz) > thres_sz:
         h_space = np.append(h_space, h - crop_sz)
