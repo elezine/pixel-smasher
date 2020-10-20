@@ -57,11 +57,11 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
     n_channels = len(cropped_ex.shape)
     if n_channels == 2:
         h, w = uncropped_img.shape[0:2]
-        new_uncropped_img = np.zeros((h,w,1))
+        new_uncropped_img = np.zeros((h,w,1)).fill(255)
         profile.update(dtype = rio.float64, count = 1)
     elif n_channels == 3:
         h, w, c = uncropped_img.shape
-        new_uncropped_img = np.zeros((h,w,3))
+        new_uncropped_img = np.zeros((h,w,3)).fill(255)
         profile.update(dtype = rio.float64, count = 3)
     else:
         raise ValueError('Wrong image shape - {}'.format(n_channels))
@@ -90,7 +90,7 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
                 try:
                     cropped_img = cv2.imread(cropped_path, cv2.IMREAD_UNCHANGED)
                 except:
-                    cropped_img = np.zeros(crop_img.shape)
+                    cropped_img = np.zeros(crop_img.shape).fill(255)
                 
                 if n_channels == 2:
                     new_uncropped_img[x:x + crop_sz, y:y + crop_sz, 0] = cropped_img[:]
