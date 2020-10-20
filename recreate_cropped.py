@@ -54,7 +54,8 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
     cropped_path = gl.glob(cropped_folder + '*.png')[0]
     cropped_ex = cv2.imread(cropped_path, cv2.IMREAD_UNCHANGED)
     
-    print(cropped_ex.dtype())
+    dtype = cropped_ex.dtype
+    print(dtype)
     return
     
     n_channels = len(cropped_ex.shape)
