@@ -109,6 +109,7 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
                 
                 try:
                     cropped_img = cv2.imread(cropped_path, cv2.IMREAD_UNCHANGED)
+                    print(np.unique(cropped_img))
                 except:
                     cropped_img = np.zeros(crop_img.shape)
                     cropped_img.fill(255)
