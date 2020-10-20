@@ -80,6 +80,7 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
                 
                 cropped_path = str(cropped_folder) + uncropped_name.replace('.tif', '_s{:04d}_'.format(index)) + str(cropped_suffix) + '.png'
                 print(cropped_path)
+                print(os.path.isfile(cropped_path))
                 
                 try:
                     cropped_img = cv2.imread(cropped_path, cv2.IMREAD_UNCHANGED)
