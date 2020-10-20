@@ -48,6 +48,7 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
     
     uncropped_img_rio = rio.open(uncropped_path)
     profile = uncropped_img_rio.profile
+    profile.update(nodata = 255)
     
     #get output size:
     cropped_path = gl.glob(cropped_folder + '*.png')[0]
