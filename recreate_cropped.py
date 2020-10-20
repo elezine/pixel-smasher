@@ -7,7 +7,7 @@ import cv2
 import os
 import sys
 
-cropped_folder = 'data_dir/classified_shield/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization/HR/x10/'
+cropped_folder = '/data_dir/classified_shield/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization/HR/x10/'
 cropped_suffix = 'T0' #'008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
 
 uncropped_folder = '/data_dir/Scenes-shield-gt/'
@@ -79,7 +79,7 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
             if ~np.any(np.sum(crop_img,axis=2)==0): # if all three bands == 0
                 
                 cropped_path = str(cropped_folder) + uncropped_name.replace('.tif', '_s{:04d}_'.format(index)) + str(cropped_suffix) + '.png'
-                print(cropped_path)
+                #print(cropped_path)
                 print(os.path.isfile(cropped_path))
                 
                 try:
