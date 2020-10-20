@@ -56,7 +56,7 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
     
     dtype = cropped_ex.dtype()
     print(dtype)
-    break
+    return
     
     n_channels = len(cropped_ex.shape)
     if n_channels == 2:
