@@ -101,7 +101,7 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
                 #print('all zero')
                 pass
     
-    save_path = save_folder + uncropped_name[:-4]
+    save_path = save_folder + uncropped_name
     
     with rio.Env():
         with rio.open(save_path, 'w', **profile) as dst:
