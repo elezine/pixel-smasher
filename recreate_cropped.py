@@ -55,11 +55,11 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
     
     n_channels = len(cropped_ex.shape)
     if n_channels == 2:
-        h, w = cropped_ex.shape
+        h, w = uncropped_img.shape[0:2]
         new_uncropped_img = np.zeros((h,w))
         profile.update(dtype = rio.float64, count = 1)
     elif n_channels == 3:
-        h, w, c = cropped_ex.shape
+        h, w, c = uncropped_img.shape
         new_uncropped_img = np.zeros((h,w,3))
         profile.update(dtype = rio.float64, count = 3)
     else:
