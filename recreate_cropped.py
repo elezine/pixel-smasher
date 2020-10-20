@@ -54,21 +54,35 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
     cropped_path = gl.glob(cropped_folder + '*.png')[0]
     cropped_ex = cv2.imread(cropped_path, cv2.IMREAD_UNCHANGED)
     
-    dtype = cropped_ex.dtype
-    print(dtype)
-    return
+    dtype = str(cropped_ex.dtype)
+    if dtype == 'uint8':
+        dtype = rio.uint8
+    if dtype == 'float64':
+        dtype = rio.float64
+    if dtype == 'bool':
+        dtype = rio.bool
+    if dtype == 'uint16':
+        dtype = rio.uint16
+    if dtype == 'int16':
+        dtype = rio.int16
+    if dtype == 'uint32':
+        dtype = rio.uint32
+    if dtype == 'int32':
+        dtype = rio.int32
+    if dtype == 'float32':
+        dtype = rio.float32
     
     n_channels = len(cropped_ex.shape)
     if n_channels == 2:
         h, w = uncropped_img.shape[0:2]
         new_uncropped_img = np.zeros((h,w,1))
         new_uncropped_img.fill(255)
-        profile.update(dtype = rio.float64, count = 1)
+        profile.update(dtype = dtype, count = 1)
     elif n_channels == 3:
         h, w, c = uncropped_img.shape
         new_uncropped_img = np.zeros((h,w,3))
         new_uncropped_img.fill(255)
-        profile.update(dtype = rio.float64, count = 3)
+        profile.update(dtype = dtype, count = 3)
     else:
         raise ValueError('Wrong image shape - {}'.format(n_channels))
 
