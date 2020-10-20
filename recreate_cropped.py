@@ -110,8 +110,8 @@ def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz,
                 try:
                     cropped_img = cv2.imread(cropped_path, cv2.IMREAD_UNCHANGED)
                     if len(np.unique(cropped_img)) == 2:
-                        cropped_img[cropped_img < 1] = 1
-                        cropped_img[cropped_img > 1] = 0
+                        cropped_img[cropped_img < 1] = 0
+                        cropped_img[cropped_img > 1] = 1
                 except:
                     cropped_img = np.zeros(crop_img.shape)
                     cropped_img.fill(255)
