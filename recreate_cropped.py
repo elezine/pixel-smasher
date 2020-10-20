@@ -7,12 +7,14 @@ import cv2
 import os
 import sys
 
-cropped_suffix = '' #'008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
-save_folder = '/data_dir/SR_georef_test/Bic/'
-SR_folder = '/data_dir/hold_mod_shield_v2/Bic/x10/' #'/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2/'
-HR_folder = '/data_dir/Scenes-shield-gt/'
+cropped_folder = 'data_dir/classified_shield/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization/HR/x10/'
+cropped_suffix = 'T0' #'008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
 
-img_list = gl.glob(HR_folder + '*SR.tif')
+uncropped_folder = '/data_dir/Scenes-shield-gt/'
+
+save_folder = '/data_dir/classified_shield_gt_georef/HR/10x/'
+
+img_list = gl.glob(uncropped_folder + '*SR.tif')
 
 def main():
     """A multi-thread tool to put cropped images back into full (non-cropped) array based on index."""
@@ -32,27 +34,30 @@ def main():
     #print('All subprocesses done.')
     
     for path in img_list:
-        worker(path, SR_folder, cropped_suffix, save_folder, crop_sz, step, thres_sz)
+        worker(path, cropped_folder, cropped_suffix, save_folder, crop_sz, step, thres_sz)
 
-def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, step, thres_sz): 
+def worker(uncropped_path, cropped_folder, cropped_suffix, save_folder, crop_sz, step, thres_sz): 
     '''
-    This worker works on one HR image at a time to get the correct indexes for each cropped SR subset of the big HR image,
-    grab that cropped image, and put it into a new array.
+    This worker works on one uncropped image at a time to get the correct indexes for each cropped subset of the uncropped image,
+    grab that cropped subset, and put it into a new array.
 
     '''
-    # load big image (HR):
-    HR_name = os.path.basename(HR_path)
-    #print('HR path: ' + HR_path)
-    HR_img = cv2.imread(HR_path, cv2.IMREAD_UNCHANGED)
-    HR_img_rio = rio.open(HR_path)
+    # load uncropped image:
+    uncropped_name = os.path.basename(uncropped_path)
+    uncropped_img = cv2.imread(uncropped_path, cv2.IMREAD_UNCHANGED)
     
-    new_img = np.zeros((HR_img.shape[0], HR_img.shape[1], 3))
+    uncropped_img_rio = rio.open(uncropped_path)
+    profile = uncropped_img_rio.profile
     
-    n_channels = len(HR_img.shape)
+    n_channels = len(uncropped_img.shape)
     if n_channels == 2:
-        h, w = HR_img.shape
+        h, w = uncropped_img.shape
+        new_uncropped_img = np.zeros((h,w))
+        profile.update(dtype = rio.float64, count = 1)
     elif n_channels == 3:
-        h, w, c = HR_img.shape
+        h, w, c = uncropped_img.shape
+        new_uncropped_img = np.zeros((h,w,3))
+        profile.update(dtype = rio.float64, count = 3)
     else:
         raise ValueError('Wrong image shape - {}'.format(n_channels))
     
@@ -65,52 +70,40 @@ def worker(HR_path, cropped_SR_folder, cropped_suffix, save_folder, crop_sz, ste
     
     index = 1
     for x in h_space:
-        #print(x)
         for y in w_space:
-            #print(y)
             if n_channels == 2:
-                crop_img = HR_img[x:x + crop_sz, y:y + crop_sz]
+                crop_img = uncropped_img[x:x + crop_sz, y:y + crop_sz]
             else:
-                crop_img = HR_img[x:x + crop_sz, y:y + crop_sz, :]
+                crop_img = uncropped_img[x:x + crop_sz, y:y + crop_sz, :]
             crop_img = np.ascontiguousarray(crop_img)
             if ~np.any(np.sum(crop_img,axis=2)==0): # if all three bands == 0
                 
-                SR_path = str(cropped_SR_folder) + HR_name.replace('.tif', '_s{:04d}'.format(index)) + '.png' #str(cropped_suffix) #add _ after }
-                #print('SR path is : ' + SR_path)
+                cropped_path = str(cropped_folder) + uncropped_name.replace('.tif', '_s{:04d}_'.format(index)) + str(cropped_suffix) + '.png'
                 
                 try:
-                    SR_image = cv2.imread(SR_path, cv2.IMREAD_UNCHANGED)
-                    #print('SR image is shape : ' + str(np.shape(SR_image)))
-                    #print(os.path.exists(SR_path))
+                    cropped_img = cv2.imread(cropped_path, cv2.IMREAD_UNCHANGED)
                 except:
-                    SR_image = np.zeros(crop_img.shape)
+                    cropped_img = np.zeros(crop_img.shape)
                 
                 if n_channels == 2:
-                    new_img[x:x + crop_sz, y:y + crop_sz] = SR_image[:]
+                    new_uncropped_img[x:x + crop_sz, y:y + crop_sz] = cropped_img[:]
                 else:
-                    new_img[x:x + crop_sz, y:y + crop_sz, :] = SR_image[:]
+                    new_uncropped_img[x:x + crop_sz, y:y + crop_sz, :] = cropped_img[:]
                 
                 index += 1
             else:
                 #print('all zero')
                 pass
     
-    save_path = save_folder + HR_name
-    profile = HR_img_rio.profile
-    profile.update(
-        dtype=rio.float64,
-        count=3)
-    
-    #print(profile)
-    #print(HR_img_rio.read().shape)
-    #print(new_img.shape)
+    save_path = save_folder + uncropped_name
     
     with rio.Env():
         with rio.open(save_path, 'w', **profile) as dst:
-            new_img = np.rollaxis(new_img, 2)
-            dst.write(new_img.astype(rio.float64))
+            if n_channels == 3:
+                new_uncropped_img = np.rollaxis(new_uncropped_img, 2)
+            dst.write(new_uncropped_img.astype(rio.float64))
     
-    return 'Processing {:s} ...'.format(HR_name)
+    return 'Processing {:s} ...'.format(uncropped_name)
     
     
 if __name__ == '__main__':
