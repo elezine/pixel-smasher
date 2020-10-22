@@ -1,3 +1,7 @@
+'''
+runs classification script with lots of switchable inputs. If output classified files exists, it loads them instead of computing.
+'''
+
 import os
 import os.path as osp
 import sys
@@ -11,7 +15,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 import pickle
 import pandas as pd
-from sklearn.metrics import cohen_kappa_score
+from sklearn.metrics import cohen_kappa_score, accuracy_score
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import draw, show, ion, ioff
 sys.path.insert(1, '/home/ethan_kyzivat/code/pixel-smasher')
@@ -28,7 +32,7 @@ from water_mask_funcs import create_buffer_mask
 sourcedir_SR='/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2' # from shield2 holdout
 sourcedir_R='/data_dir/hold_mod_shield_v2/' # should have folders for LR, HR, Bic #'/data_dir/ClassProject/valid_mod'
 sourcedir_R_mask='/data_dir/hold_mod_shield_v2_masks'
-outdir='/data_dir/classified_shield/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization' # for shield # /data_dir/classified_shield/hold_mod
+outdir='/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization' # for shield # /data_dir/classified_shield/hold_mod
 up_scale=10
 for j in ['HR','SR','LR','Bic']:
     os.makedirs(os.path.join(outdir, j, 'x'+str(up_scale)), exist_ok=True)
@@ -42,14 +46,17 @@ foreground_threshold=127
 buffer_additional=0
 ndwi_bands=(2,1) #N,G
 water_index_type='ir'
-plots_dir='/data_dir/other/classifier_plts/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots
+plots_dir=None # '/data_dir/other/classifier_plts/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots
+n_thread=mp.cpu_count() #mp.cpu_count() #mp.cpu_count() # use n_thread > 1 for multiprocessing
+save_freq=200 # 150 # HERE
 
 # auto I/O
 if apply_radiometric_correction:
     f=open("cal_hash.pkl", "rb")
     hash=pickle.load(f)
 else: hash=None
-os.makedirs(plots_dir, exist_ok=True)
+if plots_dir != None:
+    os.makedirs(plots_dir, exist_ok=True)
 def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, hash=None, method='thresh', sourcedir_R_mask=None): # filstrucutre is pre-defined
     '''
     A simple classification function for high-resolution, low-resolution, and  super resolution images.  Takes input path and write To output path (pre-– formatted).
@@ -100,8 +107,15 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, ha
         int_res_HR, bw_HR = classify(HR_in_pth, HR_out_pth,current_thresh, name, write=write,res='HR', method=method, og_mask_pth_in=HR_og_mask_pth_in, water_index_type=water_index_type)
         int_res_LR, bw_LR = classify(LR_in_pth, LR_out_pth,current_thresh, name, write=write, res='LR', method=method, og_mask_pth_in=LR_og_mask_pth_in, water_index_type=water_index_type)
         int_res_Bic, bw_Bic = classify(Bic_in_pth, Bic_out_pth,current_thresh, name, write=write,res='Bic', method=method, og_mask_pth_in= Bic_og_mask_pth_in, water_index_type=water_index_type)
+        diff=diff_image(bw_SR, bw_Bic, 0)
+        mask=np.isin(diff, (1,3)) 
+        # mask=(mask_0) | (~mask_0 & ~bw_HR) 
+        # mask=(bw_SR | bw_Bic | bw_HR) & ~(bw_SR & bw_Bic & bw_HR) # positive mask to use for kappa prime computation: includes all areas where any 2 or all of SR, Bic, and HR disagree
         int_res_SR.kappa=compute_kappa(bw_HR, bw_SR)
         int_res_Bic.kappa=compute_kappa(bw_HR, bw_Bic)
+        int_res_SR.kappa_p=compute_kappa_p(bw_HR, bw_SR, mask)
+        int_res_Bic.kappa_p=compute_kappa_p(bw_HR, bw_Bic, mask)
+
         # int_res[7 + 10*n]=compute_kappa(bw_HR, bw_Bic)
         data_frame_out=data_frame_out.append(pd.concat([int_res_SR, int_res_HR, int_res_LR, int_res_Bic]))
         print('{}'.format(current_thresh), end=' ')
@@ -169,82 +183,86 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
         # convert nan to zero
     water_index[np.isnan(water_index)]=0 # now, I can ignore RuntimeWarnings about dividing by zero
     
-        # binarize image    
-    if method=='thresh': 
-        try:
-            bw=compare(water_index)>compare(threshold) # output mask from classifier
-        except RuntimeWarning:
-            pass
+    if os.path.exists(pth_out)==False: # if output image doesn't already exist
+            # binarize image    
+        if method=='thresh': 
+            try:
+                bw=compare(water_index)>compare(threshold) # output mask from classifier
+            except RuntimeWarning:
+                pass
 
-    elif method=='local': 
-        # bw=cv2.adaptiveThreshold(ndwi,1,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2) # https://docs.opencv.org/3.4/d7/d1b/group__imgproc__misc.html#ga72b913f352e4a1b1b397736707afcde3
-        thresh=threshold_local(water_index, 75, offset=0, method='gaussian')
-        bw=compare(water_index)>compare(thresh)
-    elif method =='local-masked':
-        '''
-        This method takes in a priori water mask (Pekel mask) and runs an Otsu-like threshold for each buffered mask region in the image. Thus, it will almost always detect water if the a priori mask has water, but will never detect water in non-water regions of the a-priori mask. In other words, it is more likely to have false negatives, esp. for small water bodies.
-        '''
-        # foreground_threshold=127
-        # buffer_additional=0 # Note: output mask will be boolean dtype
-        if og_mask_pth_in==None or og_mask_pth_in==np.nan:
-            raise ValueError('EK: You didn\'t specify a valid og_mask path!')
-        og_mask = cv2.imread(og_mask_pth_in, cv2.IMREAD_UNCHANGED)
-        if np.any(og_mask==None): # I have to create my own error bc cv2 wont... :(
-            raise ValueError(f'Unable to load image: path doesn\'t exist: {pth_in}')
+        elif method=='local': 
+            # bw=cv2.adaptiveThreshold(ndwi,1,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2) # https://docs.opencv.org/3.4/d7/d1b/group__imgproc__misc.html#ga72b913f352e4a1b1b397736707afcde3
+            thresh=threshold_local(water_index, 75, offset=0, method='gaussian')
+            bw=compare(water_index)>compare(thresh)
+        elif method =='local-masked':
+            '''
+            This method takes in a priori water mask (Pekel mask) and runs an Otsu-like threshold for each buffered mask region in the image. Thus, it will almost always detect water if the a priori mask has water, but will never detect water in non-water regions of the a-priori mask. In other words, it is more likely to have false negatives, esp. for small water bodies.
+            '''
+            # foreground_threshold=127
+            # buffer_additional=0 # Note: output mask will be boolean dtype
+            if og_mask_pth_in==None or og_mask_pth_in==np.nan:
+                raise ValueError('EK: You didn\'t specify a valid og_mask path!')
+            og_mask = cv2.imread(og_mask_pth_in, cv2.IMREAD_UNCHANGED)
+            if np.any(og_mask==None): # I have to create my own error bc cv2 wont... :(
+                raise ValueError(f'Unable to load image: path doesn\'t exist: {pth_in}')
 
-        buffer_mask=create_buffer_mask(og_mask, foreground_threshold, buffer_additional)
+            buffer_mask=create_buffer_mask(og_mask, foreground_threshold, buffer_additional)
 
-            # classifier
-        labeled = measure.label(buffer_mask, background=0, connectivity=2)
-        bw = np.full(labeled.shape, False)
-        if np.all(buffer_mask==0):
-            pass
-        elif water_index.min()-water_index.max() == 0:
-            print('Uniform image. Setting = to all water.')
-            bw = np.full(labeled.shape, True)
-            pass
-        else: # continue to classifier
-            copy = np.full(labeled.shape, False)
-            regions = measure.regionprops(labeled)
-            for x,region in enumerate(regions):
-                # coords = region.coords
-                # i = coords[:,0]
-                # j = coords[:,1]
+                # classifier
+            labeled = measure.label(buffer_mask, background=0, connectivity=2)
+            bw = np.full(labeled.shape, False)
+            if np.all(buffer_mask==0):
+                pass
+            elif water_index.min()-water_index.max() == 0:
+                print('Uniform image. Setting = to all water.')
+                bw = np.full(labeled.shape, True)
+                pass
+            else: # continue to classifier
+                copy = np.full(labeled.shape, False)
+                regions = measure.regionprops(labeled)
+                for x,region in enumerate(regions):
+                    # coords = region.coords
+                    # i = coords[:,0]
+                    # j = coords[:,1]
 
-                # copy[i,j] = True
+                    # copy[i,j] = True
 
-                dist=0 # being lazy and modified from create_buffer_mask_fxn
-                bbox_coords = region.bbox #(min_row, min_col, max_row, max_col)
-                if bbox_coords[0] - dist >= 0:
-                    bbox_i_min = bbox_coords[0] - dist
-                else: 
-                    bbox_i_min = 0
-                if bbox_coords[1] - dist >= 0:
-                    bbox_j_min = bbox_coords[1] - dist
-                else:
-                    bbox_j_min = 0
-                if bbox_coords[2] + dist <= copy.shape[0]:
-                    bbox_i_max = bbox_coords[2] + dist
-                else:
-                    bbox_i_max = copy.shape[0]
-                if bbox_coords[3] + dist <= copy.shape[1]:
-                    bbox_j_max = bbox_coords[3] + dist
-                else:
-                    bbox_j_max = copy.shape[1]
+                    dist=0 # being lazy and modified from create_buffer_mask_fxn
+                    bbox_coords = region.bbox #(min_row, min_col, max_row, max_col)
+                    if bbox_coords[0] - dist >= 0:
+                        bbox_i_min = bbox_coords[0] - dist
+                    else: 
+                        bbox_i_min = 0
+                    if bbox_coords[1] - dist >= 0:
+                        bbox_j_min = bbox_coords[1] - dist
+                    else:
+                        bbox_j_min = 0
+                    if bbox_coords[2] + dist <= copy.shape[0]:
+                        bbox_i_max = bbox_coords[2] + dist
+                    else:
+                        bbox_i_max = copy.shape[0]
+                    if bbox_coords[3] + dist <= copy.shape[1]:
+                        bbox_j_max = bbox_coords[3] + dist
+                    else:
+                        bbox_j_max = copy.shape[1]
 
-                copy_x = copy[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max]
-                ndwi_x = water_index[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max]
-                thresh_x=threshold_otsu(water_index)
-                copy_x=compare(ndwi_x)>compare(thresh_x)
-                copy[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max] = copy_x
-                #bounds = find_boundaries(pekel_copy)
-                #pekel_copy[bounds] = 1
+                    copy_x = copy[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max]
+                    ndwi_x = water_index[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max]
+                    thresh_x=threshold_otsu(water_index)
+                    copy_x=compare(ndwi_x)>compare(thresh_x)
+                    copy[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max] = copy_x
+                    #bounds = find_boundaries(pekel_copy)
+                    #pekel_copy[bounds] = 1
 
-                bw = bw | copy
+                    bw = bw | copy
 
-        # for ...
-    else: print(f'Unknown classifier method: {method}')
-    
+            # for ...
+        else: print(f'Unknown classifier method: {method}')
+    else: # if image already exists
+        bw=cv2.imread(pth_out, cv2.IMREAD_UNCHANGED)
+        bw=bw > foreground_threshold
+
         # plotting (uncomment for real HERE)
     if (plots_dir != None): # (res==SR) 
         fig, axs = plt.subplots(1, 4, figsize=(12, 3), constrained_layout=True)
@@ -294,7 +312,7 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
     dataframe_out.res=res
     
         # write out bw
-    if write:
+    if (write) and (os.path.exists(pth_out)==False):
         cv2.imwrite(pth_out, np.array(255*bw, 'uint8'))  # HERE
 
     return dataframe_out, bw
@@ -306,14 +324,46 @@ def compute_kappa(HR_in, test_in):
     ''' Takes in two matrices, flattens, and computes kappa'''
             # kappa score
     # if img.shape[0]==480: # if SR or HR or Bic image
-    kappa=cohen_kappa_score(HR_in.flatten()+1, test_in.flatten()+1) # +1 added to prevent div by zero
+    kappa=cohen_kappa_score(HR_in.flatten(), test_in.flatten()) # +1 added to prevent div by zero
     return kappa
 
+def compute_kappa_p(HR_in, test_in, mask):
+    ''' Takes in two matrices, a positive (keep) pixel mask, then flattens, and computes kappa prime, a measure of kappa's coefficient but only applied to a masked portion of the data'''
+            # kappa score
+    # if img.shape[0]==480: # if SR or HR or Bic image
+    kappa=cohen_kappa_score(HR_in[mask].flatten(), test_in[mask].flatten()) # +1 added to prevent div by zero
+    return kappa ## HERE debug
+
+def diff_image(SR,Bic, foreground_threshold):
+    '''
+    Computes a difference image-like representation between two maps.
+    Output: 0 = both agree negative, 1 = Bic is positive, 2 = both agree positive, 3 = SR is positive
+    foreground_threshold is used as value to split boolean on. Set to zero if working with Boolean arrays.
+    '''
+    diff=np.full(SR.shape, 0, dtype='uint8')
+    diff[(SR>foreground_threshold) & (Bic>foreground_threshold)]=2 # SR and Bic == water
+    diff[(SR>foreground_threshold) & (Bic<=foreground_threshold)]=3 # SR == water and Bic == land
+    diff[(SR<=foreground_threshold) & (Bic>foreground_threshold)]=1 # SR == land and Bic == water
+    return diff
 class ClassifierComparison(pd.DataFrame):
-    def __init__(self, data=[np.nan]*10, index=None, columns=None):
-        super().__init__([data], columns=['num', 'name', 'thresh','res','percent_water','mean_ndwi', 'median_ndwi','kappa','min_ndwi','max_ndwi'])
+    def __init__(self, data=[np.nan]*11, index=None, columns=None):
+        super().__init__([data], columns=['num', 'name', 'thresh','res','percent_water','mean_ndwi', 'median_ndwi','kappa','kappa_p','min_ndwi','max_ndwi'])
         # TODO further: make is so I can pre-populate columns like thresh etc with the class call. not imp for now
         # Like this: def __init__(self, data=[np.nan]*8, index=None, columns=None, k=np.nan):
+
+# class ClassifierComparison(pd.DataFrame):
+#     def __init__(self, foo=None,glue=None, index=None, columns=None):
+#         super().__init__([foo, glue], columns=['foo','glue'],index=None)
+#         # TODO further: make is so I can pre-populate columns like thresh etc with the class call. not imp for now
+#         # Like this: def __init__(self, data=[np.nan]*8, index=None, columns=None, k=np.nan):
+
+# class ClassifierComparison(pd.DataFrame):
+#     def __init__(self, foo=None, glue=None, data=[np.nan]*2,index=None, columns=None):
+#         super().__init__(columns=['foo','glue'],index=None)
+#         # self.foo=foo
+#         # self.glue=glue
+#         self['foo']=foo
+#         self['glue']=glue 
 
 def name_lookup_og_mask(name_scene):
     '''
@@ -339,24 +389,29 @@ if __name__ == '__main__':
     num_files = len(dirpaths) # #HERE change back
     # global results
     results = {} # init
-    pool = Pool(mp.cpu_count()) # Pool(mp.cpu_count())
-    for i in range(1500, num_files): #range(num_files): # switch for testing # range(30): # HERE switch
+    if n_thread>1: 
+        pool = Pool(n_thread)
+    for i in range(0, num_files): #range(num_files): # switch for testing # range(30): # HERE switch
         name = dirpaths[i].replace('_'+str(iter)+'.png', '') # HERE changed for seven-steps from `dirpaths[i]`
         name_og_mask=name_lookup_og_mask(name)
 
-            # serial
-        # results[i] = group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash, method, sourcedir_R_mask)
-
-            # parallel
-        results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash, method, sourcedir_R_mask))# , , callback=collect_result # no .get()
-        if i % 150 == 0:
-            df = pd.concat(list(results.values())[i].get() for i in range(len(results))) # HERE fix
+        if n_thread==1:    # serial
+            results[i] = group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash, method, sourcedir_R_mask)
+            if i % save_freq == 0:
+                df = pd.concat(list(results.values())[i] for i in range(len(results)))
+            
+        else: # parallel
+            results[i] = pool.apply_async(group_classify, args=(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash, method, sourcedir_R_mask))# , , callback=collect_result # no .get()
+            if i % save_freq == 0:
+                df = pd.concat(list(results.values())[i].get() for i in range(len(results)))
+        if i % save_freq == 0: # common to parallel and serial branches
             csv_out='classification_stats_x'+str(up_scale)+'_'+method+'_'+str(iter)+'_tmp.csv'
             df.to_csv(csv_out) # zip(im_name, hr, lr, bic, sr)
             print('Saved temp. classification stats (length {}) csv: {}'.format(df.shape[0], csv_out))
             del df
-    pool.close()
-    pool.join()
+    if n_thread>1: 
+        pool.close()
+        pool.join()
     print('All subprocesses done.')
 
 
