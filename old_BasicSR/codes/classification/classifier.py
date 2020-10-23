@@ -108,13 +108,21 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, ha
         int_res_LR, bw_LR = classify(LR_in_pth, LR_out_pth,current_thresh, name, write=write, res='LR', method=method, og_mask_pth_in=LR_og_mask_pth_in, water_index_type=water_index_type)
         int_res_Bic, bw_Bic = classify(Bic_in_pth, Bic_out_pth,current_thresh, name, write=write,res='Bic', method=method, og_mask_pth_in= Bic_og_mask_pth_in, water_index_type=water_index_type)
         diff=diff_image(bw_SR, bw_Bic, 0)
-        mask=np.isin(diff, (1,3)) 
+        mask=np.isin(diff, (1,3)) # simply uses areas with no SR and Bic overlap
         # mask=(mask_0) | (~mask_0 & ~bw_HR) 
         # mask=(bw_SR | bw_Bic | bw_HR) & ~(bw_SR & bw_Bic & bw_HR) # positive mask to use for kappa prime computation: includes all areas where any 2 or all of SR, Bic, and HR disagree
+
+            # kappa metrics
         int_res_SR.kappa=compute_kappa(bw_HR, bw_SR)
         int_res_Bic.kappa=compute_kappa(bw_HR, bw_Bic)
         int_res_SR.kappa_p=compute_kappa_p(bw_HR, bw_SR, mask)
         int_res_Bic.kappa_p=compute_kappa_p(bw_HR, bw_Bic, mask)
+
+            # Overall accuracy metrics
+        int_res_SR.accuracy=compute_accuracy(bw_HR, bw_SR)
+        int_res_Bic.accuracy=compute_accuracy(bw_HR, bw_Bic)
+        int_res_SR.accuracy_p=compute_accuracy_p(bw_HR, bw_SR, mask)
+        int_res_Bic.accuracy_p=compute_accuracy_p(bw_HR, bw_Bic, mask)
 
         # int_res[7 + 10*n]=compute_kappa(bw_HR, bw_Bic)
         data_frame_out=data_frame_out.append(pd.concat([int_res_SR, int_res_HR, int_res_LR, int_res_Bic]))
@@ -320,6 +328,17 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
 # def collect_result(result):
 #     global results
 #     results.append(result)
+
+def compute_accuracy(HR_in, test_in):
+    ''' Takes in two matrices, flattens, and computes overall accuracy (percent agreement)'''
+    OA=accuracy_score(HR_in.flatten(), test_in.flatten()) 
+    return OA
+
+def compute_accuracy_p(HR_in, test_in, mask):
+    ''' Takes in two matrices, flattens, and computes overall accuracy prime, a measure of overall accuracy but only applied to a masked portion of the data'''
+    OA_p=accuracy_score(HR_in[mask].flatten(), test_in[mask].flatten()) 
+    return OA_p ## HERE debug
+
 def compute_kappa(HR_in, test_in):
     ''' Takes in two matrices, flattens, and computes kappa'''
             # kappa score
@@ -331,8 +350,8 @@ def compute_kappa_p(HR_in, test_in, mask):
     ''' Takes in two matrices, a positive (keep) pixel mask, then flattens, and computes kappa prime, a measure of kappa's coefficient but only applied to a masked portion of the data'''
             # kappa score
     # if img.shape[0]==480: # if SR or HR or Bic image
-    kappa=cohen_kappa_score(HR_in[mask].flatten(), test_in[mask].flatten()) # +1 added to prevent div by zero
-    return kappa ## HERE debug
+    kappa_p=cohen_kappa_score(HR_in[mask].flatten(), test_in[mask].flatten()) 
+    return kappa_p ## HERE debug
 
 def diff_image(SR,Bic, foreground_threshold):
     '''
@@ -346,11 +365,12 @@ def diff_image(SR,Bic, foreground_threshold):
     diff[(SR<=foreground_threshold) & (Bic>foreground_threshold)]=1 # SR == land and Bic == water
     return diff
 class ClassifierComparison(pd.DataFrame):
-    def __init__(self, data=[np.nan]*11, index=None, columns=None):
-        super().__init__([data], columns=['num', 'name', 'thresh','res','percent_water','mean_ndwi', 'median_ndwi','kappa','kappa_p','min_ndwi','max_ndwi'])
+    def __init__(self, data=[np.nan]*13, index=None, columns=None):
+        super().__init__([data], columns=['num', 'name', 'thresh','res','percent_water','mean_ndwi', 'median_ndwi','accuracy','accuracy_p','kappa','kappa_p','min_ndwi','max_ndwi'])
         # TODO further: make is so I can pre-populate columns like thresh etc with the class call. not imp for now
         # Like this: def __init__(self, data=[np.nan]*8, index=None, columns=None, k=np.nan):
 
+    # scratch paper for class inheritance...
 # class ClassifierComparison(pd.DataFrame):
 #     def __init__(self, foo=None,glue=None, index=None, columns=None):
 #         super().__init__([foo, glue], columns=['foo','glue'],index=None)
@@ -409,26 +429,17 @@ if __name__ == '__main__':
             df.to_csv(csv_out) # zip(im_name, hr, lr, bic, sr)
             print('Saved temp. classification stats (length {}) csv: {}'.format(df.shape[0], csv_out))
             del df
+    print('All subprocesses done.')
+
+        # concat results
     if n_thread>1: 
         pool.close()
         pool.join()
-    print('All subprocesses done.')
+        df = pd.concat(list(results.values())[i].get() for i in range(len(results)))
+    else:
+        df = pd.concat(list(results.values())[i] for i in range(len(results)))
 
-
-    # save result
-    # cols_fmt=['num','name']+['TBD']*len(thresh)*num_metrics # formatted c olumn names # TAG depends-on-num-metrics
-    # for n in range(len(thresh)):
-    #     cols_fmt[2 + 10*n]= 'SR'+'_T'+str(thresh[n]) #hr lr bic
-    #     cols_fmt[3 + 10*n]= 'HR'+'_T'+str(thresh[n])
-    #     cols_fmt[4 + 10*n]= 'LR'+'_T'+str(thresh[n])
-    #     cols_fmt[5 + 10*n]= 'Bic'+'_T'+str(thresh[n])
-    #     cols_fmt[6 + 10*n]= 'SR'+'_K'+str(thresh[n]) # kappa
-    #     cols_fmt[7 + 10*n]= 'Bic'+'_K'+str(thresh[n]) 
-    #     cols_fmt[8 + 10*n]= 'SR'+'_M'+str(thresh[n]) # mean
-    #     cols_fmt[9 + 10*n]= 'HR'+'_M'+str(thresh[n])
-    #     cols_fmt[10 + 10*n]= 'LR'+'_M'+str(thresh[n])
-    #     cols_fmt[11 + 10*n]= 'Bic'+'_M'+str(thresh[n])
-    df = pd.concat(list(results.values())[i].get() for i in range(len(results)))
+        # save results
     try:
         csv_out='classification_stats_x'+str(up_scale)+'_'+method+'_'+str(iter)+'.csv'
         df.to_csv(csv_out) # zip(im_name, hr, lr, bic, sr)
