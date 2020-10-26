@@ -17,7 +17,7 @@ from matplotlib.pyplot import draw, show, ion, ioff
 sys.path.insert(1, '/home/ethan_kyzivat/code/pixel-smasher')
 sys.path.insert(1, '/home/ethan_kyzivat/code/pixel-smasher/old_BasicSR/codes/classification')
 from water_mask_funcs import create_buffer_mask
-from classifier import sourcedir_SR, sourcedir_R, sourcedir_R_mask, outdir, up_scale, foreground_threshold, ndwi_bands, water_index_type, name_lookup_og_mask
+from classifier import sourcedir_SR, sourcedir_R, sourcedir_R_mask, outdir, up_scale, foreground_threshold, ndwi_bands, water_index_type, name_lookup_og_mask, diff_image
 import matplotlib.colors as colors
 
 '''
@@ -145,9 +145,7 @@ def group_plot(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, hash=N
             if 1==1:
                     # make and plot diff image
                 diff=np.full(tmp_output_XR_mask[0].shape, 0, dtype='uint8')
-                diff[(tmp_output_XR_mask[1]>foreground_threshold) & (tmp_output_XR_mask[2]>foreground_threshold)]=2 # SR and Bic == water
-                diff[(tmp_output_XR_mask[1]>foreground_threshold) & (tmp_output_XR_mask[2]<=foreground_threshold)]=3 # SR == water and Bic == land
-                diff[(tmp_output_XR_mask[1]<=foreground_threshold) & (tmp_output_XR_mask[2]>foreground_threshold)]=1 # SR == land and Bic == water
+                diff=diff_image(tmp_output_XR_mask[1], tmp_output_XR_mask[2], foreground_threshold)
                 # cmap1 = colors.ListedColormap(['black', '#E9C46A', 'white', '#457b9d'])
                 cmap1 = colors.ListedColormap(['black', '#B07F3E', '#2390D2', '#6BCAD0'])
                 plt.imshow(diff, cmap=cmap1,vmin=0, vmax=3, origin='lower', interpolation='bilinear') # vmin=0, vmax=3, 
