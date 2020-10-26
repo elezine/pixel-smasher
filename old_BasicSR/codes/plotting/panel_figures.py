@@ -106,7 +106,7 @@ def group_plot(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, hash=N
         # bw_SR, bw_HR, bw_LR, bw_Bic=tmp_output
         
         tmp_output_XR_mask=[]
-        for pth_in in [HR_out_pth, SR_out_pth, Bic_og_mask_pth_in, LR_out_pth]:
+        for pth_in in [HR_out_pth, SR_out_pth, Bic_out_pth, LR_out_pth]:
             tmp_output_XR_mask.append(cv2.imread(pth_in, cv2.IMREAD_UNCHANGED))
             if np.any(tmp_output_XR_mask[-1]==None): # I have to create my own error bc cv2 wont... :(
                 raise ValueError(f'Unable to load image: path doesn\'t exist: {pth_in}')
