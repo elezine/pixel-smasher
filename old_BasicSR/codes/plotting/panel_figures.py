@@ -30,7 +30,7 @@ for j in ['HR','SR','LR','Bic']:
 iter=400000 # quick fix to get latest validation image in folder
 thresh= [0] # [-0.1, -0.05, 0, 0.05, 0.1, 0.2, 0.3] # [-10, -5, -2, 0, 2, 5, 10] #2
 apply_radiometric_correction=False # For v1 of applying lookup table values to convert to radiance. Set to zero if already calibrated
-plots_dir='/data_dir/other/classifier_plts/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR_panel_figs_v2' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots
+plots_dir='/data_dir/other/classifier_plts/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR_panel_figs_v2_highres' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots
 method='local-masked'
 n_thread=mp.cpu_count() #mp.cpu_count() #mp.cpu_count() # use n_thread > 1 for multiprocessing
     # I/O for create_buffer_mask function
@@ -138,11 +138,11 @@ def group_plot(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, hash=N
                     axs[k,0].text(-0.05, .5, ires, transform=axs[k,0].transAxes, ha='right', va='center', size=fs+4, rotation='vertical')
                 # show()
                 plot_pth=os.path.join(plots_dir, 'PLOT_' + name + '.png')
-                fig.savefig(plot_pth)
+                fig.savefig(plot_pth, dpi=300); fig.savefig(plot_pth.replace('.png','.pdf'), dpi=300)
                 plt.close()
 
             ## make second diff plot
-            if 1==1:
+            if 1==0:
                     # make and plot diff image
                 diff=np.full(tmp_output_XR_mask[0].shape, 0, dtype='uint8')
                 diff=diff_image(tmp_output_XR_mask[1], tmp_output_XR_mask[2], foreground_threshold)
@@ -158,7 +158,7 @@ def group_plot(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, hash=N
                 plt.gca().invert_yaxis()
                 plt.gca().set_axis_off()
                 plt.gcf().tight_layout()
-                plt.savefig(plot_pth)
+                plt.savefig(plot_pth, dpi=300); plt.savefig(plot_pth.replace('.png','.pdf'), dpi=300)
                 plt.close()
 
         # int_res[7 + 10*n]=compute_kappa(bw_HR, bw_Bic)
@@ -205,6 +205,11 @@ if __name__ == '__main__':
     for i in range(0, num_files): #range(num_files): # switch for testing # range(30): # HERE switch
         name = dirpaths[i].replace('_'+str(iter)+'.png', '') # HERE changed for seven-steps from `dirpaths[i]`
         name_og_mask=name_lookup_og_mask(name)
+                
+        ############## testing
+        # if '20170708_181118_102a_3B_AnalyticMS_SR_s0244' not in name:
+        #     continue
+        ######################
 
             # serial
         # results[i] = group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash, method, sourcedir_R_mask)

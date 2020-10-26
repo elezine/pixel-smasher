@@ -47,7 +47,7 @@ buffer_additional=0
 ndwi_bands=(2,1) #N,G
 water_index_type='ir'
 plots_dir=None # '/data_dir/other/classifier_plts/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots
-n_thread=mp.cpu_count() #mp.cpu_count() #mp.cpu_count() # use n_thread > 1 for multiprocessing
+n_thread=1 #mp.cpu_count() #mp.cpu_count() # use n_thread > 1 for multiprocessing
 save_freq=200 # 150 # HERE
 
 # auto I/O
@@ -414,7 +414,10 @@ if __name__ == '__main__':
     for i in range(0, num_files): #range(num_files): # switch for testing # range(30): # HERE switch
         name = dirpaths[i].replace('_'+str(iter)+'.png', '') # HERE changed for seven-steps from `dirpaths[i]`
         name_og_mask=name_lookup_og_mask(name)
-
+        ############## testing
+        # if '20170708_181118_102a_3B_AnalyticMS_SR_s0244' not in name:
+        #     continue
+        ######################
         if n_thread==1:    # serial
             results[i] = group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, thresh, hash, method, sourcedir_R_mask)
             if i % save_freq == 0:
