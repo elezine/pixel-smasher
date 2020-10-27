@@ -1,5 +1,8 @@
 '''
 Preprocessing: run 5th
+User selects top_dir
+Input:  sourcedir   = os.path.join('/data_dir/planet_sub', top_dir)
+Output: savedir     = os.path.join('/data_dir/', top_dir)
 '''
 import os
 import sys
@@ -16,15 +19,19 @@ try:
 except ImportError:
     pass
 
-adjust_stretch=False # whether or not to change TDR in this step
+from extract_subimgs_single import rescale_reflectance, btm_percentile, top_percentile, band_order
+
+n_thread=1 #multiprocessing.cpu_count() # num cores 8
+up_scale = 10
+mod_scale = 10
+stretch_multiplier=1 # to increase total dynamic range (only valid if adjust_stretch==True, which is deprecated)
+adjust_stretch=False # whether or not to change TDR in this step (deprecated)
+do_rescale_reflectance=True # if I didn't do this in extract_subimgs_single.py
+input_file_extension='.png' #File extension to use for input. Usually: '.png'
 
 def generate_mod_LR_bic(top_dir):
     # set parameters
     print(f'Top dir: {top_dir}')
-    n_thread=multiprocessing.cpu_count() # num cores 8
-    up_scale = 10
-    mod_scale = 10
-    stretch_multiplier=1 # to increase total dynamic range
 
     # set data dir
     if getpass.getuser()=='ethan_kyzivat' or getpass.getuser()=='ekaterina_lezine': # on GCP 
@@ -66,7 +73,7 @@ def generate_mod_LR_bic(top_dir):
     else:
         print('It will cover ' + str(saveBicpath))
 
-    filepaths = [f for f in os.listdir(sourcedir) if f.endswith('.png')]
+    filepaths = [f for f in os.listdir(sourcedir) if f.endswith(input_file_extension)]
     num_files = len(filepaths)
 
     ## load hash
@@ -74,18 +81,22 @@ def generate_mod_LR_bic(top_dir):
     #hash=pickle.load(f)
 
     ## new parallel ##########################
-
-    pool = Pool(n_thread)
+    if n_thread>1:
+        pool = Pool(n_thread)
     for i in range(num_files): # range(700): #
         filename = filepaths[i] # will this work?
         if os.path.isfile(saveHRpath+os.sep+filename)==False: # only write if file doesn't exist
-            pool.apply_async(worker,
-                            args=(i, filename, sourcedir, saveHRpath, saveLRpath, saveBicpath, up_scale, mod_scale, stretch_multiplier, hash)) # , callback=update
-            # worker(i, filename, sourcedir, saveHRpath, saveLRpath, saveBicpath, up_scale, mod_scale, stretch_multiplier, hash) # for debugging
+            if n_thread>1:
+                pool.apply_async(worker,
+                                args=(i, filename, sourcedir, saveHRpath, saveLRpath, saveBicpath, up_scale, mod_scale, stretch_multiplier, hash)) # , callback=update
+                # worker(i, filename, sourcedir, saveHRpath, saveLRpath, saveBicpath, up_scale, mod_scale, stretch_multiplier, hash) # for debugging
+            else: # serial computation
+                worker(i, filename, sourcedir, saveHRpath, saveLRpath, saveBicpath, up_scale, mod_scale, stretch_multiplier, hash)
         else: # elif os.path.isfile(saveHRpath+os.sep+filename)==True: 
             print('Skip no. {}.'.format(i))
-    pool.close()
-    pool.join()
+    if n_thread>1:
+        pool.close()
+        pool.join()
     print('All subprocesses done.')
 
     ## new parallel ##########################
@@ -96,7 +107,7 @@ def worker(i, filename, sourcedir, saveHRpath, saveLRpath, saveBicpath, up_scale
     # read image
     image = cv2.imread(os.path.join(sourcedir, filename), cv2.IMREAD_UNCHANGED) # apparently, this loads as 8-bit bit depth... Changed!
 
-    if adjust_stretch:
+    if adjust_stretch: # deprecated
         ## apply correction
         b=[3,2,4]
         image_cal=np.array(np.zeros(image.shape), dtype='double')
@@ -105,6 +116,10 @@ def worker(i, filename, sourcedir, saveHRpath, saveLRpath, saveBicpath, up_scale
         for j in range(3):
             image_cal[:,:,j]=image[:,:,j]*coeffs[b[j]]*255*stretch_multiplier
         image=image_cal.astype(np.uint8)
+
+    if do_rescale_reflectance: # if I didn't do this in extract_subimgs_single.py
+        print(f'Rescaling reflectance...')
+        image=rescale_reflectance(image[:,:,band_order], btm_percentile, top_percentile, individual_band=False)
 
     ## continue
     width = int(np.floor(image.shape[1] / mod_scale))
@@ -131,5 +146,6 @@ if __name__ == "__main__":
     # generate_mod_LR_bic('hold_mod')
     # generate_mod_LR_bic('hold_mod_shield') # for shield scenes
     # generate_mod_LR_bic('hold_mod_shield_masks') # for shield scenes masks
-    generate_mod_LR_bic('hold_mod_shield_v2')
-    generate_mod_LR_bic('hold_mod_shield_v2_masks')
+    # generate_mod_LR_bic('hold_mod_shield_v2')
+    # generate_mod_LR_bic('hold_mod_shield_v2_masks')
+    generate_mod_LR_bic('hold_mod_scenes-shield-gt-subsets')
