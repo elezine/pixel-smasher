@@ -178,10 +178,10 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
                 return self.a > o.a 
     elif water_index_type=='ir':
             # convert nan to zero
-        water_index[np.isnan(water_index)]=255 # now, I can ignore RuntimeWarnings about dividing by zero
         if method=='local': 
             raise RuntimeError('Threshold needs to be updated for IR...')
         water_index = img[:,:,ndwi_bands[0]]
+        water_index[np.isnan(water_index)]=255 # now, I can ignore RuntimeWarnings about dividing by zero
 
         class compare:
             def __init__(self, a):
