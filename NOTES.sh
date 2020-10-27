@@ -34,3 +34,37 @@ We noticed youre using a conda environment. If you are experiencing issues with 
 for file in /data_dir/Scenes-shield-gt-subsets/*; do 
     gdal_translate  -colorinterp blue,green,red,alpha $file /data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets/`basename $file '.tif'`.tif
 done
+
+# to create masks: use gdal_reproject_match to make pekel mask subsets, then put through normal generate_mod_LR_res.py process.
+
+export PATH=$PATH:/home/ethan_kyzivat/code/geographic-functions
+masks_dir='/data_dir/Shield_Water_Mask/Scenes-shield-gt'
+out_dir='/data_dir/Shield_Water_Mask/Scenes-shield-gt-subsets'
+for file in /data_dir/Scenes-shield-gt-subsets/*; do 
+    IN=$masks_dir/${file:35:37}_no_buffer_mask.tif # e.g. 20170709_180516_1005_3B_AnalyticMS_SR + '_no_buffer_mask.tif'
+    OUT=$out_dir/`basename $file .tif`.tif
+    echo Input: $IN
+    ########### uncomment for testing
+    # ls $IN
+    # echo OUT: $OUT
+    # ls $file
+    ###################
+
+    bash gdal_reproject_match.sh $IN $OUT $file
+done
+
+# to convert from .tif to .png:
+for file in /data_dir/Shield_Water_Mask/Scenes-shield-gt-subsets/*; do 
+    gdal_translate -a_nodata none $file /data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets_masks/`basename $file '.tif'`.png
+done
+
+# to convert to [0, 255]:
+for file in /data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets_masks_01/*.png; do 
+    # gdal_calc.py -A $file --calc="A*255" --outfile=/data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets_masks/`basename $file`
+    ls $file
+done
+
+# to convert from .tif to .png (after katia work):
+for file in /data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets_masks_0_255_tif/*; do 
+    gdal_translate -a_nodata none $file /data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets_masks/`basename $file '.tif'`.png
+done

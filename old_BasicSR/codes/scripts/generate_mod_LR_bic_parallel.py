@@ -26,7 +26,7 @@ up_scale = 10
 mod_scale = 10
 stretch_multiplier=1 # to increase total dynamic range (only valid if adjust_stretch==True, which is deprecated)
 adjust_stretch=False # whether or not to change TDR in this step (deprecated)
-do_rescale_reflectance=True # if I didn't do this in extract_subimgs_single.py
+do_rescale_reflectance=False # if I didn't do this in extract_subimgs_single.py
 input_file_extension='.png' #File extension to use for input. Usually: '.png'
 
 def generate_mod_LR_bic(top_dir):
@@ -148,4 +148,5 @@ if __name__ == "__main__":
     # generate_mod_LR_bic('hold_mod_shield_masks') # for shield scenes masks
     # generate_mod_LR_bic('hold_mod_shield_v2')
     # generate_mod_LR_bic('hold_mod_shield_v2_masks')
-    generate_mod_LR_bic('hold_mod_scenes-shield-gt-subsets')
+    # generate_mod_LR_bic('hold_mod_scenes-shield-gt-subsets')
+    generate_mod_LR_bic('hold_mod_scenes-shield-gt-subsets_masks')
