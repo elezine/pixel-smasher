@@ -59,9 +59,9 @@ def group_plot(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, hash=N
     Bic_in_pth=os.path.join(sourcedir_R, 'Bic', 'x' + str(up_scale), name+ '.png')
 
                 # in paths (masks)
-    HR_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'HR', 'x' + str(up_scale), name + '_no_buffer_mask.png') # HERE sloppy quick fix # used to read: name.replace('MS_SR', 'MS_SR_no_buffer_mask')
-    LR_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'LR', 'x' + str(up_scale), name + '_no_buffer_mask.png')
-    Bic_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'Bic', 'x' + str(up_scale), name + '_no_buffer_mask.png')
+    HR_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'HR', 'x' + str(up_scale), name.replace('MS_SR', 'MS_SR_no_buffer_mask')+ '.png') # sloppy quick fix
+    LR_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'LR', 'x' + str(up_scale), name.replace('MS_SR', 'MS_SR_no_buffer_mask')+ '.png')
+    Bic_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'Bic', 'x' + str(up_scale), name.replace('MS_SR', 'MS_SR_no_buffer_mask')+ '.png')
     SR_og_mask_pth_in=HR_og_mask_pth_in
 
     # save out put to row
@@ -194,7 +194,7 @@ if __name__ == '__main__':
         ##################################
         
         # print
-    print('Starting panel figs.  Files will be in {}'.format(plots_dir))
+    print('Starting classification.  Files will be in {}'.format(outdir))
     os.makedirs(outdir, exist_ok=True)
         # loop over files
     dirpaths = [f for f in os.listdir(sourcedir_SR) ] # removed: if f.endswith('.png')
