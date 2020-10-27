@@ -33,6 +33,7 @@ apply_radiometric_correction=False # For v1 of applying lookup table values to c
 plots_dir='/data_dir/other/classifier_plts/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test_panel_figs_zoom' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots # 008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR_panel_figs_v2_highres
 method='local-masked'
 zoom=True # whether or not to zoom in before making panel figures
+zoom_percent=35
 n_thread=mp.cpu_count() #mp.cpu_count() # use n_thread > 1 for multiprocessing
     # I/O for create_buffer_mask function
 # buffer_additional=0
