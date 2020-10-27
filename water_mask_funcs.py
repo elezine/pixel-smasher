@@ -48,7 +48,7 @@ def buffer_mask(og_mask_path, ref_path, output_mask_path_buffer, output_mask_pat
     ref_int = np.nan_to_num(ref_nan, nan = 0).astype(int)
     
     og_mask = og_mask*ref_nan
-    og_mask[og_mask>0] = 1
+    og_mask[og_mask>0] = 255
 
     '''
     labeled = measure.label(og_mask, background=0, connectivity=2)
@@ -137,8 +137,8 @@ def buffer_mask(og_mask_path, ref_path, output_mask_path_buffer, output_mask_pat
 files = gl.glob('/data_dir/Scenes-shield-gt-subsets/*.tif')
 for file in files:
     name = (os.path.basename(os.path.normpath(file)))
-    output_name_buffer = '/data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets_masks/' + str(name) + '_buffer_mask.tif'
-    output_name_no_buffer =  '/data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets_masks/' + str(name) + '_no_buffer_mask.tif'
+    output_name_buffer = '/data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets_masks/' + str(name)[:-4] + '_buffer_mask.tif'
+    output_name_no_buffer =  '/data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets_masks/' + str(name)[:-4] + '_no_buffer_mask.tif'
     buffer_mask('/data_dir/pekel_mask/pekel_epsg4326.tif', file, output_name_buffer, output_name_no_buffer)
     
 def create_buffer_mask(og_mask, foreground_threshold=0, buffer_additional=0):
