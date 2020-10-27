@@ -165,6 +165,8 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
         # extract water index
     if water_index_type=='ndwi':
         water_index = (img[:,:,ndwi_bands[1]]-img[:,:,ndwi_bands[0]])/(img[:,:,ndwi_bands[1]]+img[:,:,ndwi_bands[0]]) # NRG images: so 2-0 # RGN images: so (G-N)/(G+N)
+            # convert nan to zero
+        water_index[np.isnan(water_index)]=0 # now, I can ignore RuntimeWarnings about dividing by zero
              # operator overloading to make < = > for IR, not NDWI # https://www.geeksforgeeks.org/operator-overloading-in-python/
         class compare:
             def __init__(self, a):
@@ -174,6 +176,8 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
             def __gt__(self, o):
                 return self.a > o.a 
     elif water_index_type=='ir':
+            # convert nan to zero
+        water_index[np.isnan(water_index)]=255 # now, I can ignore RuntimeWarnings about dividing by zero
         if method=='local': 
             raise RuntimeError('Threshold needs to be updated for IR...')
         water_index = img[:,:,ndwi_bands[0]]
@@ -188,9 +192,6 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
             #
     else: raise ValueError('Index not recognized (EK).')
 
-        # convert nan to zero
-    water_index[np.isnan(water_index)]=0 # now, I can ignore RuntimeWarnings about dividing by zero
-    
     if os.path.exists(pth_out)==False: # if output image doesn't already exist
             # binarize image    
         if method=='thresh': 
@@ -428,7 +429,7 @@ if __name__ == '__main__':
             if i % save_freq == 0:
                 df = pd.concat(list(results.values())[i].get() for i in range(len(results)))
         if i % save_freq == 0: # common to parallel and serial branches
-            csv_out='classification_stats_x'+str(up_scale)+'_'+method+'_'+str(iter)+'_tmp.csv'
+            csv_out='classification_stats_x'+str(up_scale)+'_'+method+'_'+str(iter)+'_'+water_index_type+'_tmp.csv'
             df.to_csv(csv_out) # zip(im_name, hr, lr, bic, sr)
             print('Saved temp. classification stats (length {}) csv: {}'.format(df.shape[0], csv_out))
             del df
@@ -444,7 +445,7 @@ if __name__ == '__main__':
 
         # save results
     try:
-        csv_out='classification_stats_x'+str(up_scale)+'_'+method+'_'+str(iter)+'.csv'
+        csv_out='classification_stats_x'+str(up_scale)+'_'+method+'_'+str(iter)+'_'+water_index_type+'.csv'
         df.to_csv(csv_out) # zip(im_name, hr, lr, bic, sr)
         print('Saved classification stats csv: {}'.format(csv_out))
     except NameError:

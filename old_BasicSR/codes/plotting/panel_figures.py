@@ -142,7 +142,7 @@ def group_plot(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, hash=N
                 plt.close()
 
             ## make second diff plot
-            if 1==0:
+            if 1==1:
                     # make and plot diff image
                 diff=np.full(tmp_output_XR_mask[0].shape, 0, dtype='uint8')
                 diff=diff_image(tmp_output_XR_mask[1], tmp_output_XR_mask[2], foreground_threshold)
