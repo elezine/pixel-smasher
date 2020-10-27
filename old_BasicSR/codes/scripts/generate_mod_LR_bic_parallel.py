@@ -21,9 +21,9 @@ except ImportError:
 
 from extract_subimgs_single import rescale_reflectance, btm_percentile, top_percentile, band_order
 
-n_thread=1 #multiprocessing.cpu_count() # num cores 8
-up_scale = 10
-mod_scale = 10
+n_thread=multiprocessing.cpu_count() # num cores 8
+up_scale = 4
+mod_scale = 4
 stretch_multiplier=1 # to increase total dynamic range (only valid if adjust_stretch==True, which is deprecated)
 adjust_stretch=False # whether or not to change TDR in this step (deprecated)
 do_rescale_reflectance=False # if I didn't do this in extract_subimgs_single.py
@@ -149,4 +149,6 @@ if __name__ == "__main__":
     # generate_mod_LR_bic('hold_mod_shield_v2')
     # generate_mod_LR_bic('hold_mod_shield_v2_masks')
     # generate_mod_LR_bic('hold_mod_scenes-shield-gt-subsets')
-    generate_mod_LR_bic('hold_mod_scenes-shield-gt-subsets_masks')
+    # generate_mod_LR_bic('hold_mod_scenes-shield-gt-subsets_masks')
+    # generate_mod_LR_bic('hold_mod_shield_v2/')
+    generate_mod_LR_bic('hold_mod_shield_v2_masks/')
