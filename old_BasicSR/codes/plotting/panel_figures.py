@@ -30,7 +30,7 @@ for j in ['HR','SR','LR','Bic']:
 iter=400000 # quick fix to get latest validation image in folder
 thresh= [0] # [-0.1, -0.05, 0, 0.05, 0.1, 0.2, 0.3] # [-10, -5, -2, 0, 2, 5, 10] #2
 apply_radiometric_correction=False # For v1 of applying lookup table values to convert to radiance. Set to zero if already calibrated
-plots_dir='/data_dir/other/classifier_plts/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test_panel_figs_zoom' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots # 008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR_panel_figs_v2_highres
+plots_dir='/data_dir/other/classifier_plts/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test_panel_figs_zoom35' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots # 008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR_panel_figs_v2_highres
 method='local-masked'
 zoom=True # whether or not to zoom in before making panel figures
 zoom_percent=35
@@ -126,7 +126,7 @@ def group_plot(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, hash=N
         if (plots_dir != None): # (res==SR) 
             fs=14 # font size
             zb=None # Zoom bounds (100.5, 150.5, 150.5,100.5) # extent # None # L,R,B,T # Note: use plt.xlim to control extent
-            if 1==0:
+            if 1==1:
                 fig, axs = plt.subplots(4, 3, figsize=(6, 8), constrained_layout=True) # sharex=True
                 cmap_mask = colors.ListedColormap(['black', '#2390D2'])
                 for k, ires in enumerate(['HR', 'SR','Cub','LR']): # HR, SR, Cub, LR on btm says Katia #HERE <<-------------
@@ -168,7 +168,7 @@ def group_plot(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, hash=N
                 plt.ylim(xt[2:])
                     # add contour lines (perimeters) for HR boundary
                 perims=np.concatenate(measure.find_contours(tmp_output_XR_mask[0], foreground_threshold))
-                plt.plot(perims[::9,1], perims[::9,0], '.r', markersize=2.5)
+                plt.plot(perims[::1,1], perims[::1,0], '.r', markersize=2.0)
                     # save plot
                 plot_pth=os.path.join(plots_dir, 'DIFF_' + name + '.png')
                 plt.gca().invert_yaxis()
