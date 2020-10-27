@@ -29,11 +29,11 @@ from water_mask_funcs import create_buffer_mask
 
 # I/O
 # sourcedir_SR='/data_dir/pixel-smasher/experiments/003_ESRGAN_x4_PLANET_pretrainDF2K_wandb_sep6/visualization' # note: shuf2k is just a 2000 image shuffling #'/data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
-sourcedir_SR='/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2' # from shield2 holdout # '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2'
-sourcedir_R='/data_dir/hold_mod_shield_v2/' # should have folders for LR, HR, Bic #'/data_dir/ClassProject/valid_mod' # '/data_dir/hold_mod_shield_v2/'
-sourcedir_R_mask='/data_dir/hold_mod_shield_v2_masks' # '/data_dir/hold_mod_shield_v2_masks'
-outdir='/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization' # for shield # /data_dir/classified_shield/hold_mod # '/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization'
-model_suffix='_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test' # suffix applied to end of images when they are run as part of a model run call, rather than a validation routine. manually update when you input input folder. Does no harm if images don't have any suffix. # e.g. '_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
+sourcedir_SR='/mnt/disks/extraspace/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test/visualization/hold_mod_shield_v2' # from shield2 holdout # '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2'
+sourcedir_R='/data_dir/hold_mod_scenes-shield-gt-subsets' # should have folders for LR, HR, Bic #'/data_dir/ClassProject/valid_mod' # '/data_dir/hold_mod_shield_v2/'
+sourcedir_R_mask='/data_dir/hold_mod_scenes-shield-gt-subsets_masks' # '/data_dir/hold_mod_shield_v2_masks'
+outdir='/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test/visualization' # for shield # /data_dir/classified_shield/hold_mod # '/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization'
+model_suffix='_008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test' # suffix applied to end of images when they are run as part of a model run call, rather than a validation routine. manually update when you input input folder. Does no harm if images don't have any suffix. # e.g. '_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
 up_scale=10
 for j in ['HR','SR','LR','Bic']:
     os.makedirs(os.path.join(outdir, j, 'x'+str(up_scale)), exist_ok=True)
@@ -74,9 +74,9 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, ha
     Bic_in_pth=os.path.join(sourcedir_R, 'Bic', 'x' + str(up_scale), name+ '.png')
 
                 # in paths (masks)
-    HR_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'HR', 'x' + str(up_scale), name.replace('MS_SR', 'MS_SR_no_buffer_mask')+ '.png') # sloppy quick fix
-    LR_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'LR', 'x' + str(up_scale), name.replace('MS_SR', 'MS_SR_no_buffer_mask')+ '.png')
-    Bic_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'Bic', 'x' + str(up_scale), name.replace('MS_SR', 'MS_SR_no_buffer_mask')+ '.png')
+    HR_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'HR', 'x' + str(up_scale), name + '_no_buffer_mask.png') # HERE sloppy quick fix # used to read: name.replace('MS_SR', 'MS_SR_no_buffer_mask')
+    LR_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'LR', 'x' + str(up_scale), name + '_no_buffer_mask.png')
+    Bic_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'Bic', 'x' + str(up_scale), name + '_no_buffer_mask.png')
     SR_og_mask_pth_in=HR_og_mask_pth_in
 
     # save out put to row
