@@ -17,7 +17,7 @@ from matplotlib.pyplot import draw, show, ion, ioff
 sys.path.insert(1, '/home/ethan_kyzivat/code/pixel-smasher')
 sys.path.insert(1, '/home/ethan_kyzivat/code/pixel-smasher/old_BasicSR/codes/classification')
 from water_mask_funcs import create_buffer_mask
-from classifier import sourcedir_SR, sourcedir_R, sourcedir_R_mask, outdir, up_scale, foreground_threshold, ndwi_bands, water_index_type, name_lookup_og_mask, diff_image
+from classifier import sourcedir_SR, sourcedir_R, sourcedir_R_mask, outdir, up_scale, foreground_threshold, ndwi_bands, water_index_type, name_lookup_og_mask, diff_image, model_suffix
 import matplotlib.colors as colors
 
 '''
@@ -52,7 +52,7 @@ def group_plot(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, hash=N
         # in paths
     # SR_in_pth=sourcedir_SR+os.sep+name+os.sep+name+'_'+str(iter)+'.png' # HERE changed for seven-steps and for Shield holdout
     SR_in_pth=os.path.join(sourcedir_SR, name) # HERE changed for seven-steps and for Shield holdout
-    name=name.replace('_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test', '').replace('.png', '') # quick fix HERE
+    name=name.replace(model_suffix, '').replace('.png', '') # quick fix HERE
     HR_in_pth=os.path.join(sourcedir_R, 'HR', 'x' + str(up_scale), name+ '.png')
     LR_in_pth=os.path.join(sourcedir_R, 'LR', 'x' + str(up_scale), name+ '.png')
     Bic_in_pth=os.path.join(sourcedir_R, 'Bic', 'x' + str(up_scale), name+ '.png')
