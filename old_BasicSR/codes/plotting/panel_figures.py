@@ -211,7 +211,7 @@ if __name__ == '__main__':
     print('Starting panel figs.  Files will be in {}'.format(plots_dir))
     os.makedirs(outdir, exist_ok=True)
         # loop over files
-    dirpaths = [f for f in os.listdir(sourcedir_SR) ] # removed: if f.endswith('.png')
+    dirpaths = [f for f in os.listdir(sourcedir_SR) if f.endswith('.png')]
     num_files = len(dirpaths) # #HERE change back
     # global results
     results = {} # init

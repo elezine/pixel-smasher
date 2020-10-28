@@ -407,7 +407,7 @@ if __name__ == '__main__':
     print('Starting classification.  Files will be in {}'.format(outdir))
     os.makedirs(outdir, exist_ok=True)
         # loop over files
-    dirpaths = [f for f in os.listdir(sourcedir_SR) ] # removed: if f.endswith('.png')
+    dirpaths = [f for f in os.listdir(sourcedir_SR) if f.endswith('.png')] # removed: if f.endswith('.png')
     num_files = len(dirpaths) # #HERE change back
     # global results
     results = {} # init
