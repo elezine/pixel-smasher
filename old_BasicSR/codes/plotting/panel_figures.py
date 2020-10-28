@@ -16,7 +16,6 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import draw, show, ion, ioff
 sys.path.insert(1, '/home/ethan_kyzivat/code/pixel-smasher')
 sys.path.insert(1, '/home/ethan_kyzivat/code/pixel-smasher/old_BasicSR/codes/classification')
-from water_mask_funcs import create_buffer_mask
 from classifier import sourcedir_SR, sourcedir_R, sourcedir_R_mask, outdir, up_scale, foreground_threshold, ndwi_bands, water_index_type, name_lookup_og_mask, diff_image, model_suffix
 import matplotlib.colors as colors
 

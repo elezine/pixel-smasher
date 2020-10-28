@@ -19,7 +19,7 @@ from sklearn.metrics import cohen_kappa_score, accuracy_score
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import draw, show, ion, ioff
 sys.path.insert(1, '/home/ethan_kyzivat/code/pixel-smasher')
-from water_mask_funcs import create_buffer_mask
+from water_mask_funcs_ek import create_buffer_mask
 
 
 # example output paths: /data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images/716222_1368610_2017-08-27_0e0f_BGRN_Analytic_s0984
