@@ -39,13 +39,13 @@ n_thread=mp.cpu_count() #mp.cpu_count() # use n_thread > 1 for multiprocessing
 
 # auto I/O
 outdir=os.path.join(outdir, 'x'+str(up_scale))
+plots_dir=os.path.join(plots_dir, 'x'+str(up_scale))
 if apply_radiometric_correction:
     f=open("cal_hash.pkl", "rb")
     hash=pickle.load(f)
 else: hash=None
 os.makedirs(plots_dir, exist_ok=True)
 def group_plot(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, hash=None, method='thresh', sourcedir_R_mask=None): # filstrucutre is pre-defined
-outdir=os.path.join(outdir, 'x'+str(up_scale))
     '''
     A simple classification function for high-resolution, low-resolution, and  super resolution images.  Takes input path and write To output path (pre-– formatted).
     '''
