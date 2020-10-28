@@ -32,7 +32,7 @@ from water_mask_funcs_ek import create_buffer_mask
 sourcedir_SR='/mnt/disks/extraspace/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test/visualization/hold_mod_shield_v2' # from shield2 holdout # '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2'
 sourcedir_R='/data_dir/hold_mod_scenes-shield-gt-subsets' # should have folders for LR, HR, Bic #'/data_dir/ClassProject/valid_mod' # '/data_dir/hold_mod_shield_v2/'
 sourcedir_R_mask='/data_dir/hold_mod_scenes-shield-gt-subsets_masks' # '/data_dir/hold_mod_shield_v2_masks'
-outdir='/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test/visualization' # for shield # /data_dir/classified_shield/hold_mod # '/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization'
+outdir='/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test/visualization_local_thresh' # for shield # /data_dir/classified_shield/hold_mod # '/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization'
 model_suffix='_008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test' # suffix applied to end of images when they are run as part of a model run call, rather than a validation routine. manually update when you input input folder. Does no harm if images don't have any suffix. # e.g. '_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
 up_scale=10
 for j in ['HR','SR','LR','Bic']:
@@ -255,7 +255,7 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
                         if water_index_type=='ndwi':
                             thresh_x=ndwi_x.min()-1 # NDWI: thresholds everything > thresh_x
                     else:
-                    thresh_x=threshold_otsu(ndwi_x)
+                        thresh_x=threshold_otsu(ndwi_x)
                     copy_x=compare(ndwi_x)>compare(thresh_x)
                     # copy[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max] = copy_x
                     copy[i,j] = copy_x
