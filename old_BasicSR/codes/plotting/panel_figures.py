@@ -44,6 +44,7 @@ if apply_radiometric_correction:
 else: hash=None
 os.makedirs(plots_dir, exist_ok=True)
 def group_plot(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, hash=None, method='thresh', sourcedir_R_mask=None): # filstrucutre is pre-defined
+outdir=os.path.join(outdir, 'x'+str(up_scale))
     '''
     A simple classification function for high-resolution, low-resolution, and  super resolution images.  Takes input path and write To output path (pre-– formatted).
     '''

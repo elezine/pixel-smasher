@@ -76,7 +76,7 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, ha
                 # in paths (masks)
     HR_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'HR', 'x' + str(up_scale), name + '_no_buffer_mask.png') # HERE sloppy quick fix # used to read: name.replace('MS_SR', 'MS_SR_no_buffer_mask')
     LR_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'LR', 'x' + str(up_scale), name + '_no_buffer_mask.png')
-    Bic_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'Bic', 'x' + str(up_scale), name + '_no_buffer_mask.png')
+    Bic_og_mask_pth_in=HR_og_mask_pth_in
     SR_og_mask_pth_in=HR_og_mask_pth_in
 
     # save out put to row
@@ -401,6 +401,7 @@ if __name__ == '__main__':
         ##################################
         
         # print
+    outdir=os.path.join(outdir, 'x'+str(up_scale))
     print('Starting classification.  Files will be in {}'.format(outdir))
     os.makedirs(outdir, exist_ok=True)
         # loop over files
