@@ -29,7 +29,7 @@ for j in ['HR','SR','LR','Bic']:
 iter=400000 # quick fix to get latest validation image in folder
 thresh= [0] # [-0.1, -0.05, 0, 0.05, 0.1, 0.2, 0.3] # [-10, -5, -2, 0, 2, 5, 10] #2
 apply_radiometric_correction=False # For v1 of applying lookup table values to convert to radiance. Set to zero if already calibrated
-plots_dir='/data_dir/other/classifier_plts/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test_panel_figs_zoom35' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots # 008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR_panel_figs_v2_highres
+plots_dir='/data_dir/other/classifier_plts/008/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test_panel_figs_zoom35' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots # 008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR_panel_figs_v2_highres
 method='local-masked'
 zoom=True # whether or not to zoom in before making panel figures
 zoom_percent=35
@@ -126,22 +126,25 @@ def group_plot(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, hash=N
             fs=14 # font size
             zb=None # Zoom bounds (100.5, 150.5, 150.5,100.5) # extent # None # L,R,B,T # Note: use plt.xlim to control extent
             if 1==1:
+                plot_order=[0,3,2,1] # HR, SR, Cub, LR on btm says Katia; Larry says HR, LR, CR, SR
                 fig, axs = plt.subplots(4, 3, figsize=(6, 8), constrained_layout=True) # sharex=True
                 cmap_mask = colors.ListedColormap(['black', '#2390D2'])
-                for k, ires in enumerate(['HR', 'SR','Cub','LR']): # HR, SR, Cub, LR on btm says Katia #HERE <<-------------
+                vmin=150
+                vmax=255
+                for k, ires in enumerate(['HR', 'SR','CR','LR']): # default order in list
                     dims=tmp_output_XR_in[k].shape[0:2]
                     if zoom==True:
                         zb=[int(dims[1]*zoom_percent/100), int(dims[1]*(100-zoom_percent)/100), int(dims[0]*(100-zoom_percent)/100), int(dims[0]*zoom_percent/100)]
                     else:
                         zb=[0, int(dims[1]), int(dims[0]), 0] # no crop
-                    axs[k,0].imshow(tmp_output_XR_in[k][zb[3]:zb[2],zb[0]:zb[1],[2,1,0]]/255, extent=zb, resample=False), axs[0, 0].set_title('Image', fontsize=fs+4), axs[k,0].set_axis_off() #axs[k,0].axes.xaxis.set_visible(False), axs[k,0].axes.yaxis.set_visible(False), # reverse order to make image red, not blue, (RGB=NGR) bc cv2...
-                    axs[k,1].imshow(tmp_output_XR_in[k][zb[3]:zb[2],zb[0]:zb[1],ndwi_bands[0]], extent=zb, resample=False, cmap='bone'), axs[0,1].set_title('Water index', fontsize=fs+4), axs[k,1].set_axis_off() #axs[k,1].axes.yaxis.set_visible(False), axs[k,1].axes.xaxis.set_visible(False) # try ax.set_axis_off()
+                    axs[plot_order[k],0].imshow(tmp_output_XR_in[k][zb[3]:zb[2],zb[0]:zb[1],[2,1,0]]/255, extent=zb, resample=False, vmin=vmin, vmax=vmax), axs[0, 0].set_title('Image', fontsize=fs+4), axs[plot_order[k],0].set_axis_off() #axs[k,0].axes.xaxis.set_visible(False), axs[k,0].axes.yaxis.set_visible(False), # reverse order to make image red, not blue, (RGB=NGR) bc cv2...
+                    axs[plot_order[k],1].imshow(tmp_output_XR_in[k][zb[3]:zb[2],zb[0]:zb[1],ndwi_bands[0]], extent=zb, resample=False, cmap='bone', vmin=vmin, vmax=vmax), axs[0,1].set_title('NIR band', fontsize=fs+4), axs[plot_order[k],1].set_axis_off() #axs[k,1].axes.yaxis.set_visible(False), axs[k,1].axes.xaxis.set_visible(False) # try ax.set_axis_off()
                     # axs[k,2].imshow(tmp_output_og[k], cmap='Greys_r'), axs[0,2].set_title('A priori BW'), axs[k,0].axes.yaxis.set_visible(False)
-                    axs[k,2].imshow(tmp_output_XR_mask[k][zb[3]:zb[2],zb[0]:zb[1]]>foreground_threshold, extent=zb, resample=False, cmap=cmap_mask), axs[0,2].set_title('Water mask', fontsize=fs+4), axs[k,2].set_axis_off() #axs[k,2].axes.yaxis.set_visible(False), axs[k,2].axes.xaxis.set_visible(False) # 'Greys_r'
+                    axs[plot_order[k],2].imshow(tmp_output_XR_mask[k][zb[3]:zb[2],zb[0]:zb[1]]>foreground_threshold, extent=zb, resample=False, cmap=cmap_mask), axs[0,2].set_title('Water mask', fontsize=fs+4), axs[plot_order[k],2].set_axis_off() #axs[k,2].axes.yaxis.set_visible(False), axs[k,2].axes.xaxis.set_visible(False) # 'Greys_r'
                     
                         # add text
                     # axs[k,0].set_ylabel(ires, fontsize=fs+2)
-                    axs[k,0].text(-0.05, .5, ires, transform=axs[k,0].transAxes, ha='right', va='center', size=fs+4, rotation='vertical')
+                    axs[plot_order[k],0].text(-0.05, .5, ires, transform=axs[plot_order[k],0].transAxes, ha='right', va='center', size=fs+4, rotation='vertical')
                 # show()
                 plot_pth=os.path.join(plots_dir, 'PLOT_' + name + '.png')
                 fig.savefig(plot_pth, dpi=300); fig.savefig(plot_pth.replace('.png','.pdf'), dpi=300)
