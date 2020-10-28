@@ -166,7 +166,7 @@ outdir=os.path.join(outdir, 'x'+str(up_scale))
                 diff=diff_image(tmp_output_XR_mask[1], tmp_output_XR_mask[2], foreground_threshold)
                 # cmap1 = colors.ListedColormap(['black', '#E9C46A', 'white', '#457b9d'])
                 cmap1 = colors.ListedColormap(['black', '#B07F3E', '#2390D2', '#6BCAD0'])
-                plt.imshow(diff[zb[3]:zb[2],zb[0]:zb[1]], extent=xt, cmap=cmap1,vmin=0, vmax=3, origin='lower', interpolation='bilinear') # vmin=0, vmax=3, 
+                plt.imshow(diff[zb[3]:zb[2],zb[0]:zb[1]], extent=xt, cmap=cmap1,vmin=0, vmax=3, origin='lower') # vmin=0, vmax=3, 
                 plt.xlim(xt[:2])
                 plt.ylim(xt[2:])
                     # add contour lines (perimeters) for HR boundary
