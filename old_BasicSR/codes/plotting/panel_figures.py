@@ -38,6 +38,7 @@ n_thread=mp.cpu_count() #mp.cpu_count() # use n_thread > 1 for multiprocessing
 # buffer_additional=0
 
 # auto I/O
+outdir=os.path.join(outdir, 'x'+str(up_scale))
 if apply_radiometric_correction:
     f=open("cal_hash.pkl", "rb")
     hash=pickle.load(f)
