@@ -245,6 +245,16 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
                     # copy_x = copy[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max]
                     # ndwi_x = water_index[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max]
                     ndwi_x = water_index[i,j]
+                    if np.all(ndwi_x==0): # check for uniform regions
+                        thresh_x=0
+                    elif np.all(ndwi_x==255):
+                        thresh_x=254
+                    elif ndwi_x.min()-ndwi_x.max() == 0: # same value, but not 0 or 255
+                        if water_index_type=='ir':
+                            thresh_x=ndwi_x.min() # IR: thresholds everything <= thresh_x
+                        if water_index_type=='ndwi':
+                            thresh_x=ndwi_x.min()-1 # NDWI: thresholds everything > thresh_x
+                    else:
                     thresh_x=threshold_otsu(ndwi_x)
                     copy_x=compare(ndwi_x)>compare(thresh_x)
                     # copy[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max] = copy_x
@@ -417,7 +427,7 @@ if __name__ == '__main__':
             if i % save_freq == 0:
                 df = pd.concat(list(results.values())[i].get() for i in range(len(results)))
         if i % save_freq == 0: # common to parallel and serial branches
-            csv_out='classification_stats_x'+str(up_scale)+'_'+method+'_'+str(iter)+'_'+water_index_type+'_tmp.csv'
+            csv_out='classification_stats_x'+str(up_scale)+'_'+method+'_'+str(iter)+'_'+water_index_type+'_global_thresh'+'_tmp.csv'
             df.to_csv(csv_out) # zip(im_name, hr, lr, bic, sr)
             print('Saved temp. classification stats (length {}) csv: {}'.format(df.shape[0], csv_out))
             del df
@@ -433,7 +443,7 @@ if __name__ == '__main__':
 
         # save results
     try:
-        csv_out='classification_stats_x'+str(up_scale)+'_'+method+'_'+str(iter)+'_'+water_index_type+'.csv'
+        csv_out='classification_stats_x'+str(up_scale)+'_'+method+'_'+str(iter)+'_'+water_index_type+'_global_thresh'+'.csv'
         df.to_csv(csv_out) # zip(im_name, hr, lr, bic, sr)
         print('Saved classification stats csv: {}'.format(csv_out))
     except NameError:
