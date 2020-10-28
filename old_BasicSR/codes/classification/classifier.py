@@ -401,7 +401,6 @@ if __name__ == '__main__':
         ##################################
         
         # print
-    outdir=os.path.join(outdir, 'x'+str(up_scale))
     print('Starting classification.  Files will be in {}'.format(outdir))
     os.makedirs(outdir, exist_ok=True)
         # loop over files

@@ -39,7 +39,6 @@ n_thread=mp.cpu_count() #mp.cpu_count() # use n_thread > 1 for multiprocessing
 
 # auto I/O
 outdir=os.path.join(outdir, 'x'+str(up_scale))
-plots_dir=os.path.join(plots_dir, 'x'+str(up_scale))
 if apply_radiometric_correction:
     f=open("cal_hash.pkl", "rb")
     hash=pickle.load(f)
