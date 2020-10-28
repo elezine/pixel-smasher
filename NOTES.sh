@@ -68,3 +68,9 @@ done
 for file in /data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets_masks_0_255_tif/*; do 
     gdal_translate -a_nodata none $file /data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets_masks/`basename $file '.tif'`.png
 done
+
+# to convert from 16 bit to 8 bit: # HERE do
+
+for file in /data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets/*.png; do  
+    gdal_translate -a_nodata none -ot Byte -scale 0 65535 $file /data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets_uint8/`basename $file`
+done
