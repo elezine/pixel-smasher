@@ -232,36 +232,23 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
                 copy = np.full(labeled.shape, False)
                 regions = measure.regionprops(labeled)
                 for x,region in enumerate(regions):
-                    # coords = region.coords
-                    # i = coords[:,0]
-                    # j = coords[:,1]
+                    coords = region.coords
+                    i = coords[:,0]
+                    j = coords[:,1]
 
                     # copy[i,j] = True
 
                     dist=0 # being lazy and modified from create_buffer_mask_fxn
                     bbox_coords = region.bbox #(min_row, min_col, max_row, max_col)
-                    if bbox_coords[0] - dist >= 0:
-                        bbox_i_min = bbox_coords[0] - dist
-                    else: 
-                        bbox_i_min = 0
-                    if bbox_coords[1] - dist >= 0:
-                        bbox_j_min = bbox_coords[1] - dist
-                    else:
-                        bbox_j_min = 0
-                    if bbox_coords[2] + dist <= copy.shape[0]:
-                        bbox_i_max = bbox_coords[2] + dist
-                    else:
-                        bbox_i_max = copy.shape[0]
-                    if bbox_coords[3] + dist <= copy.shape[1]:
-                        bbox_j_max = bbox_coords[3] + dist
-                    else:
-                        bbox_j_max = copy.shape[1]
 
-                    copy_x = copy[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max]
-                    ndwi_x = water_index[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max]
-                    thresh_x=threshold_otsu(water_index)
+                    copy_x=copy[i,j]
+                    # copy_x = copy[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max]
+                    # ndwi_x = water_index[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max]
+                    ndwi_x = water_index[i,j]
+                    thresh_x=threshold_otsu(ndwi_x)
                     copy_x=compare(ndwi_x)>compare(thresh_x)
-                    copy[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max] = copy_x
+                    # copy[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max] = copy_x
+                    copy[i,j] = copy_x
                     #bounds = find_boundaries(pekel_copy)
                     #pekel_copy[bounds] = 1
 
