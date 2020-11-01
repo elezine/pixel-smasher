@@ -29,7 +29,7 @@ for j in ['HR','SR','LR','Bic']:
 iter=400000 # quick fix to get latest validation image in folder
 thresh= [0] # [-0.1, -0.05, 0, 0.05, 0.1, 0.2, 0.3] # [-10, -5, -2, 0, 2, 5, 10] #2
 apply_radiometric_correction=False # For v1 of applying lookup table values to convert to radiance. Set to zero if already calibrated
-plots_dir='/data_dir/other/classifier_plts/008/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test_panel_figs_zoom35_global_thresh' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots # 008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR_panel_figs_v2_highres
+plots_dir='/data_dir/other/classifier_plts/008/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test_panel_figs_zoom35_local_thresh' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots # 008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR_panel_figs_v2_highres
 method='local-masked'
 zoom=True # whether or not to zoom in before making panel figures
 zoom_percent=35
