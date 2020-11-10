@@ -29,11 +29,28 @@ from water_mask_funcs_ek import create_buffer_mask
 
 # I/O
 # sourcedir_SR='/data_dir/pixel-smasher/experiments/003_ESRGAN_x4_PLANET_pretrainDF2K_wandb_sep6/visualization' # note: shuf2k is just a 2000 image shuffling #'/data_dir/ClassProject/pixel-smasher/experiments/003_RRDB_ESRGANx4_PLANET/val_images'
-sourcedir_SR='/mnt/disks/extraspace/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test/visualization/hold_mod_shield_v2' # from shield2 holdout # '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2'
-sourcedir_R='/data_dir/hold_mod_scenes-shield-gt-subsets' # should have folders for LR, HR, Bic #'/data_dir/ClassProject/valid_mod' # '/data_dir/hold_mod_shield_v2/'
+
+    # for GT-x10
+# sourcedir_SR='/mnt/disks/extraspace/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test/visualization/hold_mod_shield_v2' # from shield2 holdout # '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2'
+# sourcedir_R='/data_dir/hold_mod_scenes-shield-gt-subsets' # should have folders for LR, HR, Bic #'/data_dir/ClassProject/valid_mod' # '/data_dir/hold_mod_shield_v2/'
+# sourcedir_R_mask='/data_dir/hold_mod_scenes-shield-gt-subsets_masks' # '/data_dir/hold_mod_shield_v2_masks'
+# outdir='/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test/visualization_local_thresh' # for shield # /data_dir/classified_shield/hold_mod # '/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization'
+# model_suffix='_008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test' # suffix applied to end of images when they are run as part of a model run call, rather than a validation routine. manually update when you input input folder. Does no harm if images don't have any suffix. # e.g. '_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
+
+# sourcedir_SR='/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2' # from shield2 holdout # '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2'
+# sourcedir_R='/data_dir/hold_mod_shield_v2/' # should have folders for LR, HR, Bic #'/data_dir/ClassProject/valid_mod' # '/data_dir/hold_mod_shield_v2/'
+# sourcedir_R_mask='/data_dir/hold_mod_shield_v2_masks' # '/data_dir/hold_mod_shield_v2_masks'
+# outdir='/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization_local_thresh' # for shield # /data_dir/classified_shield/hold_mod # '/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization'
+# model_suffix='_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test' # suffix applied to end of images when they are run as part of a model run call, rather than a validation routine. manually update when you input input folder. Does no harm if images don't have any suffix. # e.g. '_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
+
+    # for holdout-all-x10
+sourcedir_SR='/mnt/disks/extraspace/pixel-smasher/results/008_ESRGAN_x4_PLANET_noPreTrain_Shorelines_Test/visualization/ShieldTestSet/' # from shield2 holdout # '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2'
+sourcedir_R='/data_dir/hold_mod_shield_v2' # should have folders for LR, HR, Bic #'/data_dir/ClassProject/valid_mod' # '/data_dir/hold_mod_shield_v2/'
 sourcedir_R_mask='/data_dir/hold_mod_scenes-shield-gt-subsets_masks' # '/data_dir/hold_mod_shield_v2_masks'
-outdir='/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test/visualization' # for shield # /data_dir/classified_shield/hold_mod # '/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization'
+outdir='/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization_local_thresh' # for shield # /data_dir/classified_shield/hold_mod # '/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization'
 model_suffix='_008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test' # suffix applied to end of images when they are run as part of a model run call, rather than a validation routine. manually update when you input input folder. Does no harm if images don't have any suffix. # e.g. '_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
+
+
 up_scale=10
 for j in ['HR','SR','LR','Bic']:
     os.makedirs(os.path.join(outdir, j, 'x'+str(up_scale)), exist_ok=True)
@@ -48,7 +65,7 @@ buffer_additional=0
 ndwi_bands=(2,1) #N,G
 water_index_type='ir'
 plots_dir=None # '/data_dir/other/classifier_plts/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2_XR' # HERE # set to None to not plot # /data_dir/other/classified_shield_test_plots
-n_thread=1 #mp.cpu_count() #mp.cpu_count() # use n_thread > 1 for multiprocessing
+n_thread=mp.cpu_count() #mp.cpu_count() # use n_thread > 1 for multiprocessing
 save_freq=200 # 150 # HERE
 
 # auto I/O
@@ -74,8 +91,8 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, ha
     Bic_in_pth=os.path.join(sourcedir_R, 'Bic', 'x' + str(up_scale), name+ '.png')
 
                 # in paths (masks)
-    HR_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'HR', 'x' + str(up_scale), name + '_no_buffer_mask.png') # HERE sloppy quick fix # used to read: name.replace('MS_SR', 'MS_SR_no_buffer_mask')
-    LR_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'LR', 'x' + str(up_scale), name + '_no_buffer_mask.png')
+    HR_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'HR', 'x' + str(up_scale), name.replace('MS_SR', 'MS_SR_no_buffer_mask')+'.png') # HERE sloppy quick fix # used to read: name.replace('MS_SR', 'MS_SR_no_buffer_mask')
+    LR_og_mask_pth_in=os.path.join(sourcedir_R_mask, 'LR', 'x' + str(up_scale), name.replace('MS_SR', 'MS_SR_no_buffer_mask')+'.png')
     Bic_og_mask_pth_in=HR_og_mask_pth_in
     SR_og_mask_pth_in=HR_og_mask_pth_in
 
@@ -215,7 +232,7 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
                 raise ValueError('EK: You didn\'t specify a valid og_mask path!')
             og_mask = cv2.imread(og_mask_pth_in, cv2.IMREAD_UNCHANGED)
             if np.any(og_mask==None): # I have to create my own error bc cv2 wont... :(
-                raise ValueError(f'Unable to load image: path doesn\'t exist: {pth_in}')
+                raise ValueError(f'Unable to load image: path doesn\'t exist: {og_mask_pth_in}')
 
             buffer_mask=create_buffer_mask(og_mask, foreground_threshold, buffer_additional)
 
@@ -255,7 +272,7 @@ def classify(pth_in, pth_out, threshold=2, name='NaN', hash=None, write=True, re
                         if water_index_type=='ndwi':
                             thresh_x=ndwi_x.min()-1 # NDWI: thresholds everything > thresh_x
                     else:
-                    thresh_x=threshold_otsu(ndwi_x)
+                        thresh_x=threshold_otsu(ndwi_x)
                     copy_x=compare(ndwi_x)>compare(thresh_x)
                     # copy[bbox_i_min:bbox_i_max, bbox_j_min:bbox_j_max] = copy_x
                     copy[i,j] = copy_x
