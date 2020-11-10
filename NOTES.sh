@@ -24,6 +24,26 @@ for file in `find visualization/*/ -name "*s*_5????.png"`; do sudo rm $file; don
 ## to rm additional in the 200,000's:
 for file in `find visualization/*/ -name "*s*_2[1-9]????.png"`; do sudo rm $file; done & 
 
+## to rm files from 008_ESRGAN_x10_PLANET_noPreTrain_wandb_2GPUs_Oct8_VGG160: (I want to save 2500, 70000, 137500)
+dl /data_dir/pixel-smasher/experiments/keep/008_ESRGAN_x10_PLANET_noPreTrain_wandb_2GPUs_Oct8_VGG160
+
+# for file in `find visualization/*/ -name "*s*_[3,4,5,6,8,9,0]*.png"`; do sudo rm $file; done & # removds most * # error arg list too long...
+for file in `find visualization/ -name "*s*_[3]*.png"`; do sudo rm $file; done &
+for file in `find visualization/ -name "*s*_[4]*.png"`; do sudo rm $file; done &
+for file in `find visualization/ -name "*s*_[5]*.png"`; do sudo rm $file; done &
+for file in `find visualization/ -name "*s*_[6]*.png"`; do sudo rm $file; done &
+for file in `find visualization/ -name "*s*_[8]*.png"`; do sudo rm $file; done &
+for file in `find visualization/ -name "*s*_[9]*.png"`; do sudo rm $file; done &
+for file in `find visualization/ -name "*s*_[0]*.png"`; do sudo rm $file; done &
+
+for file in `find visualization/ -name "*s*_1[1,2,4,5,6,7,8,9,0]*.png"`; do sudo rm $file; done & # rm most [1]*, but saves 13*
+for file in `find visualization/ -name "*s*_13[1,2,3,4,5,6,8,9,0]*.png"`; do sudo rm $file; done & # rm most [1]*, but saves 137*
+
+for file in `find visualization/ -name "*s*_2[1,2,3,4,6,7,8,9,0]*.png"`; do sudo rm $file; done & # rm most [2]*, but saves 25*
+for file in `find visualization/ -name "*s*_25000.png"`; do sudo rm $file; done & # rm 25000
+
+for file in `find visualization/ -name "*s*_7[1,2,3,4,5,6,7,8,9]*.png"`; do sudo rm $file; done & # rm most [7]*, but saves 70000
+
 ## workflow:
 '''python /home/ethan_kyzivat/code/pixel-smasher/old_BasicSR/codes/scripts/extract_subimgs_single.py && bash /home/ethan_kyzivat/code/pixel-smasher/old_BasicSR/codes/utils/rand_shuf.sh && python /home/ethan_kyzivat/code/pixel-smasher/old_BasicSR/codes/scripts/generate_mod_LR_bic_parallel.py
 
@@ -73,4 +93,11 @@ done
 
 for file in /data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets/*.png; do  
     gdal_translate -a_nodata none -ot Byte -scale 0 65535 $file /data_dir/planet_sub/hold_mod_scenes-shield-gt-subsets_uint8/`basename $file`
+done
+
+dl /data_dir/pixel-smasher/experiments/008_ESRGAN_x10_PLANET_noPreTrain_wandb_2GPUs_Oct8_VGG160
+for dir in `find visualization -type d | shuf -n 100`; do
+    echo $dir
+    cp -r $dir visualization-complete
+    echo copied!
 done
