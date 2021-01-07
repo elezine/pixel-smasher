@@ -154,12 +154,12 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, ha
         int_res_Bic.DSC=distance.dice(bw_HR.flatten(), bw_Bic.flatten())
         
             # confusion matrix
-        int_res_SR.TN, int_res_SR.FP, int_res_SR.FN, int_res_SR.TP = confusion_matrix(bw_HR.flatten(), bw_SR.flatten()).ravel()
-        int_res_Bic.TN, int_res_Bic.FP, int_res_Bic.FN, int_res_Bic.TP = confusion_matrix(bw_HR.flatten(), bw_Bic.flatten()).ravel()
+        int_res_SR.TN, int_res_SR.FP, int_res_SR.FN, int_res_SR.TP = confusion_matrix(bw_HR.flatten(), bw_SR.flatten(), labels=[0,1]).ravel()
+        int_res_Bic.TN, int_res_Bic.FP, int_res_Bic.FN, int_res_Bic.TP = confusion_matrix(bw_HR.flatten(), bw_Bic.flatten(), labels=[0,1]).ravel()
 
             # confusion matrix prime (I chose to apply masks here, rather than in separate function)
-        int_res_SR.TN_p, int_res_SR.FP_p, int_res_SR.FN_p, int_res_SR.TP_p = confusion_matrix(bw_HR[mask].flatten(), bw_SR[mask].flatten()).ravel()
-        int_res_Bic.TN_p, int_res_Bic.FP_p, int_res_Bic.FN_p, int_res_Bic.TP_p = confusion_matrix(bw_HR[mask].flatten(), bw_Bic[mask].flatten()).ravel()
+        int_res_SR.TN_p, int_res_SR.FP_p, int_res_SR.FN_p, int_res_SR.TP_p = confusion_matrix(bw_HR[mask].flatten(), bw_SR[mask].flatten(), labels=[0,1]).ravel()
+        int_res_Bic.TN_p, int_res_Bic.FP_p, int_res_Bic.FN_p, int_res_Bic.TP_p = confusion_matrix(bw_HR[mask].flatten(), bw_Bic[mask].flatten(), labels=[0,1]).ravel()
 
         # int_res[7 + 10*n]=compute_kappa(bw_HR, bw_Bic)
         data_frame_out=data_frame_out.append(pd.concat([int_res_SR, int_res_HR, int_res_LR, int_res_Bic]))
