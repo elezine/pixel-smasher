@@ -5,6 +5,7 @@ runs classification script with lots of switchable inputs. If output classified 
 import os
 import os.path as osp
 import sys
+import datetime
 # import getpass
 # from multiprocessing import Pool
 import numpy as np
@@ -15,7 +16,8 @@ from multiprocessing import Pool
 import multiprocessing as mp
 import pickle
 import pandas as pd
-from sklearn.metrics import cohen_kappa_score, accuracy_score
+from sklearn.metrics import cohen_kappa_score, accuracy_score, confusion_matrix, jaccard_score
+from scipy.spatial import distance
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import draw, show, ion, ioff
 sys.path.insert(1, '/home/ethan_kyzivat/code/pixel-smasher')
@@ -58,7 +60,7 @@ for j in ['HR','SR','LR','Bic']:
 iter=400000 # quick fix to get latest validation image in folder
 thresh= [0] # [-0.1, -0.05, 0, 0.05, 0.1, 0.2, 0.3] # [-10, -5, -2, 0, 2, 5, 10] #2
 apply_radiometric_correction=False # For v1 of applying lookup table values to convert to radiance. Set to zero if already calibrated
-num_metrics=10  # TAG depends-on-num-metrics
+num_metrics=23  # TAG depends-on-num-metrics
 method='local-masked'
     # I/O for create_buffer_mask function
 foreground_threshold=127
@@ -142,6 +144,22 @@ def group_classify(i, sourcedir_SR, sourcedir_R, outdir, name, threshold=0.2, ha
         int_res_Bic.accuracy=compute_accuracy(bw_HR, bw_Bic)
         int_res_SR.accuracy_p=compute_accuracy_p(bw_HR, bw_SR, mask)
         int_res_Bic.accuracy_p=compute_accuracy_p(bw_HR, bw_Bic, mask)
+
+            # Jaccard index
+        int_res_SR.JI = jaccard_score(bw_HR.flatten(), bw_SR.flatten(), average = 'binary')
+        int_res_Bic.JI = jaccard_score(bw_HR.flatten(), bw_Bic.flatten(), average = 'binary')
+
+            # Dice similarity coefficent
+        int_res_SR.DSC=distance.dice(bw_HR.flatten(), bw_SR.flatten())
+        int_res_Bic.DSC=distance.dice(bw_HR.flatten(), bw_Bic.flatten())
+        
+            # confusion matrix
+        int_res_SR.TN, int_res_SR.FP, int_res_SR.FN, int_res_SR.TP = confusion_matrix(bw_HR.flatten(), bw_SR.flatten()).ravel()
+        int_res_Bic.TN, int_res_Bic.FP, int_res_Bic.FN, int_res_Bic.TP = confusion_matrix(bw_HR.flatten(), bw_Bic.flatten()).ravel()
+
+            # confusion matrix prime (I chose to apply masks here, rather than in separate function)
+        int_res_SR.TN_p, int_res_SR.FP_p, int_res_SR.FN_p, int_res_SR.TP_p = confusion_matrix(bw_HR[mask].flatten(), bw_SR[mask].flatten()).ravel()
+        int_res_Bic.TN_p, int_res_Bic.FP_p, int_res_Bic.FN_p, int_res_Bic.TP_p = confusion_matrix(bw_HR[mask].flatten(), bw_Bic[mask].flatten()).ravel()
 
         # int_res[7 + 10*n]=compute_kappa(bw_HR, bw_Bic)
         data_frame_out=data_frame_out.append(pd.concat([int_res_SR, int_res_HR, int_res_LR, int_res_Bic]))
@@ -382,8 +400,9 @@ def diff_image(SR,Bic, foreground_threshold):
     diff[(SR<=foreground_threshold) & (Bic>foreground_threshold)]=1 # SR == land and Bic == water
     return diff
 class ClassifierComparison(pd.DataFrame):
-    def __init__(self, data=[np.nan]*13, index=None, columns=None):
-        super().__init__([data], columns=['num', 'name', 'thresh','res','percent_water','mean_ndwi', 'median_ndwi','accuracy','accuracy_p','kappa','kappa_p','min_ndwi','max_ndwi'])
+    # columns=... # for some reason, I can't pre-define a variable and have its lenght get auto parsed into dat=np.nan...
+    def __init__(self, data=[np.nan]*23, index=None, columns=None): # TAG depends on number of colums
+        super().__init__([data], columns=['num', 'name', 'thresh','res','percent_water','mean_ndwi', 'median_ndwi','accuracy','accuracy_p','kappa','kappa_p','min_ndwi','max_ndwi', 'JI','DSC','TP','FN','FP','TN','TP_p','FN_p','FP_p','TN_p'])
         # TODO further: make is so I can pre-populate columns like thresh etc with the class call. not imp for now
         # Like this: def __init__(self, data=[np.nan]*8, index=None, columns=None, k=np.nan):
 
@@ -466,5 +485,6 @@ if __name__ == '__main__':
         print('Saved classification stats csv: {}'.format(csv_out))
     except NameError:
         print('No CSV printed')
+    print(f'Finished at {datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
         ## for non- parallel
     #im_out=group_classify(sourcedir_SR, sourcedir_R, outdir, name)
