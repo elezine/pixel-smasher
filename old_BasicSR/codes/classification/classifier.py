@@ -40,21 +40,20 @@ from water_mask_funcs_ek import create_buffer_mask
 # model_suffix='_008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test' # suffix applied to end of images when they are run as part of a model run call, rather than a validation routine. manually update when you input input folder. Does no harm if images don't have any suffix. # e.g. '_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
 
     # for holdout-all-x10 - for real
-sourcedir_SR='/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2' # from shield2 holdout # '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2'
+# sourcedir_SR='/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2' # from shield2 holdout # '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2'
+# sourcedir_R='/data_dir/hold_mod_shield_v2/' # should have folders for LR, HR, Bic #'/data_dir/ClassProject/valid_mod' # '/data_dir/hold_mod_shield_v2/'
+# sourcedir_R_mask='/data_dir/hold_mod_shield_v2_masks' # '/data_dir/hold_mod_shield_v2_masks'
+# outdir='/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization_local_thresh' # for shield # /data_dir/classified_shield/hold_mod # '/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization'
+# model_suffix='_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test' # suffix applied to end of images when they are run as part of a model run call, rather than a validation routine. manually update when you input input folder. Does no harm if images don't have any suffix. # e.g. '_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
+
+    # for holdout-x4
+sourcedir_SR='/data_dir/pixel-smasher/results/008_ESRGAN_x4_PLANET_noPreTrain_Shorelines_Test/visualization/ShieldTestSet' # from shield2 holdout # '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2'
 sourcedir_R='/data_dir/hold_mod_shield_v2/' # should have folders for LR, HR, Bic #'/data_dir/ClassProject/valid_mod' # '/data_dir/hold_mod_shield_v2/'
 sourcedir_R_mask='/data_dir/hold_mod_shield_v2_masks' # '/data_dir/hold_mod_shield_v2_masks'
-outdir='/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization_local_thresh' # for shield # /data_dir/classified_shield/hold_mod # '/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization'
-model_suffix='_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test' # suffix applied to end of images when they are run as part of a model run call, rather than a validation routine. manually update when you input input folder. Does no harm if images don't have any suffix. # e.g. '_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
+outdir='/data_dir/classified_shield_v2/008_ESRGAN_x4_PLANET_noPreTrain_Shorelines_Test/visualization_local_thresh' # for shield # /data_dir/classified_shield/hold_mod # '/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization'
+model_suffix='_008_ESRGAN_x4_PLANET_noPreTrain_Shorelines_Test' # suffix applied to end of images when they are run as part of a model run call, rather than a validation routine. manually update when you input input folder. Does no harm if images don't have any suffix. # e.g. '_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
+up_scale=4
 
-    # for holdout-all-x10
-# sourcedir_SR='/mnt/disks/extraspace/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_Shorelines_Test/visualization/ShieldTestSet/' # from shield2 holdout # '/data_dir/pixel-smasher/results/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test/visualization/hold_mod_shield_v2'
-# sourcedir_R='/data_dir/hold_mod_shield_v2' # should have folders for LR, HR, Bic #'/data_dir/ClassProject/valid_mod' # '/data_dir/hold_mod_shield_v2/'
-# sourcedir_R_mask='/data_dir/hold_mod_scenes-shield_v2_masks' # '/data_dir/hold_mod_shield_v2_masks'
-# outdir='/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization_local_thresh' # for shield # /data_dir/classified_shield/hold_mod # '/data_dir/classified_shield_v2/008_ESRGAN_x10_PLANET_noPreTrain_130k_Test_hold_shield_v2/visualization'
-# model_suffix='_008_ESRGAN_x10_PLANET_noPreTrain_130k_Shorelines_Test' # suffix applied to end of images when they are run as part of a model run call, rather than a validation routine. manually update when you input input folder. Does no harm if images don't have any suffix. # e.g. '_008_ESRGAN_x10_PLANET_noPreTrain_130k_Test'
-
-
-up_scale=10
 for j in ['HR','SR','LR','Bic']:
     os.makedirs(os.path.join(outdir, j, 'x'+str(up_scale)), exist_ok=True)
 iter=400000 # quick fix to get latest validation image in folder
@@ -439,6 +438,8 @@ if __name__ == '__main__':
         
         # print
     print('Starting classification.  Files will be in {}'.format(outdir))
+    start_time=datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+    print(f'Started at {start_time}')
     os.makedirs(outdir, exist_ok=True)
         # loop over files
     dirpaths = [f for f in os.listdir(sourcedir_SR) if f.endswith('.png')] # removed: if f.endswith('.png')
@@ -485,6 +486,7 @@ if __name__ == '__main__':
         print('Saved classification stats csv: {}'.format(csv_out))
     except NameError:
         print('No CSV printed')
-    print(f'Finished at {datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
+    print(f'Started at {start_time}')
+    print(f'Finished at {datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")}')
         ## for non- parallel
     #im_out=group_classify(sourcedir_SR, sourcedir_R, outdir, name)
